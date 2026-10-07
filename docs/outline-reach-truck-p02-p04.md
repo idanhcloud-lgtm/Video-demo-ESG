@@ -24,12 +24,14 @@ Composition `Problem02` (`src/scenes/Problem02.tsx`).
 - Đồ họa giữ đúng video phần 1 (`src/layout.ts`, `src/components/`): bố cục panel, thanh vấn đề SOLVING/SOLVED, ô kệ màu, cột cửa D1–D25, nhãn CROSS AISLE, callout, thanh chú thích, font Lexend.
 - Nhịp: tab 02 sáng (0,7s) → thẻ vấn đề (1,5–5s) → thẻ thu vào tab → hai tuyến đầy đủ (5,8s) → zoom lối 2–6 (7,2s) → vệt trắng chạy trên đoạn so sánh (8,5–11s) → callout (11–16,7s) → thu zoom, ẩn điểm khác (16,7s) → SOLVED (18s) → hết (21s).
 
-## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (~21s) – DÀN Ý
+## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (23s) – ĐÃ DỰNG
+
+Composition `Problem03` (`src/scenes/Problem03.tsx`).
 
 Cùng phiếu 28 điểm (`src/data/to28.ts`), hằng số mới (1,4 m / 8,65 m), cùng khung đồ họa vấn đề 02.
 
 ### Thông điệp
-Phiếu B2C rải trên 16/18 lối. Thuật toán không làm hàng bớt rải rác (hai xe ghé cùng 16 lối); nó xếp thứ tự thành **một vòng đi – về**:
+Phiếu B2C rải trên 15/18 lối. Thuật toán không làm hàng bớt rải rác (hai xe ghé cùng 15 lối); nó xếp thứ tự thành **một vòng đi – về**:
 lượt đi qua vùng sâu, lượt về qua vùng gần cửa. Xe hiện tại quét lần lượt A→T nên kết thúc ở góc xa nhất và chạy không về cửa.
 
 ### Số liệu (đã tính bằng công thức app)
@@ -46,10 +48,10 @@ Chênh lệch chạy không: 233 m, hơn một nửa mức tiết kiệm 430 m c
 | Thời điểm | Nội dung |
 |---|---|
 | 0–1,5s | Tab 03 sáng, chip SOLVING |
-| 1,5–5s | Thẻ "PROBLEM 03 · VẤN ĐỀ 03 – Scattered items / Hàng rải rác nhiều dãy". Mô tả: "One TO touches 16 of 18 aisles – the printed order sweeps them one by one" / "Một phiếu rải 16/18 lối – phiếu in quét lần lượt từng dãy" |
+| 1,5–5s | Thẻ "PROBLEM 03 · VẤN ĐỀ 03 – Scattered items / Hàng rải rác nhiều dãy". Mô tả: "One TO touches 15 of 18 aisles – the printed order sweeps them one by one" / "Một phiếu rải 15/18 lối – phiếu in quét lần lượt từng dãy" |
 | 5–6s | Thẻ thu vào tab, hai panel hiện tuyến đầy đủ (không zoom, cả kho) |
-| 6–7,5s | Đánh dấu 16 lối có hàng (vạch sáng mờ ở đầu lối) ở cả hai panel. Caption: "Same 16 aisles on both routes" / "Hai xe ghé cùng 16 lối" |
-| 7,5–11s | Tô hai màu theo lượt: phần tuyến tới lối 18 (lượt đi) và phần sau đó (lượt về). Đỏ: lượt đi chiếm gần hết (#1–#27), lượt về là đoạn chạy không. Xanh: lượt đi #1–#12 qua vùng sâu, lượt về #13–#28 qua vùng gần cửa |
+| 6–7,5s | Đánh dấu 15 lối có hàng ở cả hai panel. Caption: "Same TO on both routes: 15 of 18 aisles to visit" |
+| 7,5–11s | Tô hai màu: lượt đi (màu xe) tới điểm xa nhất CTP-92, lượt về (xanh dương) từ đó về cửa. Đỏ: lượt đi #1–#28, lượt về chỉ là đoạn chạy không. Xanh lá: lượt đi #1–#13 qua vùng sâu, lượt về #14–#28 qua vùng gần cửa |
 | 11–16,5s | Vệt trắng chạy trên đoạn về cửa của mỗi xe + nhãn số mét ngay trên đường: đỏ "282,9 m – no stops", xanh "49,8 m". Callout: đỏ "Ends at the far corner (lane 18, VT 92) → 283 m back empty"; xanh "Out through the deep zone, back through the front – last stop next to the door" |
 | 16,5–18s | Bỏ tô, ẩn điểm khác, giữ đoạn về cửa |
 | 18–21s | Tab 03 SOLVED. Caption: "One loop out and back – no long empty return → problem 03 solved" / "Một vòng đi – về, không chạy không đường dài → vấn đề 03 đã giải quyết" |

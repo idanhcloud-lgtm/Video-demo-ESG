@@ -8,7 +8,7 @@ type Pt = [number, number];
 const segLen = (a: Pt, b: Pt) => Math.hypot(b[0] - a[0], b[1] - a[1]);
 const toPath = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(' ');
 
-function pointAtFraction(pts: Pt[], f: number): Pt {
+export function pointAtFraction(pts: Pt[], f: number): Pt {
   const total = pts.slice(1).reduce((s, p, i) => s + segLen(pts[i], p), 0);
   let left = Math.max(0, Math.min(1, f)) * total;
   for (let i = 1; i < pts.length; i++) {
@@ -20,6 +20,12 @@ function pointAtFraction(pts: Pt[], f: number): Pt {
     left -= l;
   }
   return pts[pts.length - 1];
+}
+
+/** Route polyline in map pixels and the polyline index where each stop is reached. */
+export function routePixels(stops: Stop[], doorId: string) {
+  const {pts, stopIdx} = routePolyline(stops, doorId);
+  return {pts: pts.map(([x, y]) => project(x, y)), stopIdx};
 }
 
 const RouteIcon: React.FC<{kind: 'algo' | 'current'}> = ({kind}) => {
@@ -69,6 +75,12 @@ export interface RoutePanelProps {
   focusProgress?: number;
   /** 0–1: hide stop markers outside the focus legs. */
   hideOthers?: number;
+  /** Stop (1-based) where the way back starts; from there the route is drawn in a lighter tint. */
+  splitStop?: number;
+  splitMix?: number;
+  /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
+  underlay?: React.ReactNode;
+  overlay?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -81,6 +93,10 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   focusLegs = [],
   focusProgress = 0,
   hideOthers = 0,
+  splitStop,
+  splitMix = 0,
+  underlay,
+  overlay,
   children,
 }) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
@@ -106,7 +122,9 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
     }
   }
   const focusStops = new Set(focusLegs.flatMap((leg) => [leg - 1, leg]));
-  const legPts = (leg: number) => pts.slice(stopIdx[leg - 1], stopIdx[leg] + 1);
+  // Leg n (n = number of stops) is the way back from the last stop to the door.
+  const legPts = (leg: number) => pts.slice(stopIdx[leg - 1], leg < stops.length ? stopIdx[leg] + 1 : pts.length);
+  const BACK = '#7cc4ff';
   const textOnFill = kind === 'algo' ? '#062016' : '#ffffff';
 
   return (
@@ -157,6 +175,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
       <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
           <MapBase startDoor={doorId} />
+          {underlay}
           <path d={toPath(pts)} fill="none" stroke={accent} strokeOpacity={0.3} strokeWidth={1.5} strokeDasharray="4 6" />
           <path
             d={toPath(driven)}
@@ -165,8 +184,31 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
             strokeWidth={5.5}
             strokeLinejoin="round"
             strokeLinecap="round"
+            opacity={1 - 0.75 * splitMix}
             style={{filter: `drop-shadow(0 0 5px ${accent})`}}
           />
+          {splitStop && splitMix > 0 ? (
+            <g opacity={splitMix}>
+              <path
+                d={toPath(pts.slice(0, stopIdx[splitStop - 1] + 1))}
+                fill="none"
+                stroke={accent}
+                strokeWidth={5.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                style={{filter: `drop-shadow(0 0 5px ${accent})`}}
+              />
+              <path
+                d={toPath(pts.slice(stopIdx[splitStop - 1]))}
+                fill="none"
+                stroke={BACK}
+                strokeWidth={5.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                style={{filter: `drop-shadow(0 0 5px ${BACK})`}}
+              />
+            </g>
+          ) : null}
           {focusLegs.map((leg, i) => {
             const p = Math.max(0, Math.min(1, focusProgress - i));
             if (p <= 0) return null;
@@ -203,6 +245,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
               </g>
             );
           })}
+          {overlay}
         </g>
       </svg>
       {children}
@@ -234,7 +277,13 @@ export const VsBadge: React.FC = () => (
   </div>
 );
 
-export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; vi: string; p: number}> = ({kind, en, vi, p}) => {
+export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; vi: string; p: number; placement?: 'top' | 'bottom'}> = ({
+  kind,
+  en,
+  vi,
+  p,
+  placement = 'bottom',
+}) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
   return (
     <div
@@ -242,7 +291,7 @@ export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; v
         position: 'absolute',
         left: 30,
         right: 30,
-        top: 513,
+        top: placement === 'bottom' ? 513 : LAYOUT.headerH + 14,
         borderRadius: 16,
         overflow: 'hidden',
         border: `2px solid ${accent}`,

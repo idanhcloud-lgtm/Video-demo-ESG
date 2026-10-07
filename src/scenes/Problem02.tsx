@@ -2,10 +2,10 @@ import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
 import {useTimelineFrame} from '../timeline';
 import {Background} from '../components/Background';
 import {CaptionBar} from '../components/CaptionBar';
+import {ProblemCard} from '../components/ProblemCard';
 import {ProblemTabs} from '../components/ProblemTabs';
 import {Callout, RoutePanel, VsBadge} from '../components/RoutePanel';
 import {TO28, TO28_DOOR, TO28_OPTIMIZED} from '../data/to28';
-import {LAYOUT} from '../layout';
 import {aisleOrder} from '../map/route';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
 
@@ -65,13 +65,6 @@ export const Problem02: React.FC = () => {
   const capStart = frame < T.solved ? T.panelsIn : T.solved;
   const capOpacity = interpolate(frame, [capStart, capStart + 12], [0, 1], clamp);
 
-  // Problem card: centred, then shrinks into the tab slot.
-  const slot = {x: LAYOUT.tabs.xs[1] + LAYOUT.tabs.w / 2, y: LAYOUT.tabs.y + LAYOUT.tabs.h / 2};
-  const cardX = interpolate(cardOut, [0, 1], [960, slot.x]);
-  const cardY = interpolate(cardOut, [0, 1], [400, slot.y]);
-  const cardScale = interpolate(cardOut, [0, 1], [1, 0.33]) * (0.9 + 0.1 * cardIn);
-  const cardOpacity = cardIn * interpolate(cardOut, [0.6, 1], [1, 0], clamp);
-
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
       <Background />
@@ -82,31 +75,15 @@ export const Problem02: React.FC = () => {
         checkScale={solved ? check : 1}
       />
 
-      {/* Problem card */}
-      <div
-        style={{
-          position: 'absolute',
-          left: cardX,
-          top: cardY,
-          transform: `translate(-50%, -50%) scale(${cardScale})`,
-          opacity: cardOpacity,
-          textAlign: 'center',
-          width: 1760,
-        }}
-      >
-        <div style={{display: 'inline-block', background: '#fff', color: '#0b1222', fontWeight: 700, fontSize: 26, letterSpacing: 3, padding: '8px 26px', borderRadius: 30, marginBottom: -22, position: 'relative', zIndex: 2}}>
-          PROBLEM 02 · VẤN ĐỀ 02
-        </div>
-        <div style={{display: 'flex', alignItems: 'center', gap: 40, border: '4px solid #fff', borderRadius: 34, padding: '56px 70px', margin: '0 180px', background: '#0a1020', boxShadow: '0 0 70px rgba(255,255,255,0.25)', textAlign: 'left'}}>
-          <div style={{fontSize: 130, fontWeight: 800}}>02</div>
-          <div>
-            <div style={{fontSize: 66, fontWeight: 700, lineHeight: 1.15}}>Cross aisles not optimally used</div>
-            <div style={{fontSize: 44, color: colors.muted}}>Lối đi ngang chưa được sử dụng tối ưu</div>
-          </div>
-        </div>
-        <div style={{marginTop: 50, fontSize: 34, fontWeight: 700, opacity: 1 - cardOut}}>The printed order decides where the truck changes aisle, not the nearest cross aisle</div>
-        <div style={{fontSize: 26, color: colors.muted, opacity: 1 - cardOut}}>Thứ tự in trên phiếu quyết định chỗ đổi lối, không phải lối ngang gần nhất</div>
-      </div>
+      <ProblemCard
+        n={2}
+        en="Cross aisles not optimally used"
+        vi="Lối đi ngang chưa được sử dụng tối ưu"
+        descEn="The printed order decides where the truck changes aisle, not the nearest cross aisle"
+        descVi="Thứ tự in trên phiếu quyết định chỗ đổi lối, không phải lối ngang gần nhất"
+        enter={cardIn}
+        out={cardOut}
+      />
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
         <RoutePanel kind="algo" stops={algo} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={ALGO_LEGS} focusProgress={traceAlgo} hideOthers={hideOthers}>
