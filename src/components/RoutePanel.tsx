@@ -61,6 +61,63 @@ const RouteIcon: React.FC<{kind: 'algo' | 'current'}> = ({kind}) => {
   );
 };
 
+/** Panel frame and header shared by all comparison panels (layout of video part 1). */
+export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit: string; sub: string; children: React.ReactNode}> = ({
+  kind,
+  value,
+  unit,
+  sub,
+  children,
+}) => {
+  const accent = kind === 'algo' ? colors.green : colors.red;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: LAYOUT.panelLeft[kind],
+        top: LAYOUT.panelTop,
+        width: LAYOUT.panelW,
+        height: LAYOUT.panelH,
+        boxSizing: 'border-box',
+        borderRadius: 16,
+        background: colors.panel,
+        border: `1px solid ${colors.line}`,
+        borderTop: `3px solid ${accent}`,
+        boxShadow: `0 -6px 26px ${accent}40`,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          height: LAYOUT.headerH - 3,
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 18,
+          padding: '0 24px 0 28px',
+          background: colors.panelHeader,
+          borderBottom: `1px solid ${colors.line}`,
+        }}
+      >
+        <RouteIcon kind={kind} />
+        <div style={{flex: 1}}>
+          <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
+          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
+          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Lấy theo dãy A → T'}</div>
+        </div>
+        <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0}}>
+          <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
+            {value}
+            <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>{unit}</span>
+          </div>
+          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>{sub}</div>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+};
+
 export interface RoutePanelProps {
   kind: 'algo' | 'current';
   stops: Stop[];
@@ -131,50 +188,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   const textOnFill = kind === 'algo' ? '#062016' : '#ffffff';
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: LAYOUT.panelLeft[kind],
-        top: LAYOUT.panelTop,
-        width: LAYOUT.panelW,
-        height: LAYOUT.panelH,
-        boxSizing: 'border-box',
-        borderRadius: 16,
-        background: colors.panel,
-        border: `1px solid ${colors.line}`,
-        borderTop: `3px solid ${accent}`,
-        boxShadow: `0 -6px 26px ${accent}40`,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          height: LAYOUT.headerH - 3,
-          boxSizing: 'border-box',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 18,
-          padding: '0 24px 0 28px',
-          background: colors.panelHeader,
-          borderBottom: `1px solid ${colors.line}`,
-        }}
-      >
-        <RouteIcon kind={kind} />
-        <div style={{flex: 1}}>
-          <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
-          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Lấy theo dãy A → T'}</div>
-        </div>
-        <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0}}>
-          <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
-            {Math.round(d).toLocaleString('en-US')}
-            <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>m</span>
-          </div>
-          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>
-            {visited} / {stops.length} stops · điểm
-          </div>
-        </div>
-      </div>
+    <PanelShell kind={kind} value={Math.round(d).toLocaleString('en-US')} unit="m" sub={`${visited} / ${stops.length} stops · điểm`}>
       <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
           <MapBase startDoor={doorId} />
@@ -252,7 +266,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
         </g>
       </svg>
       {children}
-    </div>
+    </PanelShell>
   );
 };
 

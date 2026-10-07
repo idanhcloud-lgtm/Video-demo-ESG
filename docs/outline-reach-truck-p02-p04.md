@@ -51,15 +51,18 @@ Lập luận: hàng rải theo hai chiều (15/18 lối, hai điểm cùng dãy 
 | 14–21s | Thẻ trắng "Where do the metres go?": hai thanh cột chồng 3 màu mọc lên, rồi 3 ô chênh lệch +149 / −346 / −233 |
 | 21–24s | Tab 03 SOLVED – "Vào dãy vừa đủ tới điểm cần lấy" |
 
-## Vấn đề 04 – Morning congestion / Ùn tắc đầu buổi sáng (~25s)
+## Vấn đề 04 – Morning congestion / Ùn tắc dãy đầu buổi sáng (24,3s) – ĐÃ DỰNG
 
-- Thẻ vấn đề: "9:00 AM – every printed TO starts at aisle A".
-  Giờ cao điểm, mọi phiếu in theo A→T nên xe dồn về dãy A.
-- Minh họa: bản đồ toàn kho, 5–6 xe xuất phát từ các cửa D khác nhau.
-  - Hiện tại (đỏ): tất cả kéo về dãy A. Dãy A nhấp nháy cảnh báo, có biểu tượng đếm số xe trong dãy.
-  - Thuật toán (xanh): mỗi phiếu có điểm đầu riêng theo vị trí hàng, nên xe tỏa ra nhiều dãy.
-  - Callout: "Each TO gets its own start point → trucks spread out".
-- Kết luận: "Trucks spread across aisles → problem 04 solved".
+Composition `Problem04` (`src/scenes/Problem04.tsx`). Theo slide 8: 9:00 sáng, xe dồn vào dãy A.
+
+- **Minh họa, không phải số đo**: góc mỗi bản đồ có nhãn "ILLUSTRATION · MINH HỌA".
+- 6 xe rời cửa D01–D04, D13, D19 cùng lúc, cùng tốc độ.
+  - Hiện tại: phiếu in luôn bắt đầu từ dãy A → 4 xe (D01–D04) vào lối 1 (dãy CAT/CBP), xếp hàng ở VT 24/17/10/3 và đứng chờ (vòng đỏ nhấp nháy).
+  - Thuật toán: cùng 4 xe đi tới lối 1, 3, 5, 7 (điểm đầu riêng của mỗi phiếu) và tiếp tục chạy.
+  - 2 xe ở khu khác (lối 10, 13) giống nhau ở hai bên, cho cảnh sinh động.
+- Đầu panel đếm số xe trong dãy A theo thời gian thực: 4 vs 1.
+- Nhịp: thẻ vấn đề (0–5s) → banner đỏ "9:00 AM" giữa màn hình rồi thu nhỏ (6,3–8,7s) → xe chạy (8,7–14,3s) → nhấp nháy dãy A + nhãn "4 TRUCKS · 1 AISLE" / "1 TRUCK PER AISLE" (14,3s) → callout (15,7–21s) → SOLVED (21,3–24,3s).
+- Lưu ý: thuật toán tối ưu từng phiếu, không điều phối nhiều xe. Việc xe tỏa ra là hệ quả của việc mỗi phiếu bắt đầu ở điểm hàng của nó.
 
 ## Phần kết (~25s)
 
