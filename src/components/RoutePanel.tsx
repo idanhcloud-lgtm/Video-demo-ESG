@@ -40,6 +40,9 @@ export interface PanelProps {
   /** Legs (1-based index into the visit order: leg i goes stop i → stop i+1) to emphasise. */
   highlightLegs?: number[];
   highlight?: number;
+  /** 0–1: fade the route and stops outside `highlightLegs`. */
+  dim?: number;
+  showFinished?: boolean;
 }
 
 export const RoutePanel: React.FC<PanelProps> = ({
@@ -53,7 +56,10 @@ export const RoutePanel: React.FC<PanelProps> = ({
   highlightCross = 0,
   highlightLegs = [],
   highlight = 0,
+  dim = 0,
+  showFinished = true,
 }) => {
+  const focusStops = new Set(highlightLegs.flatMap((leg) => [leg - 1, leg]));
   const accent = kind === 'algo' ? colors.green : colors.red;
   const {pts, stopIdx} = routePolyline(stops, doorId);
   const cum = cumulative(pts);
@@ -102,6 +108,7 @@ export const RoutePanel: React.FC<PanelProps> = ({
             d={toPath(pts)}
             fill="none"
             stroke={accent}
+            opacity={1 - 0.7 * dim}
             strokeWidth={0.9}
             strokeLinejoin="round"
             strokeDasharray={`${d} ${total + 10}`}
@@ -114,8 +121,9 @@ export const RoutePanel: React.FC<PanelProps> = ({
                 key={leg}
                 d={toPath(seg)}
                 fill="none"
-                stroke="#ffffff"
-                strokeWidth={1.3}
+                stroke={accent}
+                strokeWidth={1.6}
+                style={{filter: `drop-shadow(0 0 1.2px ${accent})`}}
                 strokeLinejoin="round"
                 opacity={highlight}
               />
@@ -125,7 +133,7 @@ export const RoutePanel: React.FC<PanelProps> = ({
             const [x, y] = stopPoint(s);
             const done = i < visited;
             return (
-              <g key={i}>
+              <g key={i} opacity={focusStops.has(i) ? 1 : 1 - 0.7 * dim}>
                 <circle cx={x} cy={fy(y)} r={2.1} fill={done ? accent : '#0d1626'} stroke={accent} strokeWidth={0.45} />
                 <text x={x} y={fy(y) + 0.8} fontSize={2.2} fontWeight={800} textAnchor="middle" fill={done ? '#0b1220' : accent}>
                   {i + 1}
@@ -137,7 +145,7 @@ export const RoutePanel: React.FC<PanelProps> = ({
             <rect x={-2} y={-1.3} width={4} height={2.6} rx={0.6} fill={colors.yellow} stroke="#0b1220" strokeWidth={0.3} />
           </g>
         </WarehouseMap>
-        {finished ? (
+        {finished && showFinished ? (
           <div
             style={{
               position: 'absolute',

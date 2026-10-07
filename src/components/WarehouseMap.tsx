@@ -92,6 +92,7 @@ export const WarehouseMap: React.FC<{
       {crossLabel(-2.5, 'FRONT', 'Đầu dãy')}
       {crossLabel(xOfVT(34), 'TUNNEL 1 · VT 34', 'Hầm 1')}
       {crossLabel(xOfVT(75), 'TUNNEL 2 · VT 75', 'Hầm 2')}
+      {crossLabel(xOfVT(105), 'ROW END', 'Cuối dãy')}
       {/* doors */}
       {DOORS.map((d) => (
         <g key={d.id}>

@@ -11,17 +11,17 @@ Nguồn: video phần 1 (vấn đề 01) và `Slide_ESG_Project_V3.pptx` (slide 
 | c. Minh họa | 12s | Callout "CURRENT · HIỆN TẠI" (đỏ) và "ALGORITHM · THUẬT TOÁN" (xanh), có số liệu |
 | d. Kết luận | 4s | Tick vào thanh tiêu đề, dòng chú thích "→ problem 0x solved" |
 
-## Vấn đề 02 – Cross aisles not optimally utilized / Lối đi ngang chưa được sử dụng tối ưu (~30s) – ĐÃ DỰNG
+## Vấn đề 02 – Cross aisles not optimally utilized / Lối đi ngang chưa được sử dụng tối ưu (~21,7s) – ĐÃ DỰNG
 
-Composition `Problem02` (`src/scenes/Problem02.tsx`), dữ liệu `src/data/problem02.ts`.
+Composition `Problem02` (`src/scenes/Problem02.tsx`).
 
-- Bản đồ Kho C thật (`src/map/khoC.ts`), ô BIN 1,4 m, tim lối 8,65 m. Quãng đường tính đúng công thức app.
-- Phiếu mẫu: 14 điểm trên dãy CDT, CET, CFT, CGT, CHT (lối 4–8), xuất phát cửa D06.
-- Hiện tại (A→T, mỗi dãy VT tăng dần): 469,6 m. Thuật toán (S-shape + 2-opt): 335,2 m. Chênh −134,4 m (−28,6%).
-- Hai lộ trình qua cùng các hầm. Chênh lệch nằm ở lúc sang lối 6→7 và 7→8:
-  - Hiện tại: qua hầm 2 rồi chạy ngược về VT 36 (84,3 m), sau đó qua hầm 1 rồi chạy ngược về VT 12 (89,8 m).
-  - Thuật toán: qua hầm 2 rồi đi tiếp cùng chiều (36,7 m), sau đó qua hầm 1 (22,6 m).
-- Nhịp: thẻ vấn đề (0–4,5s) → bản đồ zoom và nháy 3 điểm sang lối (5–7s) → hai xe chạy cùng tốc độ (7–21s) → callout và tô sáng đoạn chênh lệch (21,5–26,5s) → tick "solved" (26,5–30s).
+- Sơ đồ: Kho C (`src/map/khoC.ts`), ô BIN 1,4 m, tim lối 8,65 m, quãng đường theo công thức app.
+- Vị trí hàng: phiếu 28 điểm của video phần 1 (`src/data/to28.ts`), đọc từ khung hình. Kiểm chứng: với hằng số cũ 1,35 / 5,4 hai tuyến ra 1.439,6 m và 1.007,6 m, khớp 1.440 / 1.008 m trong video.
+- Tuyến xanh giữ đúng thứ tự trong video phần 1. Với hằng số mới: hiện tại 1.596 m, thuật toán 1.166 m (−430 m, −26,9%).
+- Phóng to lối 1–12, tô sáng lối 3–5:
+  - Hiện tại: dãy 3 VT 70 → VT 20 → ra đầu dãy → dãy 4 VT 12 → VT 62 → hầm 1 → dãy 5 VT 38 → VT 98 (vào sâu, ra đầu, lại vào sâu).
+  - Thuật toán: dãy 3 VT 70 → hầm 2 → dãy 5 VT 98; các điểm gần cửa (VT 62, 38, 20, 12) lấy trên đường về.
+- Nhịp: thẻ vấn đề (0–4,5s) → hai tuyến đầy đủ (4,5–6,3s) → nháy 4 chỗ sang lối (6,3–9,3s) → zoom (9,3–11s) → tô sáng + callout (11–18,7s) → tick "solved" (18,7–21,7s).
 
 ## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (~25s)
 
