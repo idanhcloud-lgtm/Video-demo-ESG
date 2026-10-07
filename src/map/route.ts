@@ -1,4 +1,4 @@
-import {DOORS, RACKS, aisleY, dist, distFromDoor, legPath, xOfVT} from './khoC';
+import {DOORS, DOOR_X_M, RACKS, VT_WIDTH_M, aisleY, dist, distFromDoor, legPath, xOfVT} from './khoC';
 
 export interface Stop {
   rack: string;
@@ -26,46 +26,55 @@ export function routeLength(stops: Stop[], doorId: string) {
   return total + distFromDoor(dy, laneOf(last.rack), last.vt);
 }
 
-/** Current practice: TO printed by bin code, i.e. rack A → T, then VT ascending. */
+// Ported from the optimization app (ESG/so-sanh-lo-trinh-kho-c.html) so the video uses the same ordering.
+
+/** Current practice ("sweepOrder" in the app): aisles in A→T order; each aisle swept in one direction,
+ *  entering from the end nearer to where the truck is, never passing a stop and coming back. */
 export function aisleOrder(stops: Stop[]) {
-  return [...stops].sort((a, b) => a.rack.localeCompare(b.rack) || a.vt - b.vt);
-}
-
-/** S-shape: lanes nearest the door first, alternating direction per lane; then 2-opt. */
-export function optimizedOrder(stops: Stop[], doorId: string) {
-  const lanes = [...new Set(stops.map((s) => laneOf(s.rack)))].sort((a, b) => a - b);
-  const startLane = laneOf(stops[0].rack);
-  if (Math.abs(aisleY(lanes[lanes.length - 1]) - doorY(doorId)) < Math.abs(aisleY(lanes[0]) - doorY(doorId))) {
-    lanes.reverse();
-  }
-  void startLane;
-  let route: Stop[] = [];
-  lanes.forEach((lane, i) => {
-    const inLane = stops.filter((s) => laneOf(s.rack) === lane).sort((a, b) => a.vt - b.vt);
-    route = route.concat(i % 2 === 0 ? inLane : inLane.reverse());
+  const lanes = [...new Set(stops.map((s) => laneOf(s.rack)))].sort((x, y) => x - y);
+  const out: Stop[] = [];
+  let curV = DOOR_X_M / VT_WIDTH_M;
+  lanes.forEach((lane) => {
+    const g = stops.filter((s) => laneOf(s.rack) === lane).sort((x, y) => x.vt - y.vt);
+    const lo = g[0].vt;
+    const hi = g[g.length - 1].vt;
+    if (Math.abs(curV - lo) > Math.abs(curV - hi)) g.reverse();
+    out.push(...g);
+    curV = out[out.length - 1].vt;
   });
-  return twoOpt(route, doorId);
+  return out;
 }
 
-function twoOpt(route: Stop[], doorId: string) {
-  let best = route;
-  let bestLen = routeLength(best, doorId);
+/** App's serpentine key: even lanes by VT ascending, odd lanes by VT descending. */
+const serp = (s: Stop) => {
+  const a = laneOf(s.rack);
+  return a % 2 === 0 ? a * 1e5 + s.vt : a * 1e5 + (99999 - s.vt);
+};
+
+/** Optimized route ("optimise" in the app): serpentine start, then 2-opt until no gain (max 40 rounds). */
+export function optimizedOrder(stops: Stop[], doorId: string) {
+  let seq = [...stops].sort((x, y) => serp(x) - serp(y));
+  const n = seq.length;
+  if (n > 120) return seq;
   let improved = true;
-  while (improved) {
+  let guard = 0;
+  let cur = routeLength(seq, doorId);
+  while (improved && guard < 40) {
     improved = false;
-    for (let i = 0; i < best.length - 1; i++) {
-      for (let k = i + 1; k < best.length; k++) {
-        const trial = [...best.slice(0, i), ...best.slice(i, k + 1).reverse(), ...best.slice(k + 1)];
-        const len = routeLength(trial, doorId);
-        if (len < bestLen - 1e-9) {
-          best = trial;
-          bestLen = len;
+    guard++;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const cand = [...seq.slice(0, i), ...seq.slice(i, j + 1).reverse(), ...seq.slice(j + 1)];
+        const L = routeLength(cand, doorId);
+        if (L < cur - 1e-3) {
+          seq = cand;
+          cur = L;
           improved = true;
         }
       }
     }
   }
-  return best;
+  return seq;
 }
 
 function doorLeg(dy: number, lane: number, vt: number): [number, number][] {
