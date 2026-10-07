@@ -1,0 +1,291 @@
+<title>Xe Mover 2 Pallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --bg:#E9ECE7; --panel:#F5F7F3; --ink:#16191B; --ink-2:#4A5350; --ink-3:#77817D;
+  --rule:#C2CAC3; --steel:#3B4650; --steel-2:#2B333B; --wood:#B98D5A; --wood-2:#9A7343;
+  --mv:#1D6FA3; --mv-2:#14567E; --ok:#3F7D52; --ok-2:#356A46;
+  --door:#E0A415; --empty:#D2D7D0; --shadow:rgba(22,25,27,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101315; --panel:#161A1D; --ink:#E7ECE8; --ink-2:#A8B2AD; --ink-3:#79837E;
+  --rule:#2C3438; --steel:#4A555F; --steel-2:#333C44; --wood:#B98D5A; --wood-2:#8A6538;
+  --mv:#5AA9DC; --mv-2:#3E86B8; --ok:#6BAE7F; --ok-2:#4F8C61;
+  --door:#E9B93F; --empty:#20262A; --shadow:rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#101315; --panel:#161A1D; --ink:#E7ECE8; --ink-2:#A8B2AD; --ink-3:#79837E;
+  --rule:#2C3438; --steel:#4A555F; --steel-2:#333C44; --wood:#B98D5A; --wood-2:#8A6538;
+  --mv:#5AA9DC; --mv-2:#3E86B8; --ok:#6BAE7F; --ok-2:#4F8C61;
+  --door:#E9B93F; --empty:#20262A; --shadow:rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 40px}
+h1{font-family:"Barlow Condensed",Impact,sans-serif;font-weight:700;
+  font-size:clamp(26px,3.4vw,38px);text-transform:uppercase;letter-spacing:.01em;margin:0}
+.sub{color:var(--ink-2);font-size:14.5px;margin:4px 0 0;max-width:70ch}
+
+.stage{margin:18px 0 0;border:1px solid var(--rule);background:var(--panel);
+  box-shadow:0 2px 10px var(--shadow);overflow:hidden}
+svg#scene{display:block;width:100%;height:auto}
+
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;margin:16px 0 4px}
+.status{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:22px;
+  letter-spacing:.02em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--mv);flex:none}
+.status.full .dot{background:var(--ok)}
+.status.door .dot{background:var(--door)}
+
+.gauges{display:flex;gap:26px;margin-left:auto;flex-wrap:wrap}
+.gauge{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2)}
+.gauge b{font-size:20px;color:var(--ink);font-weight:600}
+.gauge.p1 b{color:var(--mv)} .gauge.p2 b{color:var(--mv)}
+.gauge.done b{color:var(--ok)}
+
+.controls{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.btn{border:0;border-radius:3px;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:14px 26px;font-size:18px}
+.btn.primary{background:var(--mv);color:#fff}
+.btn.primary:hover{background:var(--mv-2)}
+.btn.auto{background:var(--ink);color:var(--bg)}
+.btn.auto[aria-pressed="true"]{background:var(--ok)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible{outline:3px solid var(--door);outline-offset:2px}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:18px;height:12px;display:inline-block;border-radius:2px;border:1px solid var(--rule)}
+
+.layer{transition:fill .2s ease}
+.layer.pop{animation:pop .32s ease}
+@keyframes pop{0%{transform:translateY(-8px);opacity:.2}100%{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.layer.pop{animation:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Xe mover · 2 pallet lấy hàng</h1>
+    <p class="sub">Mỗi lần lấy được một kiện, pallet đầy dần lên (đổi màu bên trong thể hiện mức chứa). Đầy pallet 1 rồi sang pallet 2 — khi <b>cả hai đầy</b>, xe tự chạy ra cửa để giao.</p>
+  </header>
+
+  <div class="stage"><svg id="scene" viewBox="0 0 1000 520" role="img" aria-label="Xe mover chở hai pallet"></svg></div>
+
+  <div class="hud">
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">Sẵn sàng lấy hàng</span></div>
+    <div class="gauges">
+      <div class="gauge p1" id="g1">Pallet 1 &nbsp;<b>0/6</b></div>
+      <div class="gauge p2" id="g2">Pallet 2 &nbsp;<b>0/6</b></div>
+      <div class="gauge" id="gt">Tổng &nbsp;<b>0/12</b></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" id="pick">Lấy 1 kiện hàng</button>
+    <button class="btn auto" id="auto" aria-pressed="false">Tự động lấy</button>
+    <button class="btn ghost" id="reset">Về đầu</button>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--empty)"></i> Chỗ trống</span>
+    <span><i style="background:var(--mv)"></i> Đã xếp hàng</span>
+    <span><i style="background:var(--ok)"></i> Pallet đầy</span>
+    <span><i style="background:var(--door)"></i> Cửa xuất</span>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+var scene=document.getElementById('scene');
+
+var CAP=6;                 // số lớp mỗi pallet
+var GROUND=430;            // đường sàn
+var DRIVE=430;             // xe chạy sang phải bao nhiêu khi ra cửa
+// hình học pallet
+var P=[ {x:250}, {x:452} ];   // x trái mỗi pallet (trên càng)
+var PW=176, LAYH=18;
+var DECK=GROUND-58;        // mặt trên pallet gỗ (đáy chồng hàng)
+
+var fill=[0,0], driving=false, atDoor=false, autoT=null;
+var truck, layerEls=[[],[]];
+
+/* ---------------- vẽ khung cảnh tĩnh ---------------- */
+function drawStatic(){
+  while(scene.firstChild) scene.removeChild(scene.firstChild);
+
+  // nền + sàn
+  scene.appendChild(el('rect',{x:0,y:0,width:1000,height:520,fill:'var(--panel)'}));
+  scene.appendChild(el('rect',{x:0,y:GROUND,width:1000,height:520-GROUND,fill:'var(--bg)'}));
+  scene.appendChild(el('line',{x1:0,y1:GROUND,x2:1000,y2:GROUND,stroke:'var(--rule)','stroke-width':2}));
+  // vạch kẻ sàn
+  for(var gx=20;gx<1000;gx+=46){
+    scene.appendChild(el('line',{x1:gx,y1:GROUND+18,x2:gx+22,y2:GROUND+18,stroke:'var(--rule)','stroke-width':3,opacity:.5}));
+  }
+
+  // ---- cửa xuất (bên phải) ----
+  var door=el('g',{});
+  door.appendChild(el('rect',{x:902,y:150,width:14,height:GROUND-150,fill:'var(--ink-3)',opacity:.55}));
+  door.appendChild(el('rect',{x:986,y:150,width:14,height:GROUND-150,fill:'var(--ink-3)',opacity:.55}));
+  door.appendChild(el('rect',{x:902,y:150,width:98,height:16,fill:'var(--ink-3)',opacity:.55}));
+  // sọc cảnh báo sàn
+  for(var i=0;i<7;i++){
+    door.appendChild(el('rect',{x:906+i*13,y:GROUND+4,width:8,height:14,fill:'var(--door)',opacity:.9,transform:'skewX(-20)'}));
+  }
+  var dl=el('text',{x:951,y:132,'text-anchor':'middle','font-family':'Barlow Condensed, sans-serif',
+    'font-weight':700,'font-size':26,fill:'var(--door)','letter-spacing':1}); dl.textContent='CỬA XUẤT'; door.appendChild(dl);
+  scene.appendChild(door);
+
+  // ---- xe mover (nhóm dịch chuyển được) ----
+  truck=el('g',{id:'truck'});
+  scene.appendChild(truck);
+
+  // bóng đổ dưới xe
+  truck.appendChild(el('ellipse',{cx:340,cy:GROUND+8,rx:330,ry:12,fill:'var(--shadow)'}));
+
+  // ===== khối động lực (đuôi xe, bên trái) =====
+  // cột chống / khung bảo vệ
+  truck.appendChild(el('rect',{x:96,y:150,width:16,height:GROUND-150,rx:4,fill:'var(--steel-2)'}));
+  truck.appendChild(el('rect',{x:96,y:150,width:120,height:16,rx:4,fill:'var(--steel-2)'}));   // nóc bảo vệ
+  // thân máy
+  truck.appendChild(el('rect',{x:104,y:300,width:132,height:112,rx:12,fill:'var(--steel)',stroke:'var(--steel-2)','stroke-width':3}));
+  truck.appendChild(el('rect',{x:120,y:318,width:70,height:40,rx:6,fill:'var(--steel-2)'}));     // bảng điều khiển
+  // đèn cảnh báo
+  truck.appendChild(el('rect',{x:150,y:138,width:20,height:16,rx:3,fill:'var(--door)'}));
+  truck.appendChild(el('circle',{cx:160,cy:136,r:7,fill:'var(--door)',opacity:.85}));
+  // tay lái / cần
+  truck.appendChild(el('rect',{x:200,y:210,width:12,height:96,rx:6,fill:'var(--steel-2)'}));
+  truck.appendChild(el('rect',{x:196,y:206,width:44,height:14,rx:7,fill:'var(--ink)'}));
+
+  // ===== càng nâng =====
+  truck.appendChild(el('rect',{x:212,y:DECK+30,width:436,height:16,rx:3,fill:'var(--steel-2)'}));   // càng ngang
+  truck.appendChild(el('rect',{x:212,y:300,width:14,height:DECK+46-300,fill:'var(--steel-2)'}));      // lưng tựa càng
+
+  // bánh xe
+  truck.appendChild(wheel(150,GROUND,34));
+  truck.appendChild(wheel(300,GROUND,20));
+  truck.appendChild(wheel(620,GROUND,20));
+
+  // ===== 2 pallet =====
+  for(var p=0;p<2;p++){
+    layerEls[p]=[];
+    var px=P[p].x;
+    var g=el('g',{});
+    // đế gỗ
+    g.appendChild(el('rect',{x:px,y:DECK,width:PW,height:9,fill:'var(--wood)',stroke:'var(--wood-2)','stroke-width':1.5}));
+    [0, PW/2-15, PW-30].forEach(function(fx){
+      g.appendChild(el('rect',{x:px+fx,y:DECK+9,width:30,height:20,fill:'var(--wood-2)'}));
+    });
+    // khung sức chứa (nét đứt) + các lớp hàng
+    var stackTop=DECK-CAP*LAYH;
+    g.appendChild(el('rect',{x:px+6,y:stackTop,width:PW-12,height:CAP*LAYH,fill:'none',
+      stroke:'var(--ink-3)','stroke-width':1.5,'stroke-dasharray':'5 4',opacity:.55,rx:3}));
+    for(var i=0;i<CAP;i++){
+      var ly=DECK-(i+1)*LAYH;
+      var r=el('rect',{'class':'layer',x:px+9,y:ly+2,width:PW-18,height:LAYH-3,rx:2,
+        fill:'var(--empty)',stroke:'var(--rule)','stroke-width':1});
+      g.appendChild(r); layerEls[p].push(r);
+    }
+    // nhãn pallet
+    var lb=el('text',{x:px+PW/2,y:DECK+46,'text-anchor':'middle','font-family':'Barlow Condensed, sans-serif',
+      'font-weight':700,'font-size':20,fill:'var(--ink-2)'}); lb.textContent='PALLET '+(p+1); g.appendChild(lb);
+    // huy hiệu ĐẦY
+    var badge=el('g',{id:'badge'+p,opacity:0});
+    badge.appendChild(el('rect',{x:px+PW/2-32,y:DECK-CAP*LAYH-30,width:64,height:22,rx:11,fill:'var(--ok)'}));
+    var bt=el('text',{x:px+PW/2,y:DECK-CAP*LAYH-14,'text-anchor':'middle','font-family':'Barlow Condensed, sans-serif',
+      'font-weight':700,'font-size':15,fill:'#fff'}); bt.textContent='ĐẦY'; badge.appendChild(bt);
+    g.appendChild(badge);
+    truck.appendChild(g);
+  }
+}
+function wheel(cx,cy,r){
+  var g=el('g',{});
+  g.appendChild(el('circle',{cx:cx,cy:cy,r:r,fill:'var(--ink)'}));
+  g.appendChild(el('circle',{cx:cx,cy:cy,r:r*0.42,fill:'var(--steel)'}));
+  return g;
+}
+
+/* ---------------- cập nhật trạng thái ---------------- */
+function palletFull(p){ return fill[p]>=CAP; }
+function updateFills(popPallet,popLayer){
+  for(var p=0;p<2;p++){
+    var col = palletFull(p) ? 'var(--ok)' : 'var(--mv)';
+    for(var i=0;i<CAP;i++){
+      var on = i<fill[p];
+      layerEls[p][i].setAttribute('fill', on?col:'var(--empty)');
+      layerEls[p][i].setAttribute('stroke', on? (palletFull(p)?'var(--ok-2)':'var(--mv-2)') : 'var(--rule)');
+    }
+    document.getElementById('badge'+p).setAttribute('opacity', palletFull(p)?1:0);
+  }
+  if(popPallet!==undefined && layerEls[popPallet][popLayer]){
+    var e=layerEls[popPallet][popLayer]; e.classList.remove('pop'); void e.getBBox(); e.classList.add('pop');
+  }
+  document.querySelector('#g1 b').textContent=fill[0]+'/'+CAP;
+  document.querySelector('#g2 b').textContent=fill[1]+'/'+CAP;
+  document.querySelector('#gt b').textContent=(fill[0]+fill[1])+'/'+(CAP*2);
+  document.getElementById('g1').className='gauge p1'+(palletFull(0)?' done':'');
+  document.getElementById('g2').className='gauge p2'+(palletFull(1)?' done':'');
+}
+function setStatus(text,kind){
+  document.getElementById('statusText').textContent=text;
+  document.getElementById('status').className='status'+(kind?(' '+kind):'');
+}
+
+/* ---------------- hành động ---------------- */
+function pick(){
+  if(driving||atDoor) return;
+  var cur = fill[0]<CAP ? 0 : (fill[1]<CAP ? 1 : -1);
+  if(cur<0) return;
+  var layer=fill[cur];
+  fill[cur]++;
+  updateFills(cur,layer);
+  if(fill[0]>=CAP && fill[1]>=CAP){ setStatus('Cả 2 pallet đã đầy → xe ra cửa','full'); stopAuto(); setTimeout(driveToDoor,650); }
+  else setStatus('Đang lấy hàng — Pallet '+(cur+1));
+}
+function driveToDoor(){
+  if(atDoor) return; driving=true;
+  document.getElementById('pick').disabled=true;
+  var t0=null, dur=2600;
+  function step(now){
+    if(!t0)t0=now; var k=Math.min(1,(now-t0)/dur);
+    var e = k<.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;   // easeInOut
+    truck.setAttribute('transform','translate('+(DRIVE*e).toFixed(1)+',0)');
+    if(k<1){ requestAnimationFrame(step); }
+    else { driving=false; atDoor=true; setStatus('Đã tới cửa — giao hàng xong','door'); }
+  }
+  requestAnimationFrame(step);
+}
+function reset(){
+  stopAuto(); driving=false; atDoor=false; fill=[0,0];
+  truck.setAttribute('transform','translate(0,0)');
+  document.getElementById('pick').disabled=false;
+  updateFills(); setStatus('Sẵn sàng lấy hàng','');
+}
+function stopAuto(){ if(autoT){ clearInterval(autoT); autoT=null; } document.getElementById('auto').setAttribute('aria-pressed','false'); }
+function toggleAuto(){
+  if(autoT){ stopAuto(); return; }
+  if(atDoor||driving) return;
+  document.getElementById('auto').setAttribute('aria-pressed','true');
+  autoT=setInterval(function(){
+    if(fill[0]>=CAP && fill[1]>=CAP){ stopAuto(); return; }
+    pick();
+  },650);
+}
+
+document.getElementById('pick').onclick=pick;
+document.getElementById('auto').onclick=toggleAuto;
+document.getElementById('reset').onclick=reset;
+
+drawStatic();
+updateFills();
+setStatus('Sẵn sàng lấy hàng','');
+})();
+</script>

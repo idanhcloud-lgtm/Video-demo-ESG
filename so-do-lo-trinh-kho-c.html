@@ -1,0 +1,1205 @@
+<title>Mô Phỏng Lộ Trình</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --concrete:#E9ECE7;
+  --concrete-2:#DDE2DC;
+  --concrete-3:#CFD6CF;
+  --panel:#F5F7F3;
+  --ink:#16191B;
+  --ink-2:#4A5350;
+  --ink-3:#77817D;
+  --rule:#C2CAC3;
+  --rack:#D2D7D0;
+  --rack-edge:#AEB5AD;
+  --rack-wall:#BCC3BB;
+  --aisle:#FBFCFB;
+  --tunnel:#E2E6DF;
+  --rt:#D9531E;
+  --rt-soft:#F6DDD2;
+  --mv:#1D6FA3;
+  --mv-soft:#D5E5F0;
+  --door:#E0A415;
+  --door-live:#B8860B;
+  --ok:#3F7D52;
+  --warn:#B5651D;
+  --shadow:rgba(22,25,27,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --concrete:#101315;
+    --concrete-2:#171B1E;
+    --concrete-3:#20262A;
+    --panel:#161A1D;
+    --ink:#E7ECE8;
+    --ink-2:#A8B2AD;
+    --ink-3:#79837E;
+    --rule:#2C3438;
+    --rack:#333C41;
+    --rack-edge:#4A555A;
+    --rack-wall:#3E484D;
+    --aisle:#0B0E10;
+    --tunnel:#1B2124;
+    --rt:#FF7A45;
+    --rt-soft:#3A211A;
+    --mv:#5AA9DC;
+    --mv-soft:#152A38;
+    --door:#E9B93F;
+    --door-live:#FFD569;
+    --ok:#6BAE7F;
+    --warn:#D89143;
+    --shadow:rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --concrete:#101315;
+  --concrete-2:#171B1E;
+  --concrete-3:#20262A;
+  --panel:#161A1D;
+  --ink:#E7ECE8;
+  --ink-2:#A8B2AD;
+  --ink-3:#79837E;
+  --rule:#2C3438;
+  --rack:#333C41;
+  --rack-edge:#4A555A;
+  --rack-wall:#3E484D;
+  --aisle:#0B0E10;
+  --tunnel:#1B2124;
+  --rt:#FF7A45;
+  --rt-soft:#3A211A;
+  --mv:#5AA9DC;
+  --mv-soft:#152A38;
+  --door:#E9B93F;
+  --door-live:#FFD569;
+  --ok:#6BAE7F;
+  --warn:#D89143;
+  --shadow:rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--concrete);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{max-width:1500px;margin:0 auto;padding:22px 20px 48px}
+
+/* ---------- header ---------- */
+.masthead{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 24px;
+  padding-bottom:14px;border-bottom:2px solid var(--ink);
+}
+.masthead h1{
+  font-family:"Barlow Condensed",Impact,sans-serif;
+  font-weight:700;font-size:clamp(28px,4.2vw,44px);
+  letter-spacing:.01em;line-height:.95;margin:0;text-transform:uppercase;
+  text-wrap:balance;
+}
+.masthead .sub{color:var(--ink-2);font-size:14px;max-width:56ch;margin:0}
+.stamp{
+  margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  border:1px solid var(--rule);padding:5px 9px;white-space:nowrap;
+}
+
+/* ---------- controls ---------- */
+.controls{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 18px;
+  padding:16px 0;border-bottom:1px solid var(--rule);
+}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:13px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+}
+select,button,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+select{
+  background:var(--panel);border:1px solid var(--rule);padding:7px 10px;
+  min-width:96px;border-radius:2px;
+}
+.seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.seg button{
+  background:var(--panel);border:0;padding:8px 14px;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:14px;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--concrete)}
+.seg button+button{border-left:1px solid var(--rule)}
+.btn{
+  background:var(--ink);color:var(--concrete);border:0;border-radius:2px;
+  padding:9px 18px;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+button:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--rt);outline-offset:2px;
+}
+
+/* ---------- stats ---------- */
+.stats{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 16px;border:1px solid var(--rule);background:var(--panel)}
+.stat{flex:1 1 130px;padding:11px 14px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:0}
+.stat .k{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+}
+.stat .v{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:22px;
+  font-variant-numeric:tabular-nums;line-height:1.2;
+}
+.stat .v small{font-size:13px;font-weight:400;color:var(--ink-2)}
+.stat .v.rt{color:var(--rt)} .stat .v.mv{color:var(--mv)} .stat .v.good{color:var(--ok)}
+
+/* ---------- layout ---------- */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px;align-items:start}
+@media (max-width:1000px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+.mapbox{
+  position:relative;
+  border:1px solid var(--rule);background:var(--concrete-2);
+  overflow-x:auto;overflow-y:hidden;box-shadow:0 1px 3px var(--shadow);
+}
+svg.plan{display:block;width:100%;min-width:1150px;height:auto}
+
+/* ---- bảng pallet trên xe (dưới danh sách chuyến) ---- */
+.rail{display:flex;flex-direction:column;gap:18px;min-width:0}
+.rail > .panel:first-child{display:flex;flex-direction:column;flex:1 1 auto;min-height:180px;overflow:hidden}
+.rail > .panel:first-child .steps{max-height:none;flex:1 1 auto;min-height:0}
+.pallet-panel{flex:0 0 auto;display:flex;flex-direction:column}
+.pallet-panel .ph-body{flex:1 1 auto;display:flex;align-items:center;justify-content:center}
+.pallet-panel[hidden]{display:none}
+.pallet-panel .ph-body{padding:20px 16px 22px}
+.ph-pallets{display:flex;gap:26px;justify-content:center}
+.ph-pallet{display:flex;flex-direction:column;align-items:center;gap:9px}
+.ph-name{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.ph-load{position:relative;width:96px;height:158px;background:var(--concrete-3);
+  border:1.5px solid var(--rule);border-radius:3px;overflow:hidden;display:flex;align-items:flex-end}
+.ph-fill{width:100%;height:0;background:var(--mv);transition:height .3s ease}
+.ph-pallet.full .ph-fill{background:var(--ok)}
+.ph-base{width:96px;height:12px;background:#B98D5A;border-radius:0 0 3px 3px}
+.ph-cap{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--ink-3);white-space:nowrap;font-weight:500}
+.ph-pallet.full .ph-cap{color:var(--ok);font-weight:600}
+@media (prefers-reduced-motion:reduce){.ph-fill{transition:none}}
+
+/* ---------- panel ---------- */
+.panel{border:1px solid var(--rule);background:var(--panel)}
+.panel h2{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:.1em;text-transform:uppercase;margin:0;
+  padding:11px 14px;border-bottom:1px solid var(--rule);
+}
+.steps{list-style:none;margin:0;padding:0;max-height:560px;overflow-y:auto}
+.steps li{
+  display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:baseline;
+  padding:9px 14px;border-bottom:1px solid var(--rule);
+}
+.steps li.trip-head{
+  grid-template-columns:1fr;background:var(--concrete-3);
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);padding:7px 14px;
+  cursor:pointer;user-select:none;transition:background .15s,color .15s;
+}
+.steps li.trip-head:hover:not(.done){background:var(--concrete-2)}
+.steps li.trip-head.done{background:var(--ok);color:#fff}
+.steps li.done-step{opacity:.38;text-decoration:line-through}
+.steps li.on{background:var(--rt-soft)}
+.mode-mv .steps li.on{background:var(--mv-soft)}
+.steps .n{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;
+}
+.steps .loc{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500}
+.steps .meta{display:block;font-family:"IBM Plex Sans",sans-serif;font-size:12px;color:var(--ink-2);margin-top:1px}
+.steps .d{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.panel .empty{padding:16px 14px;color:var(--ink-2);font-size:13px}
+
+.tag{
+  display:inline-block;font-family:"Barlow Condensed",sans-serif;font-weight:600;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:1px 6px;border-radius:2px;vertical-align:1px;
+}
+.tag.long{background:var(--mv-soft);color:var(--mv)}
+.tag.nguyen{background:var(--concrete-3);color:var(--ink-2)}
+.tag.t1{background:var(--rt-soft);color:var(--warn)}
+
+/* ---------- legend ---------- */
+.legend{
+  display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:14px;
+  font-size:12.5px;color:var(--ink-2);
+}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:16px;height:10px;display:inline-block;border:1px solid var(--rack-edge)}
+
+/* ---------- input ---------- */
+details.paste{margin-top:22px;border:1px solid var(--rule);background:var(--panel)}
+details.paste summary{
+  cursor:pointer;padding:11px 14px;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+details.paste .body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+textarea{
+  width:100%;min-height:150px;background:var(--concrete);border:1px solid var(--rule);
+  padding:10px;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;
+  border-radius:2px;resize:vertical;
+}
+.hint{font-size:12.5px;color:var(--ink-2);margin:0}
+.hint code{font-family:"IBM Plex Mono",monospace;background:var(--concrete-3);padding:1px 4px}
+
+.issues{margin-top:14px;border-left:3px solid var(--warn);background:var(--panel);padding:10px 14px;font-size:13px}
+.issues b{font-weight:600}
+.issues ul{margin:6px 0 0;padding-left:18px}
+.issues li{margin:2px 0}
+
+footer.note{
+  margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
+  font-size:12.5px;color:var(--ink-3);max-width:78ch;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+.to-picker{display:flex;flex-direction:column;gap:6px}
+.to-search{padding:7px 10px;border:1px solid var(--rule);border-radius:2px;font-family:inherit;font-size:13px;width:380px;max-width:100%}
+.to-toolbar{display:flex;gap:14px;align-items:center;font-size:12px}
+.to-toolbar a{color:var(--mv);cursor:pointer;text-decoration:underline}
+.to-count{color:var(--ink-2);font-family:"IBM Plex Mono",monospace}
+.to-list{width:380px;max-width:100%;max-height:230px;overflow-y:auto;border:1px solid var(--rule);border-radius:2px;background:var(--panel)}
+.to-list label{display:flex;gap:9px;align-items:center;padding:6px 11px;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-bottom:1px solid var(--rule)}
+.to-list label:last-child{border-bottom:0}
+.to-list label:hover{background:var(--concrete-2)}
+.to-list input{width:15px;height:15px;flex:none;margin:0}
+.to-date{padding:5px 6px;border:1px solid var(--rule);border-radius:2px;font-family:inherit;font-size:12.5px}
+.upload-bar .btn{background:var(--mv);color:#fff;border-color:var(--mv)}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Mô phỏng lộ trình</h1>
+      <p class="sub">Mặt bằng thật: 35 dãy, 18 lối xe nâng, 2 đường hầm cắt ngang tại VT 33–35 và 74–76. Vẽ đúng hướng kho — dãy A dưới cùng, dãy T trên cùng. Lộ trình tính trực tiếp trên trình duyệt.</p>
+    </div>
+    <div class="stamp">B2C · 22.176 bin</div>
+  </header>
+
+  <div class="upload-bar" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:14px 0 2px">
+    <label class="btn" style="cursor:pointer;display:inline-flex;align-items:center">Tải file CSV (TO thật)<input type="file" id="csvFile" accept=".csv" style="display:none"></label>
+    <span id="upInfo" style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2)">Đang dùng phiếu mẫu — tải file TO (CSV) để chạy dữ liệu thật.</span>
+  </div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="door">Cửa xuất</label>
+      <select id="door"></select>
+    </div>
+    <div class="field">
+      <label>Xem lộ trình</label>
+      <div class="seg" role="group">
+        <button id="mRT" aria-pressed="true">Reach truck</button>
+        <button id="mMV" aria-pressed="false">Mover</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="speed">Tốc độ</label>
+      <select id="speed">
+        <option value="0.5">Chậm</option>
+        <option value="1" selected>Vừa</option>
+        <option value="2.5">Nhanh</option>
+      </select>
+    </div>
+    <div class="field" id="toPickField" hidden>
+      <label>Chọn TO để chạy (tick nhiều được)</label>
+      <div class="to-picker">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--ink-2)">Từ <input type="date" id="toFrom" class="to-date"> đến <input type="date" id="toTo" class="to-date"></div>
+        <input type="text" id="toSearch" class="to-search" placeholder="Gõ mã TO hoặc ngày để lọc…">
+        <div class="to-toolbar"><span class="to-count" id="toCount">Đã chọn 0</span><a id="toAll">Chọn tất cả (đang hiện)</a><a id="toClear">Bỏ chọn hết</a></div>
+        <div class="to-list" id="toList"></div>
+      </div>
+    </div>
+    <button class="btn" id="play">Chạy mô phỏng</button>
+    <button class="btn ghost" id="reset">Về đầu</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="stage" id="stage">
+    <div class="mapbox"><svg class="plan" id="plan" role="img" aria-label="Sơ đồ mặt bằng kho C với lộ trình lấy hàng"></svg></div>
+    <div class="rail">
+      <aside class="panel">
+        <h2 id="panelTitle">Thứ tự ghé</h2>
+        <ol class="steps" id="steps"></ol>
+      </aside>
+      <aside class="panel pallet-panel" id="palletHud" hidden>
+        <h2>Trên xe · Chuyến <span id="phTrip">1</span></h2>
+        <div class="ph-body"><div class="ph-pallets" id="phPallets"></div></div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--rack);border-color:var(--rack-edge)"></i> Kệ rack</span>
+    <span><i style="background:var(--tunnel);border-color:var(--rule)"></i> Đường hầm 33–35 / 74–76</span>
+    <span><i style="background:var(--door);border-color:var(--door-live)"></i> Cửa xuất</span>
+    <span><i style="background:var(--rt);border:0"></i> Lộ trình reach truck</span>
+    <span><i style="background:var(--mv);border:0"></i> Lộ trình mover</span>
+  </div>
+
+  <div id="issues"></div>
+
+  <details class="paste">
+    <summary>Dán phiếu TO khác</summary>
+    <div class="body">
+      <p class="hint">Mỗi dòng một mục, ngăn cách bằng dấu <code>Tab</code> hoặc dấu phẩy: <code>mã hàng · số lượng · bin xuất</code>. Bin không đúng dạng rack (ví dụ <code>COF-001</code>) sẽ được tách ra khỏi lộ trình.</p>
+      <textarea id="toText" spellcheck="false"></textarea>
+      <p class="hint">Quy cách pallet lấy từ <code>LE quantity</code> của SAP. Mã chưa có quy cách sẽ được coi là một pallet nguyên.</p>
+      <div><button class="btn" id="rerun">Tính lại lộ trình</button></div>
+    </div>
+  </details>
+
+  <footer class="note">
+    Bản demo dựng trên dữ liệu thật của Kho C. Bề rộng một VT 1,4 m và khoảng cách tim hai lối 8,65 m là số đo thực tế (10/2026). Vị trí 25 cửa hiện dàn đều trên bề ngang kho và cần thay bằng toạ độ thật.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= DỮ LIỆU KHO ================= */
+// Đo thực tế 10/2026: 1 VT rộng 1,4 m; tim lối tới tim lối 8,65 m.
+// Bề sâu kệ chưa đo nên giữ 1,1 m; bề rộng lối = phần còn lại (chỉ ảnh hưởng hình vẽ, không ảnh hưởng số mét).
+var VTW = 1.4, PITCH = 8.65, RACK_D = 1.1, AISLE_W = PITCH - 2*RACK_D;
+var CROSS = [0, 34, 75];
+
+// dãy -> { lối, phía T/P, VT lớn nhất } — giống app chính.
+// Đã đối chiếu thực tế (10/2026): lối 1 kẹp giữa CAT và CBP; lối 18 chỉ có CTP.
+var DAY = {
+  CAT:[1,'T',76],   CBP:[1,'P',76],
+  CBT:[2,'T',76],   CCP:[2,'P',76],
+  CCT:[3,'T',80],   CDP:[3,'P',80],
+  CDT:[4,'T',104],  CEP:[4,'P',104],
+  CET:[5,'T',104],  CFP:[5,'P',104],
+  CFT:[6,'T',104],  CGP:[6,'P',104],
+  CGT:[7,'T',104],  CHP:[7,'P',104],
+  CHT:[8,'T',104],  CIP:[8,'P',104],
+  CIT:[9,'T',104],  CKP:[9,'P',104],
+  CKT:[10,'T',104], CLP:[10,'P',104],
+  CLT:[11,'T',104], CMP:[11,'P',104],
+  CMT:[12,'T',104], CNP:[12,'P',104],
+  CNT:[13,'T',104], COP:[13,'P',104],
+  COT:[14,'T',104], CPP:[14,'P',104],
+  CPT:[15,'T',104], CQP:[15,'P',104],
+  CQT:[16,'T',104], CRP:[16,'P',104],
+  CRT:[17,'T',104], CSP:[17,'P',104],
+  CTP:[18,'P',96]
+};
+var NO_TUNNEL = {CAT:1, CTP:1};      // dãy tường, xe nâng không chạy xuyên qua
+var GAPS = { CAT:[[9,14]] };          // CAT không có kệ ở VT 9–14 (cửa phụ)
+var NAISLE = 18;
+
+// VT lớn nhất theo từng lối — dùng để tính lối cuối dãy
+var AMAX = {};
+Object.keys(DAY).forEach(function(d){
+  var a = DAY[d][0]; AMAX[a] = Math.max(AMAX[a]||0, DAY[d][2]);
+});
+
+// quy cách pallet (LE quantity, SAP)
+var QC = {"605148":300,"605136":1000,"617811":16,"617814":16,
+          "605915":500,"602379":750,"608877":5400};
+
+var TO_MAU = [
+  "605148\t100\tCDT-046-4",
+  "605136\t100\tCMP-013-3",
+  "617811\t2\tCOF-001",
+  "617814\t5\tCOF-001",
+  "605915\t100\tCOP-100-3",
+  "602379\t500\tCBT-025-2",
+  "601234\t50\tCGP-080-5",
+  "608877\t200\tCCT-060-1",
+  "609001\t30\tCNT-040-3",
+  "610456\t80\tCRP-090-2",
+  "612300\t60\tP05-05",
+  "615001\t40\tCBP-030-6"
+].join("\n");
+
+var TEN = {"605148":"Rổ chữ nhật 3T4-Lá","605136":"Rổ chữ nhật cao 2T6","617811":"Tủ Tabi-L 5 ngăn",
+  "617814":"Tủ Tabi-L 5 ngăn","605915":"Rổ chữ nhật cao 3T6","602379":"Rổ chữ nhật 2T6",
+  "601234":"Thau chữ nhật lớn","608877":"Xô tròn 10L","609001":"Rổ vuông nhỏ",
+  "610456":"Thùng đựng đồ nắp","612300":"Khay đựng trái cây","615001":"Hộp bảo quản"};
+
+// 25 cửa dàn đều trên bề ngang kho
+var DOORS = [];
+for (var i=1;i<=25;i++){
+  DOORS.push({ ten: String(i).padStart(2,'0'), y: (i-1)*(NAISLE-1)*PITCH/24 });
+}
+var DOOR_X = -7, DOOR_VT = DOOR_X/VTW;
+
+/* ================= HÌNH HỌC ================= */
+function aisleY(a){ return (a-1)*PITCH; }
+function rackBand(day){
+  var a = DAY[day][0], y = aisleY(a);
+  return DAY[day][1]==='T'
+    ? [y - AISLE_W/2 - RACK_D, y - AISLE_W/2]
+    : [y + AISLE_W/2, y + AISLE_W/2 + RACK_D];
+}
+function xOf(vt){ return vt*VTW; }
+
+// Thuc te dãy A nam DUOI, dãy T nam TREN -> lat truc doc khi ve.
+// Chi doi cach hien thi, khong doi mo hinh tinh khoang cach.
+var Y_TOP, Y_BOT;
+function initFlip(){
+  Y_TOP = rackBand('CAT')[0];
+  Y_BOT = rackBand('CTP')[1];
+}
+function fy(y){ return Y_TOP + Y_BOT - y; }
+
+function maxBetween(a1,a2){
+  var lo=Math.min(a1,a2), hi=Math.max(a1,a2), m=0;
+  for(var k=lo;k<=hi;k++) m=Math.max(m, AMAX[k]||0);
+  return m;
+}
+function crossOptions(a1,a2){ return CROSS.concat([maxBetween(a1,a2)+1]); }
+
+function dist(a1,v1,a2,v2){
+  if(a1===a2) return Math.abs(v1-v2)*VTW;
+  var dy = Math.abs(aisleY(a1)-aisleY(a2)), best = Infinity;
+  crossOptions(a1,a2).forEach(function(p){
+    var d = (Math.abs(v1-p)+Math.abs(v2-p))*VTW + dy;
+    if(d<best) best=d;
+  });
+  return best;
+}
+// khoảng cách từ cửa (toạ độ y tự do) tới một điểm trong lối
+function distDoor(dy0,a2,v2){
+  var dy = Math.abs(dy0 - aisleY(a2));
+  var best = Infinity;
+  CROSS.concat([maxBetween(1,a2)+1]).forEach(function(p){
+    var d = (Math.abs(DOOR_VT-p)+Math.abs(v2-p))*VTW + dy;
+    if(d<best) best=d;
+  });
+  return best;
+}
+// chuỗi điểm gấp khúc để vẽ — trả về toạ độ ĐÃ LẬT, dùng thẳng để vẽ và chạy mô phỏng
+function legPath(p1,p2){
+  if(p1.a===p2.a && Math.abs(p1.y-p2.y)<0.01)
+    return [[xOf(p1.v),fy(p1.y)],[xOf(p2.v),fy(p2.y)]];
+  var opts = CROSS.concat([maxBetween(p1.a||1,p2.a||1)+1]);
+  var bp=opts[0], bd=Infinity;
+  opts.forEach(function(p){
+    var d = (Math.abs(p1.v-p)+Math.abs(p2.v-p))*VTW + Math.abs(p1.y-p2.y);
+    if(d<bd){bd=d;bp=p;}
+  });
+  return [[xOf(p1.v),fy(p1.y)],[xOf(bp),fy(p1.y)],[xOf(bp),fy(p2.y)],[xOf(p2.v),fy(p2.y)]];
+}
+
+/* ================= ĐỌC PHIẾU ================= */
+function parseTO(text){
+  var rack=[], ngoai=[], bad=[];
+  text.replace(/^﻿/,'').split(/\r?\n/).forEach(function(line){
+    if(!line.trim()) return;
+    var f = line.split(/\t|,|;/).map(function(s){return s.trim();}).filter(function(s){return s!=="";});
+    if(f.length<3){ bad.push(line.trim()); return; }
+    var ma=f[0], sl=parseFloat(f[1].replace(/\./g,'').replace(',','.')), bin=f[2].toUpperCase();
+    if(!(sl>0)){ bad.push(line.trim()); return; }
+    var m = bin.match(/^([A-Z]{3})-(\d{1,3})-(\d{1,2})$/);
+    if(m && DAY[m[1]]) rack.push({ma:ma,sl:sl,bin:bin,day:m[1],vt:parseInt(m[2],10),tang:parseInt(m[3],10)});
+    else ngoai.push({ma:ma,sl:sl,bin:bin});
+  });
+  return {rack:rack,ngoai:ngoai,bad:bad};
+}
+
+/* ================= TÍNH LỘ TRÌNH ================= */
+function build(text,doorY){
+  var p = parseTO(text);
+  var stopMap={}, stops=[];
+  p.rack.forEach(function(l){
+    var k=l.day+"|"+l.vt, s=stopMap[k];
+    if(!s){
+      s={day:l.day,vt:l.vt,a:DAY[l.day][0],y:aisleY(DAY[l.day][0]),
+         v:l.vt,tang:[],needRT:false,idx:stops.length,items:[]};
+      stopMap[k]=s; stops.push(s);
+    }
+    if(s.tang.indexOf(l.tang)<0) s.tang.push(l.tang);
+    if(l.tang>1) s.needRT=true;
+    s.items.push(l);
+  });
+
+  // phân rã số lượng theo quy cách
+  var units=[], le=[], thieuQC=[];
+  p.rack.forEach(function(l){
+    var s=stopMap[l.day+"|"+l.vt], std=QC[l.ma]||0;
+    if(std<=0){
+      thieuQC.push(l.ma);
+      units.push({kind:'NGUYEN',stops:[s],items:[l]});
+      return;
+    }
+    var nf=Math.floor(l.sl/std), rem=l.sl-nf*std;
+    for(var i=0;i<nf;i++) units.push({kind:'NGUYEN',stops:[s],items:[l]});
+    if(rem>1e-7) le.push({s:s,frac:rem/std,l:l});
+  });
+
+  // gom hàng lẻ lên pallet lồng — next-fit theo thứ tự rắn bò
+  le.sort(function(x,y){return serp(x.s)-serp(y.s);});
+  var cur=[],cf=0;
+  function flush(){
+    if(!cur.length) return;
+    var ss=[],its=[];
+    cur.forEach(function(f){ if(ss.indexOf(f.s)<0) ss.push(f.s); its.push(f.l); });
+    units.push({kind:'LONG',stops:ss,items:its});
+    cur=[];cf=0;
+  }
+  le.forEach(function(f){
+    if(cur.length && cf+f.frac<=1.000001){ cur.push(f); cf+=f.frac; }
+    else { flush(); cur=[f]; cf=f.frac; }
+  });
+  flush();
+
+  return {stops:stops,units:units,ngoai:p.ngoai,bad:p.bad,
+          thieuQC:thieuQC.filter(function(v,i,a){return a.indexOf(v)===i;}),
+          leTong:le.reduce(function(t,f){return t+f.frac;},0)};
+}
+
+function serp(s){ return s.a%2===0 ? s.a*1e5+s.vt : s.a*1e5+(99999-s.vt); }
+
+/* ================= NẠP FILE CSV TO THẬT ================= */
+var UP = null; // {byTO, toList, bad}
+function _delim(line){ var c={';':0,',':0,'\t':0}; for(var i=0;i<line.length;i++)if(c[line[i]]!=null)c[line[i]]++; return c[';']>=c[',']?(c[';']>=c['\t']?';':'\t'):(c[',']>=c['\t']?',':'\t'); }
+function _col(h,names){ var lo=h.map(function(x){return (x||'').toLowerCase().trim();});
+  for(var j=0;j<names.length;j++){ var e=lo.indexOf(names[j]); if(e>=0)return e; }               // khớp chính xác trước
+  for(var i=0;i<h.length;i++)for(var k=0;k<names.length;k++)if(lo[i].indexOf(names[k])>=0)return i; // rồi mới khớp một phần
+  return -1; }
+function _num(s,euro){ if(s==null)return 0; s=(''+s).trim(); if(!s)return 0; if(euro)s=s.replace(/\./g,'').replace(',','.'); else s=s.replace(/,/g,''); var v=parseFloat(s); return isNaN(v)?0:v; }
+function _iso(s){ s=(''+s).trim(); var m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2); m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2); return s; }
+function parseCSV(text){
+  text=text.replace(/^﻿/,''); var L=text.split(/\r?\n/); if(!L.length)return [];
+  var d=_delim(L[0]), euro=(d===';'); var H=L[0].split(d);
+  var cTO=_col(H,['to','transfer order number','transfer order','to number','so to']),
+      cBin=_col(H,['bin','source storage bin','source bin','bin xuat']),
+      cMat=_col(H,['material','vật tư','ma vat tu','mã hàng','mahang']),
+      cQty=_col(H,['qty','dest.target quantity','target quantity','so luong']),
+      cCap=_col(H,['cap','capacity usage','capacity']),
+      cDate=_col(H,['date','creation date','confirmation date','ngay']);
+  var rows=[];
+  for(var r=1;r<L.length;r++){ if(!L[r].trim())continue; var f=L[r].split(d);
+    rows.push({to:(f[cTO]||'').trim(), bin:(f[cBin]||'').trim().toUpperCase(), ma:cMat>=0?(f[cMat]||'').trim():'', qty:_num(f[cQty],euro), cap:_num(f[cCap],euro), date:cDate>=0?_iso(f[cDate]):''}); }
+  return rows;
+}
+function ingestCSV(rows){
+  var rx=/^([A-Z]{3})-(\d{1,3})-(\d{1,2})$/, byTO={}, order=[], bad=0;
+  rows.forEach(function(r){ var m=rx.exec(r.bin); if(!m||!DAY[m[1]]){bad++;return;}
+    if(!byTO[r.to]){ byTO[r.to]={to:r.to,date:r.date,lines:[]}; order.push(r.to); }
+    byTO[r.to].lines.push({ma:r.ma||r.bin, sl:r.qty, bin:r.bin, day:m[1], vt:+m[2], tang:+m[3], cap:r.cap}); });
+  UP={byTO:byTO, toList:order, bad:bad};
+  return UP;
+}
+// dựng mô hình từ các dòng CSV (số pallet lấy trực tiếp từ cột Capacity usage của SAP)
+function buildFromCSVLines(lines){
+  var stopMap={}, stops=[];
+  lines.forEach(function(l){
+    var k=l.day+'|'+l.vt, s=stopMap[k];
+    if(!s){ s={day:l.day,vt:l.vt,a:DAY[l.day][0],y:aisleY(DAY[l.day][0]),v:l.vt,tang:[],needRT:false,idx:stops.length,items:[]}; stopMap[k]=s; stops.push(s); }
+    if(s.tang.indexOf(l.tang)<0) s.tang.push(l.tang);
+    if(l.tang>1) s.needRT=true;
+    s.items.push(l);
+  });
+  var units=[], le=[], thieuCap=[];
+  lines.forEach(function(l){
+    var s=stopMap[l.day+'|'+l.vt], cap=l.cap;
+    if(!(cap>0)){ thieuCap.push(l.ma); units.push({kind:'NGUYEN',stops:[s],items:[l]}); return; }
+    var nf=Math.floor(cap+1e-9), rem=cap-nf;
+    for(var i=0;i<nf;i++) units.push({kind:'NGUYEN',stops:[s],items:[l]});
+    if(rem>1e-6) le.push({s:s,frac:rem,l:l});
+  });
+  le.sort(function(x,y){return serp(x.s)-serp(y.s);});
+  var cur=[],cf=0;
+  function flush(){ if(!cur.length)return; var ss=[],its=[]; cur.forEach(function(f){ if(ss.indexOf(f.s)<0)ss.push(f.s); its.push(f.l); }); units.push({kind:'LONG',stops:ss,items:its}); cur=[];cf=0; }
+  le.forEach(function(f){ if(cur.length&&cf+f.frac<=1.000001){cur.push(f);cf+=f.frac;}else{flush();cur=[f];cf=f.frac;} });
+  flush();
+  return {stops:stops,units:units,ngoai:[],bad:[],
+          thieuQC:thieuCap.filter(function(v,i,a){return a.indexOf(v)===i;}),
+          leTong:le.reduce(function(t,f){return t+f.frac;},0)};
+}
+function selectedTOs(){ var out=[]; var cbs=document.querySelectorAll('#toList input:checked'); for(var i=0;i<cbs.length;i++)out.push(cbs[i].value); return out; }
+function updateToCount(){ var n=document.querySelectorAll('#toList input:checked').length; var e=document.getElementById('toCount'); if(e)e.textContent='Đã chọn '+n+(n?' TO':''); }
+function filterToList(){
+  var q=((document.getElementById('toSearch')||{}).value||'').trim().toLowerCase();
+  var f=((document.getElementById('toFrom')||{}).value)||'', t=((document.getElementById('toTo')||{}).value)||'';
+  var L=document.querySelectorAll('#toList label');
+  for(var i=0;i<L.length;i++){ var d=L[i].getAttribute('data-date')||'';
+    var okQ=L[i].textContent.toLowerCase().indexOf(q)>=0, okD=(!f||d>=f)&&(!t||d<=t);
+    L[i].style.display=(okQ&&okD)?'':'none'; }
+}
+function afterUploadCSV(){
+  var box=document.getElementById('toList'); box.innerHTML='';
+  UP.toList.forEach(function(to,idx){ var st=UP.byTO[to]; var lb=document.createElement('label'); lb.setAttribute('data-date',st.date);
+    lb.innerHTML='<input type="checkbox" value="'+to+'"'+(idx===0?' checked':'')+'> '+to+(st.date?(' · '+st.date):'')+' · '+st.lines.length+' dòng';
+    box.appendChild(lb); });
+  var ds=UP.toList.map(function(to){return UP.byTO[to].date;}).filter(function(d){return d;}).sort();
+  var rf=document.getElementById('toFrom'), rt=document.getElementById('toTo');
+  if(rf&&ds.length){ rf.min=rt.min=ds[0]; rf.max=rt.max=ds[ds.length-1]; rf.value=ds[0]; rt.value=ds[ds.length-1]; }
+  document.getElementById('toPickField').hidden=false; updateToCount();
+  document.getElementById('upInfo').textContent='Đã tải '+UP.toList.length+' TO'+(ds.length?(' · '+ds[0]+' → '+ds[ds.length-1]):'')+(UP.bad?(' · bỏ '+UP.bad+' dòng lỗi bin'):'');
+  run();
+}
+
+function tourLen(seq,doorY){
+  if(!seq.length) return 0;
+  var t = distDoor(doorY,seq[0].a,seq[0].v);
+  for(var i=0;i<seq.length-1;i++) t += dist(seq[i].a,seq[i].v,seq[i+1].a,seq[i+1].v);
+  return t + distDoor(doorY,seq[seq.length-1].a,seq[seq.length-1].v);
+}
+
+function optimise(pts,doorY){
+  var seq = pts.slice().sort(function(x,y){return serp(x)-serp(y);});
+  var n=seq.length; if(n>120) return seq;          // chọn quá nhiều điểm -> giữ thứ tự quét, không 2-opt (tránh treo)
+  var improved=true, guard=0, cur=tourLen(seq,doorY);
+  while(improved && guard<60){
+    improved=false; guard++;
+    for(var i=0;i<n-1;i++) for(var j=i+1;j<n;j++){
+      var cand=seq.slice();
+      var seg=cand.slice(i,j+1).reverse();
+      for(var k=0;k<seg.length;k++) cand[i+k]=seg[k];
+      var L=tourLen(cand,doorY); if(L < cur-1e-3){ seq=cand; cur=L; improved=true; }
+    }
+  }
+  return seq;
+}
+
+function tripCost(ua,ub,doorY){
+  var bs=ua.stops.slice();
+  if(ub) ub.stops.forEach(function(s){ if(bs.indexOf(s)<0) bs.push(s); });
+  var used={},cur=null,tot=0,order=[];
+  for(var k=0;k<bs.length;k++){
+    var best=null,bd=Infinity;
+    bs.forEach(function(s){
+      if(used[s.idx]) return;
+      var d = cur ? dist(cur.a,cur.v,s.a,s.v) : distDoor(doorY,s.a,s.v);
+      if(d<bd){bd=d;best=s;}
+    });
+    used[best.idx]=true; order.push(best); tot+=bd; cur=best;
+  }
+  tot += distDoor(doorY,cur.a,cur.v);
+  return {cost:tot,order:order};
+}
+
+function planMover(units,doorY){
+  var n=units.length;
+  if(!n) return {trips:[],total:0};
+  if(n>300){   // chọn rất nhiều TO -> ghép cặp theo thứ tự quét (bỏ savings O(n²)) để không treo
+    var ix=units.map(function(u,i){return i;}).sort(function(x,y){return serp(units[x].stops[0])-serp(units[y].stops[0]);});
+    var tr=[],tot=0;
+    for(var q=0;q<ix.length;q+=2){ var ua=units[ix[q]], ubb=(q+1<ix.length)?units[ix[q+1]]:null; var rr=tripCost(ua,ubb,doorY); tot+=rr.cost; tr.push({units:ubb?[ua,ubb]:[ua],order:rr.order,cost:rr.cost}); }
+    return {trips:tr,total:tot};
+  }
+  var alone=units.map(function(u){return tripCost(u,null,doorY).cost;});
+  var sav=[];
+  for(var i=0;i<n-1;i++) for(var j=i+1;j<n;j++)
+    sav.push({i:i,j:j,s:alone[i]+alone[j]-tripCost(units[i],units[j],doorY).cost});
+  sav.sort(function(a,b){return b.s-a.s;});
+  // mover càng dài, luôn chở được 2 pallet -> ghép hết, kể cả khi cặp đó không tiết kiệm
+  var mate={};
+  sav.forEach(function(p){
+    if(mate[p.i]===undefined && mate[p.j]===undefined){ mate[p.i]=p.j; mate[p.j]=p.i; }
+  });
+  var done={},trips=[],total=0;
+  units.slice().map(function(u,i){return i;})
+    .sort(function(x,y){return serp(units[x].stops[0])-serp(units[y].stops[0]);})
+    .forEach(function(a){
+      if(done[a]) return;
+      done[a]=true;
+      var b=mate[a], ub=null;
+      if(b!==undefined){ done[b]=true; ub=units[b]; }
+      var r=tripCost(units[a],ub,doorY);
+      total+=r.cost;
+      trips.push({units:ub?[units[a],ub]:[units[a]],order:r.order,cost:r.cost});
+    });
+  return {trips:trips,total:total};
+}
+
+/* ================= VẼ SƠ ĐỒ ================= */
+var NS="http://www.w3.org/2000/svg";
+function el(n,at){ var e=document.createElementNS(NS,n); for(var k in at) e.setAttribute(k,at[k]); return e; }
+
+var DOORCOL_X = -4.2, LOI_X = -9.6;
+
+function drawPlan(model,route,doorY,mode){
+  var svg=document.getElementById('plan');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  var x0=LOI_X-3, x1=105*VTW+3;
+  var y0=fy(rackBand('CTP')[1])-5.5, y1=fy(rackBand('CAT')[0])+3.5;
+  svg.setAttribute('viewBox', x0+' '+y0+' '+(x1-x0)+' '+(y1-y0));
+
+  var g=el('g'); svg.appendChild(g);
+  g.appendChild(el('rect',{x:x0,y:y0,width:x1-x0,height:y1-y0,fill:'var(--aisle)'}));
+  g.appendChild(el('rect',{x:x0,y:y0,width:(0-x0),height:y1-y0,fill:'var(--concrete-3)',opacity:.5}));
+
+  // đường hầm cắt ngang — vẽ trước để kệ nằm đè lên
+  [[33,35],[74,76]].forEach(function(c){
+    g.appendChild(el('rect',{
+      x:xOf(c[0]-0.5), y:fy(rackBand('CSP')[1]), width:xOf(c[1]+0.5)-xOf(c[0]-0.5),
+      height:rackBand('CSP')[1]-rackBand('CBT')[0],
+      fill:'var(--tunnel)', stroke:'var(--rule)','stroke-width':0.1,'stroke-dasharray':'0.8 0.6'
+    }));
+    var t=el('text',{x:xOf((c[0]+c[1])/2),y:y0+2.4,'text-anchor':'middle',
+      'font-family':'IBM Plex Mono, monospace','font-size':1.5,fill:'var(--ink-3)'});
+    t.textContent='VT '+c[0]+'–'+c[1]; g.appendChild(t);
+  });
+
+  // kệ + nhãn dãy
+  Object.keys(DAY).forEach(function(day){
+    var band=rackBand(day), vmax=DAY[day][2];
+    var segs=[[1,vmax]], cuts=[];
+    if(!NO_TUNNEL[day]) cuts.push([33,35],[74,76]);
+    if(GAPS[day]) cuts=cuts.concat(GAPS[day]);
+    cuts.forEach(function(c){
+      var out=[];
+      segs.forEach(function(s){
+        if(c[1]<s[0]||c[0]>s[1]){ out.push(s); return; }
+        if(c[0]>s[0]) out.push([s[0],c[0]-1]);
+        if(c[1]<s[1]) out.push([c[1]+1,s[1]]);
+      });
+      segs=out;
+    });
+    var wall = NO_TUNNEL[day];
+    segs.forEach(function(s){
+      if(s[1]<s[0]) return;
+      g.appendChild(el('rect',{
+        x:xOf(s[0]-0.5), y:fy(band[1]), width:xOf(s[1]+0.5)-xOf(s[0]-0.5), height:band[1]-band[0],
+        fill: wall?'var(--rack-wall)':'var(--rack)', stroke:'var(--rack-edge)','stroke-width':0.12
+      }));
+    });
+    var labelX = xOf(segs.length>0 ? segs[0][0]-0.3 : 0.5);
+    var t=el('text',{x:labelX, y:fy((band[0]+band[1])/2)+0.38, 'text-anchor':'start',
+      'font-family':'IBM Plex Mono, monospace','font-size':0.98,
+      fill:'var(--ink-2)', 'font-weight':700,
+      'paint-order':'stroke', stroke:'var(--aisle)', 'stroke-width':0.4, 'stroke-linejoin':'round'});
+    t.textContent=day; g.appendChild(t);
+  });
+
+  // số lối, đặt ở tim mỗi lối
+  for(var a=1;a<=NAISLE;a++){
+    var t2=el('text',{x:LOI_X,y:fy(aisleY(a))+0.5,'text-anchor':'middle',
+      'font-family':'Barlow Condensed, sans-serif','font-weight':600,'font-size':1.5,
+      fill:'var(--ink-3)'});
+    t2.textContent=a; g.appendChild(t2);
+  }
+  var hl=el('text',{x:LOI_X,y:fy(aisleY(NAISLE))-2.6,'text-anchor':'middle',
+    'font-family':'Barlow Condensed, sans-serif','font-weight':700,'font-size':1.4,
+    fill:'var(--ink-3)'});
+  hl.textContent='LỐI'; g.appendChild(hl);
+
+  // thước VT
+  for(var v=10;v<=100;v+=10){
+    var t3=el('text',{x:xOf(v),y:y1-0.8,'text-anchor':'middle',
+      'font-family':'IBM Plex Mono, monospace','font-size':1.4,fill:'var(--ink-3)'});
+    t3.textContent=v; g.appendChild(t3);
+  }
+  var vl=el('text',{x:LOI_X,y:y1-0.8,'text-anchor':'middle',
+    'font-family':'Barlow Condensed, sans-serif','font-weight':700,'font-size':1.4,
+    fill:'var(--ink-3)'});
+  vl.textContent='VT'; g.appendChild(vl);
+
+  // cửa
+  DOORS.forEach(function(d){
+    var live=Math.abs(d.y-doorY)<0.01;
+    g.appendChild(el('rect',{x:DOORCOL_X,y:fy(d.y)-1.1,width:2.6,height:2.2,
+      fill: live?'var(--door-live)':'var(--door)', opacity: live?1:.4,
+      stroke:'var(--rack-edge)','stroke-width':0.08}));
+    if(live){
+      var t4=el('text',{x:DOORCOL_X-0.3,y:fy(d.y)+0.62,'text-anchor':'end',
+        'font-family':'Barlow Condensed, sans-serif','font-weight':700,'font-size':1.9,
+        fill:'var(--ink)'});
+      t4.textContent='CỬA '+d.ten; g.appendChild(t4);
+    }
+  });
+
+  // lộ trình
+  var col = mode==='rt' ? 'var(--rt)' : 'var(--mv)';
+  route.paths.forEach(function(pl,pi){
+    var ti = route.pathTis ? route.pathTis[pi] : null;
+    var strokeCol = (ti!==null && doneTripSet[ti]) ? 'var(--ok)' : col;
+    var dstr = pl.map(function(p,i){return (i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ');
+    var pathEl = el('path',{d:dstr,fill:'none',stroke:strokeCol,'stroke-width':0.55,
+      'stroke-linejoin':'round','stroke-linecap':'round',opacity:.85});
+    if(ti!==null) pathEl.setAttribute('data-path-trip',ti);
+    g.appendChild(pathEl);
+  });
+
+  // điểm dừng
+  route.marks.forEach(function(m){
+    var my=fy(m.y);
+    var fillCol = (m.ti!==null && m.ti!==undefined && doneTripSet[m.ti]) ? 'var(--ok)' : col;
+    var circ=el('circle',{'class':'mk',cx:xOf(m.v),cy:my,r:1.5,fill:fillCol,stroke:'var(--concrete)','stroke-width':0.25});
+    if(m.ti!==null && m.ti!==undefined) circ.setAttribute('data-mk-trip',m.ti);
+    if(m.key) circ.setAttribute('data-mk-key', m.key);
+    g.appendChild(circ);
+    var t5=el('text',{x:xOf(m.v),y:my+0.62,'text-anchor':'middle',
+      'font-family':'IBM Plex Mono, monospace','font-weight':600,'font-size':1.6,fill:'#fff'});
+    if(m.ti!==null && m.ti!==undefined) t5.setAttribute('data-mk-trip',m.ti);
+    t5.textContent=m.label; g.appendChild(t5);
+  });
+
+  // xe
+  var truck=el('g',{id:'truck',opacity:0});
+  truck.appendChild(el('rect',{x:-1.5,y:-1.1,width:3,height:2.2,rx:0.3,
+    fill:'var(--ink)',stroke:col,'stroke-width':0.35}));
+  truck.appendChild(el('rect',{x:1.5,y:-0.75,width:1.5,height:0.3,fill:col}));
+  truck.appendChild(el('rect',{x:1.5,y:0.45,width:1.5,height:0.3,fill:col}));
+  g.appendChild(truck);
+  return truck;
+}
+
+/* ================= TRẠNG THÁI ================= */
+var mode='rt', anim=null, truckEl=null, flat=[], model=null, cur=null, doneTripSet={}, trailEl=null, markCircles=[];
+var flatTis=[], tripPallets=[], curTrip=-1, hudPallets=[];
+
+function fmt(n){ return n.toLocaleString('vi-VN',{maximumFractionDigits:0}); }
+
+function run(){
+  var doorY=DOORS[document.getElementById('door').selectedIndex].y;
+  doneTripSet={};
+  var sel = UP ? selectedTOs() : [];
+  if(UP && sel.length){
+    var lines=[]; sel.forEach(function(to){ var t=UP.byTO[to]; if(t)t.lines.forEach(function(l){lines.push(l);}); });
+    model=buildFromCSVLines(lines);
+  } else {
+    model=build(document.getElementById('toText').value, doorY);
+  }
+
+  var rtPts=model.stops.filter(function(s){return s.needRT;});
+  var rtSeq=optimise(rtPts,doorY);
+  var rtLen=tourLen(rtSeq,doorY);
+  var mv=planMover(model.units,doorY);
+
+  cur={doorY:doorY,rtSeq:rtSeq,rtLen:rtLen,mv:mv};
+  renderStats();
+  renderRoute();
+}
+
+function routeGeometry(){
+  var doorY=cur.doorY, paths=[], marks=[], legs=[], pathTis=[];
+  var start={a:null,v:DOOR_VT,y:doorY};
+  if(mode==='rt'){
+    var seq=cur.rtSeq, prev=start;
+    seq.forEach(function(s,i){
+      var p=legPath(prev,{a:s.a,v:s.v,y:s.y}); paths.push(p); legs.push(p); pathTis.push(null);
+      marks.push({v:s.v,y:s.y,label:String(i+1),ti:null}); prev={a:s.a,v:s.v,y:s.y};
+    });
+    if(seq.length){ paths.push(legPath(prev,start)); pathTis.push(null); }
+    if(seq.length) legs.push(legPath(prev,start));
+  } else {
+    cur.mv.trips.forEach(function(t,ti){
+      var prev=start;
+      t.order.forEach(function(s,i){
+        var p=legPath(prev,{a:s.a,v:s.v,y:s.y}); paths.push(p); legs.push(p); pathTis.push(ti);
+        marks.push({v:s.v,y:s.y,label:(ti+1)+'.'+(i+1),ti:ti,key:s.day+'|'+s.vt}); prev={a:s.a,v:s.v,y:s.y};
+      });
+      var back=legPath(prev,start); paths.push(back); legs.push(back); pathTis.push(ti);
+    });
+  }
+  return {paths:paths,marks:marks,legs:legs,pathTis:pathTis};
+}
+
+function renderRoute(){
+  var geo=routeGeometry();
+  truckEl=drawPlan(model,geo,cur.doorY,mode);
+  flat=[]; flatTis=[];
+  geo.legs.forEach(function(p,li){
+    for(var i=0;i<p.length-1;i++){ flat.push([p[i],p[i+1]]); flatTis.push(geo.pathTis[li]); }
+  });
+  // cấu trúc pallet thật của từng chuyến (mover): mỗi chuyến 1–2 pallet, mỗi pallet gồm các điểm
+  tripPallets = (mode==='mv' && cur.mv) ? cur.mv.trips.map(function(t){
+    return t.units.map(function(u){
+      var keys={}; u.stops.forEach(function(s){ keys[s.day+'|'+s.vt]=true; });
+      return {kind:u.kind, keys:keys, total:u.stops.length};
+    });
+  }) : [];
+  renderSteps();
+  document.getElementById('stage').className='stage'+(mode==='mv'?' mode-mv':'');
+  document.getElementById('panelTitle').textContent = mode==='rt' ? 'Reach truck · thứ tự hạ' : 'Mover · các chuyến';
+  clearProgress();
+  stopAnim();
+  // ô pallet: chỉ hiện ở mover
+  var hud=document.getElementById('palletHud');
+  if(mode==='mv' && cur.mv.trips.length){ hud.hidden=false; showTrip(0); }
+  else { hud.hidden=true; curTrip=-1; }
+  requestAnimationFrame(syncRailHeight);
+}
+
+// cột phải cao đúng bằng bản đồ để đáy hai bên bằng mí (chỉ khi bố cục 2 cột)
+function syncRailHeight(){
+  var rail=document.querySelector('.rail'), mb=document.querySelector('.mapbox');
+  if(!rail || !mb) return;
+  rail.style.height = (window.innerWidth>1000) ? (mb.offsetHeight+'px') : '';
+}
+
+function renderStats(){
+  var s=document.getElementById('stats');
+  var nRT=cur.rtSeq.length, nSkip=model.stops.length-nRT;
+  s.innerHTML =
+    stat('Điểm reach truck', nRT, 'rt', nSkip? ('bỏ '+nSkip+' điểm tầng 1'):'') +
+    stat('Quãng đường hạ', fmt(cur.rtLen)+' m','rt','') +
+    stat('Chỗ pallet', model.units.length,'', model.leTong? ('hàng lẻ ≈ '+model.leTong.toFixed(2)+' pallet'):'') +
+    stat('Chuyến mover', cur.mv.trips.length,'mv','') +
+    stat('Quãng đường gom', fmt(cur.mv.total)+' m','mv','') +
+    stat('Ngoài rack', model.ngoai.length,'', 'lấy thủ công');
+  renderIssues();
+}
+function stat(k,v,cls,sub){
+  return '<div class="stat"><div class="k">'+k+'</div><div class="v '+cls+'">'+v+
+         (sub?' <small>'+sub+'</small>':'')+'</div></div>';
+}
+
+function renderIssues(){
+  var box=document.getElementById('issues'), out='';
+  if(model.thieuQC.length)
+    out += '<li>Chưa có quy cách: <b>'+model.thieuQC.join(', ')+'</b> — mỗi dòng đang được tính là một pallet nguyên.</li>';
+  if(model.ngoai.length)
+    out += '<li>Ngoài rack: '+model.ngoai.map(function(n){return '<b>'+n.bin+'</b>';}).join(', ')+' — không nằm trong lộ trình.</li>';
+  if(model.bad.length)
+    out += '<li>Không đọc được '+model.bad.length+' dòng.</li>';
+  box.innerHTML = out ? '<div class="issues"><b>Cần lưu ý</b><ul>'+out+'</ul></div>' : '';
+}
+
+function renderSteps(){
+  var ol=document.getElementById('steps');
+  ol.innerHTML='';
+  if(mode==='rt'){
+    if(!cur.rtSeq.length){ ol.innerHTML='<li class="trip-head">Không có điểm nào cần reach truck</li>'; return; }
+    var cum=0, prev={a:null,v:DOOR_VT,y:cur.doorY};
+    cur.rtSeq.forEach(function(s,i){
+      cum += (prev.a===null) ? distDoor(cur.doorY,s.a,s.v) : dist(prev.a,prev.v,s.a,s.v);
+      ol.appendChild(step(i+1, s.day+'-'+String(s.vt).padStart(3,'0'),
+        'Tầng '+s.tang.sort(function(a,b){return a-b;}).join(', ')+' · lối '+s.a,
+        fmt(cum)+' m'));
+      prev={a:s.a,v:s.v,y:s.y};
+    });
+  } else {
+    if(!cur.mv.trips.length){ ol.innerHTML='<li class="empty">Phiếu không có dòng nào trên rack.</li>'; return; }
+    cur.mv.trips.forEach(function(t,ti){
+      var kinds=t.units.map(function(u){return u.kind;}).join(' + ');
+      var h=document.createElement('li');
+      h.className='trip-head'+(doneTripSet[ti]?' done':'');
+      h.textContent='Chuyến '+(ti+1)+' · '+kinds+' · '+fmt(t.cost)+' m';
+      ol.appendChild(h);
+      t.order.forEach(function(s,i){
+        var its=[];
+        t.units.forEach(function(u){ u.items.forEach(function(it){
+          if(it.day===s.day && it.vt===s.vt) its.push(it);
+        });});
+        var txt = its.map(function(it){return it.ma+' × '+fmt(it.sl);}).join(' · ');
+        var tag = s.needRT ? '' : ' <span class="tag t1">tầng 1</span>';
+        var li=step((ti+1)+'.'+(i+1), s.day+'-'+String(s.vt).padStart(3,'0'),
+          txt+tag, 'T'+s.tang.join(','));
+        if(doneTripSet[ti]) li.classList.add('done-step');
+        ol.appendChild(li);
+      });
+      (function(capturedTi, headEl){
+        headEl.addEventListener('click', function(){
+          var isDone = !doneTripSet[capturedTi];
+          if(isDone) doneTripSet[capturedTi]=true; else delete doneTripSet[capturedTi];
+          headEl.classList.toggle('done', isDone);
+          var mkCol = isDone ? 'var(--ok)' : 'var(--mv)';
+          document.querySelectorAll('[data-mk-trip="'+capturedTi+'"]').forEach(function(e){
+            if(e.tagName.toLowerCase()==='circle') e.setAttribute('fill', mkCol);
+          });
+          document.querySelectorAll('[data-path-trip="'+capturedTi+'"]').forEach(function(e){
+            e.setAttribute('stroke', mkCol);
+          });
+          var sib = headEl.nextSibling;
+          while(sib && !(sib.classList && sib.classList.contains('trip-head'))){
+            if(sib.classList) sib.classList.toggle('done-step', isDone);
+            sib=sib.nextSibling;
+          }
+        });
+      })(ti, h);
+    });
+  }
+}
+function step(n,loc,meta,d){
+  var li=document.createElement('li');
+  li.innerHTML='<span class="n">'+n+'</span><span><span class="loc">'+loc+
+    '</span><span class="meta">'+meta+'</span></span><span class="d">'+d+'</span>';
+  return li;
+}
+
+/* ================= MÔ PHỎNG ================= */
+function stopAnim(){
+  if(anim){ cancelAnimationFrame(anim); anim=null; }
+  document.getElementById('play').textContent='Chạy mô phỏng';
+  if(truckEl) truckEl.setAttribute('opacity',0);
+  document.querySelectorAll('.steps li').forEach(function(li){li.classList.remove('on');});
+}
+
+function clearProgress(){
+  if(trailEl && trailEl.parentNode) trailEl.parentNode.removeChild(trailEl);
+  trailEl=null;
+  markCircles.forEach(function(m){ m.el.setAttribute('fill', m.orig); });
+  markCircles=[];
+}
+
+/* ---- ô pallet: đồng bộ với lộ trình đang chạy ---- */
+function showTrip(ti){
+  curTrip=ti;
+  hudPallets = (tripPallets[ti]||[]).map(function(p){
+    return {kind:p.kind, keys:p.keys, total:p.total, got:0, seen:{}};
+  });
+  renderHud();
+}
+function palletHit(key){
+  var changed=false;
+  hudPallets.forEach(function(p){
+    if(p.keys[key] && !p.seen[key]){ p.seen[key]=true; p.got++; changed=true; }
+  });
+  if(changed) renderHud();
+}
+function fillTripFull(){
+  hudPallets.forEach(function(p){ p.got=p.total; });
+  renderHud();
+}
+function renderHud(){
+  var tripEl=document.getElementById('phTrip'); if(tripEl) tripEl.textContent=(curTrip+1);
+  var box=document.getElementById('phPallets'); if(!box) return;
+  box.innerHTML='';
+  hudPallets.forEach(function(p,idx){
+    var frac = p.total ? p.got/p.total : 0;
+    var full = p.total>0 && p.got>=p.total;
+    var lab = full ? 'ĐẦY' : (p.kind==='LONG' ? (p.got+'/'+p.total+' điểm') : 'chờ lấy');
+    var cell=document.createElement('div'); cell.className='ph-pallet'+(full?' full':'');
+    cell.innerHTML =
+      '<div class="ph-name">Pallet '+(idx+1)+'</div>'+
+      '<div class="ph-load"><div class="ph-fill" style="height:'+(frac*100).toFixed(0)+'%"></div></div>'+
+      '<div class="ph-base"></div>'+
+      '<div class="ph-cap">'+lab+'</div>';
+    box.appendChild(cell);
+  });
+}
+
+function startAnim(){
+  if(!flat.length || !truckEl) return;
+  clearProgress();
+  var speed=parseFloat(document.getElementById('speed').value);
+  var lens=flat.map(function(sg){
+    return Math.hypot(sg[1][0]-sg[0][0], sg[1][1]-sg[0][1]);
+  });
+  var total=lens.reduce(function(a,b){return a+b;},0);
+  if(total<=0) return;
+
+  // vệt xanh tiến độ — nằm trên đường gốc, dưới các chấm/nhãn
+  var host=truckEl.parentNode;
+  trailEl=el('path',{fill:'none',stroke:'var(--ok)','stroke-width':0.9,
+    'stroke-linejoin':'round','stroke-linecap':'round',opacity:0.95});
+  var firstMark=host.querySelector('circle.mk');
+  host.insertBefore(trailEl, firstMark || truckEl);
+
+  // thu thập các chấm điểm dừng để tô xanh khi xe đi qua
+  markCircles=[];
+  host.querySelectorAll('circle.mk').forEach(function(c){
+    markCircles.push({el:c, orig:c.getAttribute('fill'),
+      cx:parseFloat(c.getAttribute('cx')), cy:parseFloat(c.getAttribute('cy')), hit:false,
+      ti: c.hasAttribute('data-mk-trip')?parseInt(c.getAttribute('data-mk-trip'),10):null,
+      key: c.getAttribute('data-mk-key')||null});
+  });
+  if(mode==='mv') showTrip(0);   // pallet chuyến 1, rỗng
+
+  function trailD(upToSeg, tipX, tipY){
+    var d='M'+flat[0][0][0].toFixed(2)+' '+flat[0][0][1].toFixed(2);
+    for(var i=0;i<upToSeg;i++) d+='L'+flat[i][1][0].toFixed(2)+' '+flat[i][1][1].toFixed(2);
+    if(tipX!==undefined) d+='L'+tipX.toFixed(2)+' '+tipY.toFixed(2);
+    return d;
+  }
+
+  var done=0, seg=0, last=performance.now();
+  truckEl.setAttribute('opacity',1);
+  document.getElementById('play').textContent='Dừng';
+
+  function frame(now){
+    var dt=(now-last)/1000; last=now;
+    done += dt*22*speed;
+    while(seg<flat.length && done>lens[seg]){ done-=lens[seg]; seg++; }
+    if(seg>=flat.length){
+      // hoàn thành — tô toàn bộ vệt và mọi điểm dừng
+      if(trailEl) trailEl.setAttribute('d', trailD(flat.length));
+      markCircles.forEach(function(m){ m.el.setAttribute('fill','var(--ok)'); m.hit=true; });
+      if(mode==='mv') fillTripFull();
+      stopAnim();
+      return;
+    }
+    // đang ở chuyến nào (theo đoạn đường) — chuyển chuyến thì pallet rỗng lại
+    if(mode==='mv'){
+      var segTrip=flatTis[seg];
+      if(segTrip!==null && segTrip!==undefined && segTrip!==curTrip) showTrip(segTrip);
+    }
+    var sg=flat[seg], f=lens[seg]?done/lens[seg]:0;
+    var x=sg[0][0]+(sg[1][0]-sg[0][0])*f, y=sg[0][1]+(sg[1][1]-sg[0][1])*f;
+    var ang=Math.atan2(sg[1][1]-sg[0][1], sg[1][0]-sg[0][0])*180/Math.PI;
+    truckEl.setAttribute('transform','translate('+x.toFixed(2)+' '+y.toFixed(2)+') rotate('+ang.toFixed(1)+')');
+    if(trailEl) trailEl.setAttribute('d', trailD(seg, x, y));
+    markCircles.forEach(function(m){
+      if(!m.hit){
+        var dx=m.cx-x, dy=m.cy-y;
+        if(dx*dx+dy*dy < 4){
+          m.el.setAttribute('fill','var(--ok)'); m.hit=true;
+          if(mode==='mv' && m.ti===curTrip && m.key) palletHit(m.key);
+        }
+      }
+    });
+    anim=requestAnimationFrame(frame);
+  }
+  anim=requestAnimationFrame(frame);
+}
+
+/* ================= KHỞI TẠO ================= */
+var sel=document.getElementById('door');
+DOORS.forEach(function(d){
+  var o=document.createElement('option'); o.textContent='Cửa '+d.ten; sel.appendChild(o);
+});
+sel.selectedIndex=0;
+initFlip();
+document.getElementById('toText').value=TO_MAU;
+
+function setMode(m){
+  mode=m;
+  document.getElementById('mRT').setAttribute('aria-pressed', m==='rt');
+  document.getElementById('mMV').setAttribute('aria-pressed', m==='mv');
+  renderRoute();
+}
+document.getElementById('mRT').onclick=function(){setMode('rt');};
+document.getElementById('mMV').onclick=function(){setMode('mv');};
+document.getElementById('door').onchange=function(){ run(); };
+document.getElementById('rerun').onclick=function(){ UP=null; document.getElementById('toPickField').hidden=true; document.getElementById('upInfo').textContent='Đang dùng phiếu dán tay.'; run(); };
+
+document.getElementById('csvFile').addEventListener('change',function(e){
+  var file=e.target.files[0]; if(!file)return;
+  document.getElementById('upInfo').textContent='Đang đọc file…';
+  var fr=new FileReader();
+  fr.onload=function(){ setTimeout(function(){ try{ ingestCSV(parseCSV(fr.result)); afterUploadCSV(); }catch(err){ document.getElementById('upInfo').textContent='Lỗi đọc file: '+err.message; } },30); };
+  fr.readAsText(file);
+});
+document.getElementById('toList').addEventListener('change',function(){ updateToCount(); run(); });
+document.getElementById('toSearch').addEventListener('input',filterToList);
+document.getElementById('toFrom').addEventListener('change',filterToList);
+document.getElementById('toTo').addEventListener('change',filterToList);
+document.getElementById('toAll').addEventListener('click',function(){ var L=document.querySelectorAll('#toList label'); for(var i=0;i<L.length;i++){ if(L[i].style.display!=='none'){ var cb=L[i].querySelector('input'); if(cb)cb.checked=true; } } updateToCount(); run(); });
+document.getElementById('toClear').addEventListener('click',function(){ var cbs=document.querySelectorAll('#toList input:checked'); for(var i=0;i<cbs.length;i++)cbs[i].checked=false; updateToCount(); run(); });
+document.getElementById('reset').onclick=stopAnim;
+document.getElementById('play').onclick=function(){
+  if(anim) stopAnim(); else startAnim();
+};
+window.addEventListener('resize', syncRailHeight);
+
+run();
+})();
+</script>

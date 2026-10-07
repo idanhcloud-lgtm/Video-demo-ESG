@@ -1,0 +1,210 @@
+<title>Tiết Kiệm Lộ Trình Kho C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF1EC;
+  --card:#F7F9F5;
+  --card-2:#FFFFFF;
+  --ink:#14181A;
+  --ink-2:#49524E;
+  --ink-3:#7A847F;
+  --rule:#D3DAD2;
+  --rule-strong:#B7C0B6;
+  --ok:#2F6E43;
+  --ok-soft:#E3EFE6;
+  --rt:#C24A18;
+  --rt-soft:#F6E3D8;
+  --mv:#1A6597;
+  --mv-soft:#DBE9F2;
+  --shadow:rgba(20,24,26,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1113;
+    --card:#161A1D;
+    --card-2:#1C2226;
+    --ink:#E8ECE9;
+    --ink-2:#A7B1AC;
+    --ink-3:#79837E;
+    --rule:#2A3236;
+    --rule-strong:#3A444A;
+    --ok:#6DB183;
+    --ok-soft:#17281D;
+    --rt:#F0824F;
+    --rt-soft:#33201A;
+    --mv:#5CA6D6;
+    --mv-soft:#152A38;
+    --shadow:rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1113;
+  --card:#161A1D;
+  --card-2:#1C2226;
+  --ink:#E8ECE9;
+  --ink-2:#A7B1AC;
+  --ink-3:#79837E;
+  --rule:#2A3236;
+  --rule-strong:#3A444A;
+  --ok:#6DB183;
+  --ok-soft:#17281D;
+  --rt:#F0824F;
+  --rt-soft:#33201A;
+  --mv:#5CA6D6;
+  --mv-soft:#152A38;
+  --shadow:rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  line-height:1.5;padding:32px 20px 48px;
+}
+.wrap{max-width:820px;margin:0 auto}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 8px;
+}
+h1{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:clamp(30px,5vw,44px);line-height:1.02;margin:0 0 6px;letter-spacing:.01em;
+  text-wrap:balance;
+}
+.sub{color:var(--ink-2);font-size:15px;margin:0 0 26px;max-width:60ch}
+
+/* HERO */
+.hero{
+  background:var(--card);border:1px solid var(--rule);border-radius:14px;
+  padding:26px 28px;margin-bottom:22px;display:flex;flex-wrap:wrap;
+  align-items:center;gap:10px 34px;box-shadow:0 1px 3px var(--shadow);
+}
+.hero .big{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;color:var(--ok);
+  font-size:clamp(52px,10vw,78px);line-height:.9;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;
+}
+.hero .big small{font-size:.38em;font-weight:600;color:var(--ink-2);margin-left:4px;letter-spacing:0}
+.hero .hlabel{color:var(--ink-2);font-size:14px;max-width:26ch}
+.hero .hlabel b{color:var(--ink);font-weight:600}
+.hero .hpct{
+  margin-left:auto;text-align:right;font-family:"IBM Plex Mono",monospace;
+}
+.hero .hpct .p{font-size:30px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.hero .hpct .pl{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em}
+
+/* TABLE */
+.tblcard{
+  background:var(--card);border:1px solid var(--rule);border-radius:14px;
+  overflow:hidden;box-shadow:0 1px 3px var(--shadow);margin-bottom:22px;
+}
+.tblscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{padding:15px 18px;text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1.5px solid var(--rule-strong);background:var(--card-2);
+}
+tbody td{border-bottom:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:15px}
+tbody tr:last-child td{border-bottom:0}
+.rowname{
+  font-family:"IBM Plex Sans",sans-serif !important;font-weight:600;font-size:15px;
+  display:flex;align-items:center;gap:9px;
+}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.rt{background:var(--rt)}
+.dot.mv{background:var(--mv)}
+.muted{color:var(--ink-2)}
+.save{color:var(--ok);font-weight:700}
+.save .pct{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-left:2px}
+.rowsub{font-size:11px;color:var(--ink-3);font-family:"IBM Plex Sans",sans-serif;font-weight:400}
+tr.total td{
+  background:var(--ok-soft);border-top:1.5px solid var(--rule-strong);
+  font-size:16px;padding-top:17px;padding-bottom:17px;
+}
+tr.total .rowname{font-weight:700;font-size:16px}
+tr.total .save{font-size:18px}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.chip{
+  background:var(--card);border:1px solid var(--rule);border-radius:10px;
+  padding:11px 15px;flex:1 1 150px;min-width:140px;box-shadow:0 1px 2px var(--shadow);
+}
+.chip .cv{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:19px;color:var(--ink);font-variant-numeric:tabular-nums}
+.chip .cl{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* NOTE */
+.note{
+  border-left:3px solid var(--ok);background:var(--card);border-radius:0 10px 10px 0;
+  padding:14px 18px;font-size:13.5px;color:var(--ink-2);
+}
+.note b{color:var(--ink);font-weight:600}
+.note p{margin:0 0 8px}
+.note p:last-child{margin:0}
+.foot{margin-top:22px;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Kho C · Tháng 7/2026 · Dữ liệu TO thật (SAP)</p>
+  <h1>Tối ưu lộ trình lấy &amp; hạ hàng</h1>
+  <p class="sub">So sánh cách kho đang làm (lấy theo dãy A→T, quét một lượt) với lộ trình tối ưu, tính trên toàn bộ transfer order của một tháng.</p>
+
+  <div class="hero">
+    <div>
+      <div class="big">~338<small>km / tháng</small></div>
+      <div class="hlabel">quãng đường xe nâng <b>cắt được</b> nếu đi theo lộ trình tối ưu</div>
+    </div>
+    <div class="hpct">
+      <div class="p">8,1%</div>
+      <div class="pl">tổng quãng đường</div>
+    </div>
+  </div>
+
+  <div class="tblcard">
+    <div class="tblscroll">
+      <table>
+        <thead>
+          <tr><th>Công đoạn</th><th>Theo dãy</th><th>Tối ưu</th><th>Tiết kiệm</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rowname"><span class="dot rt"></span>Reach truck<span class="rowsub">· hạ hàng</span></span></td>
+            <td class="muted">1.235.764 m</td>
+            <td class="muted">1.059.109 m</td>
+            <td class="save">176.655 m <span class="pct">(14,3%)</span></td>
+          </tr>
+          <tr>
+            <td><span class="rowname"><span class="dot mv"></span>Mover<span class="rowsub">· lấy hàng</span></span></td>
+            <td class="muted">2.913.464 m</td>
+            <td class="muted">2.752.020 m</td>
+            <td class="save">161.444 m <span class="pct">(5,5%)</span></td>
+          </tr>
+          <tr class="total">
+            <td><span class="rowname">TỔNG / tháng</span></td>
+            <td class="muted">4.149.228 m</td>
+            <td class="muted">3.811.129 m</td>
+            <td class="save">~338 km <span class="pct">(8,1%)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="chips">
+    <div class="chip"><div class="cv">1.920</div><div class="cl">transfer order / tháng</div></div>
+    <div class="chip"><div class="cv">15.871</div><div class="cl">pallet (nguyên + lồng)</div></div>
+    <div class="chip"><div class="cv">28</div><div class="cl">ngày có phát sinh TO</div></div>
+    <div class="chip"><div class="cv">~12,1 km</div><div class="cl">tiết kiệm / ngày</div></div>
+  </div>
+
+  <div class="note">
+    <p><b>Cách tính.</b> “Theo dãy” = mô phỏng đúng cách kho đang chạy: lấy/hạ theo thứ tự dãy A→T, trong mỗi dãy quét một lượt (đi ngang điểm nào làm điểm đó, không vòng lại). “Tối ưu” = cùng dữ liệu nhưng sắp xếp lại thứ tự ghé để đi ngắn nhất (thuật toán 2-opt).</p>
+    <p>Số pallet lấy trực tiếp từ cột <b>Capacity usage</b> của SAP (đủ 100% dòng). Tính cho <b>cửa xuất số 1</b>; đổi cửa thì con số thay đổi đôi chút.</p>
+  </div>
+
+  <p class="foot">Nguồn: TO Kho C tháng 7/2026 · 1.920 TO · bin hợp lệ 100% · VT = 1,4 m, tim lối tới tim lối = 8,65 m (đo thực tế 10/2026).</p>
+</div>

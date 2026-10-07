@@ -1,0 +1,2059 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Gợi ý vị trí lưu kho</title>
+<style>
+:root{
+  --paper:#EEF1F3; --surface:#FFFFFF; --surface-2:#F6F8F9; --sunk:#E6EAED;
+  --ink:#151B20; --ink-2:#4B5761; --ink-3:#77838C;
+  --line:#DCE2E6; --line-2:#EAEEF1;
+  --focus:#2a78d6; --rec:#2a78d6;
+  --t-ap:#184f95; --t-a:#2a78d6; --t-b:#5598e7; --t-c:#86b6ef;
+  --curve:#151B20; --grid:#E4E8EB; --axis:#C3CBD1;
+  --zone-rgb:21 27 32;
+  --up:#B45309; --up-bg:#FDF1E3; --ok:#15803D; --ok-bg:#E6F4EA; --yield:#5B6874; --yield-bg:#EEF1F4;
+  --tag-bg:#FFF3C4; --tag-line:#E1C35A; --tag-ink:#3A2F07;
+  --shadow:0 1px 2px rgba(16,24,32,.06), 0 6px 20px rgba(16,24,32,.06);
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:"Segoe UI Variable Display","Segoe UI Semibold","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Mono","Cascadia Code",Consolas,ui-monospace,"SF Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1215; --surface:#161B1F; --surface-2:#1B2126; --sunk:#232A30;
+    --ink:#E8EDF0; --ink-2:#AAB5BD; --ink-3:#7E8A93;
+    --line:#2A3238; --line-2:#222A30;
+    --focus:#6fa8ee; --rec:#5598e7;
+    --t-ap:#9ec5f4; --t-a:#5598e7; --t-b:#2a78d6; --t-c:#1c5cab;
+    --curve:#E8EDF0; --grid:#242C32; --axis:#3A444C;
+    --zone-rgb:232 237 240;
+    --up:#F0A45A; --up-bg:#35240F; --ok:#5CCB84; --ok-bg:#12291B; --yield:#A3AFB9; --yield-bg:#20272D;
+    --tag-bg:#3A3113; --tag-line:#7A6420; --tag-ink:#F4E7B8;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1215; --surface:#161B1F; --surface-2:#1B2126; --sunk:#232A30;
+  --ink:#E8EDF0; --ink-2:#AAB5BD; --ink-3:#7E8A93;
+  --line:#2A3238; --line-2:#222A30;
+  --focus:#6fa8ee; --rec:#5598e7;
+  --t-ap:#9ec5f4; --t-a:#5598e7; --t-b:#2a78d6; --t-c:#1c5cab;
+  --curve:#E8EDF0; --grid:#242C32; --axis:#3A444C;
+  --zone-rgb:232 237 240;
+  --up:#F0A45A; --up-bg:#35240F; --ok:#5CCB84; --ok-bg:#12291B; --yield:#A3AFB9; --yield-bg:#20272D;
+  --tag-bg:#3A3113; --tag-line:#7A6420; --tag-ink:#F4E7B8;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+
+:root{ --on-ap:#FFFFFF; --on-b:#0d2a4f; --on-c:#0d2a4f; --hatch:#B8C1C8; --door:#EDA400 }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --on-ap:#0d2a4f; --on-b:#FFFFFF; --on-c:#FFFFFF; --hatch:#3A444C }
+}
+:root[data-theme="dark"]{ --on-ap:#0d2a4f; --on-b:#FFFFFF; --on-c:#FFFFFF; --hatch:#3A444C }
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{background:var(--paper)}
+body{margin:0; background:var(--paper); color:var(--ink); font:14px/1.5 var(--sans);
+  -webkit-font-smoothing:antialiased}
+button,input{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1320px; margin:0 auto; padding-inline:20px; padding-block:0 56px}
+
+/* ---------- header ---------- */
+.top{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  padding-block:22px 18px; border-bottom:1px solid var(--line)}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.logo{width:40px; height:40px; flex:none; border-radius:10px; background:var(--ink); color:var(--paper);
+  display:grid; place-items:center}
+.logo svg{width:24px; height:24px}
+.brand h1{margin:0; font:600 22px/1.2 var(--display); letter-spacing:-.01em}
+.brand p{margin:2px 0 0; color:var(--ink-3); font-size:13px}
+.actions{display:flex; gap:8px; flex-wrap:wrap}
+.btn{display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 14px; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; font-size:13.5px;
+  cursor:pointer; white-space:nowrap; transition:background .15s, border-color .15s}
+.btn:hover{border-color:var(--ink-3)}
+.btn svg{width:16px; height:16px}
+.btn.primary{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.hidden-input{position:absolute; width:1px; height:1px; opacity:0; pointer-events:none}
+
+/* ---------- sources & settings ---------- */
+.sources{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding-block:14px}
+.src{display:inline-flex; align-items:center; gap:8px; padding:5px 6px 5px 11px; border-radius:8px;
+  background:var(--surface); border:1px solid var(--line); font-size:12.5px; max-width:100%}
+.src b{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px}
+.src span{color:var(--ink-3); white-space:nowrap}
+.src button{border:0; background:transparent; width:24px; height:24px; border-radius:6px; cursor:pointer;
+  color:var(--ink-3); display:grid; place-items:center}
+.src button:hover{background:var(--sunk); color:var(--ink)}
+.src.qc{border-style:dashed}
+.src-note{color:var(--ink-3); font-size:12.5px}
+.settings{margin-left:auto}
+.settings summary{list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  height:32px; padding:0 12px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+  font-size:12.5px; font-weight:600; color:var(--ink-2)}
+.settings summary::-webkit-details-marker{display:none}
+.settings[open] summary{border-color:var(--ink-3)}
+.settings-body{position:absolute; right:0; margin-top:8px; z-index:20; width:min(420px, calc(100vw - 40px));
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:16px;
+  display:grid; gap:14px}
+.settings-wrap{position:relative}
+.set-group h4{margin:0 0 8px; font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.set-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.set-row.two{grid-template-columns:repeat(2,1fr)}
+.set-row label{display:grid; gap:4px; font-size:12px; color:var(--ink-2)}
+.set-row input{height:34px; padding:0 10px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2);
+  font-variant-numeric:tabular-nums; width:100%}
+.set-hint{margin:0; font-size:12px; color:var(--ink-3)}
+.set-err{margin:0; font-size:12px; color:var(--up)}
+
+/* ---------- empty state ---------- */
+.empty{margin-top:28px; border:2px dashed var(--line); border-radius:16px; background:var(--surface);
+  padding:48px 24px; display:grid; justify-items:center; text-align:center; gap:14px}
+.empty.drag{border-color:var(--focus)}
+.empty .big{font:600 24px/1.25 var(--display); margin:0; text-wrap:balance}
+.empty p{margin:0; color:var(--ink-2); max-width:60ch}
+.req{display:grid; gap:10px; margin-top:6px; text-align:left; width:min(640px,100%)}
+.req div{display:grid; grid-template-columns:130px 1fr; gap:12px; font-size:13px; padding:10px 14px;
+  border-radius:10px; background:var(--surface-2)}
+.req dt,.req b{font-weight:600}
+.req code{font-family:var(--mono); font-size:12px; background:var(--sunk); padding:1px 6px; border-radius:5px}
+@media (max-width:560px){ .req div{grid-template-columns:1fr; gap:2px} }
+
+/* ---------- cards ---------- */
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow)}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:16px 18px 0}
+.card-head h2{margin:0; font:600 16px/1.3 var(--display)}
+.card-head p{margin:0; color:var(--ink-3); font-size:12.5px}
+.overview{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:16px; margin-top:18px}
+@media (max-width:980px){ .overview{grid-template-columns:1fr} }
+
+/* ---------- chart ---------- */
+.chart{position:relative; padding:6px 10px 12px}
+.chart svg{display:block; width:100%; height:auto; overflow:visible}
+.chart text{font-family:var(--sans); fill:var(--ink-3); font-size:11px}
+.chart .lbl-strong{fill:var(--ink); font-weight:600}
+.chart .lbl-2{fill:var(--ink-2)}
+.tip{position:absolute; pointer-events:none; z-index:5; background:var(--surface); border:1px solid var(--line);
+  border-radius:10px; box-shadow:var(--shadow); padding:9px 11px; font-size:12.5px; min-width:190px; max-width:280px;
+  opacity:0; transition:opacity .12s}
+.tip.on{opacity:1}
+.tip .t1{font-weight:600}
+.tip .t2{color:var(--ink-2)}
+.tip .t3{color:var(--ink-3); margin-top:4px; border-top:1px solid var(--line-2); padding-top:5px}
+
+/* ---------- tier summary ---------- */
+.tiers-body{padding:10px 18px 18px}
+.tier-list{display:grid; gap:0}
+.tier-row{display:grid; grid-template-columns:56px 1fr auto; gap:12px; align-items:center; padding:12px 0;
+  border-top:1px solid var(--line-2)}
+.tier-row:first-child{border-top:0}
+.tier-row .nums{display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2)}
+.tier-row .nums b{color:var(--ink); font-weight:600; font-size:14px}
+.tier-row .rec{font-size:12.5px; text-align:right; color:var(--ink-2)}
+.tier-row .rec b{display:block; color:var(--ink); font-weight:600}
+.bar{height:6px; border-radius:3px; background:var(--sunk); margin-top:7px; overflow:hidden}
+.bar i{display:block; height:100%; border-radius:3px}
+.tiers-foot{margin:12px 0 0; font-size:12px; color:var(--ink-3)}
+
+/* ---------- chips ---------- */
+.tier{display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12.5px; letter-spacing:.01em;
+  padding:2px 8px 2px 6px; border-radius:6px; background:var(--sunk); color:var(--ink); white-space:nowrap}
+.tier::before{content:""; width:9px; height:9px; border-radius:3px; background:var(--tc)}
+.tier.big{font-size:15px; padding:5px 10px 5px 8px}
+.tier.big::before{width:12px; height:12px}
+.t-ap{--tc:var(--t-ap)} .t-a{--tc:var(--t-a)} .t-b{--tc:var(--t-b)} .t-c{--tc:var(--t-c)}
+.bin{font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.02em; white-space:nowrap;
+  padding:1px 7px; border-radius:4px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line)}
+.bin.none{background:transparent; border-style:dashed; color:var(--ink-3)}
+.st{display:inline-flex; align-items:center; gap:6px; padding:3px 9px 3px 7px; border-radius:999px;
+  font-size:12px; font-weight:600; white-space:nowrap}
+.st svg{width:14px; height:14px; flex:none}
+.st-up{background:var(--up-bg); color:var(--up)}
+.st-ok{background:var(--ok-bg); color:var(--ok)}
+.st-yield{background:var(--yield-bg); color:var(--yield)}
+.st-none{background:var(--sunk); color:var(--ink-3)}
+
+/* zone strip */
+.zs{display:inline-grid; grid-template-columns:repeat(3,38px); gap:2px; vertical-align:middle}
+.zs span{height:24px; border-radius:4px; display:grid; place-items:center; font-size:11px; font-weight:600;
+  font-variant-numeric:tabular-nums; color:var(--ink-2); background:rgb(var(--zone-rgb) / calc(var(--a) * .72 + .05))}
+.zs span.hi{color:var(--surface)}
+.zs span.rec{box-shadow:inset 0 0 0 2px var(--rec)}
+.zs-legend{display:inline-grid; grid-template-columns:repeat(3,38px); gap:2px; font-size:10.5px; color:var(--ink-3);
+  text-align:center; font-weight:600}
+
+/* ---------- headline ---------- */
+.headline{margin-top:16px; display:grid; grid-template-columns:auto 1fr; gap:6px 22px; align-items:center;
+  padding:18px 20px; border-radius:14px; background:var(--ink); color:var(--paper)}
+.headline .hn{font:600 40px/1 var(--display); letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.headline .ht{font-size:15px; line-height:1.45; max-width:75ch}
+.headline .ht b{font-weight:700}
+.headline .hs{grid-column:2; font-size:12.5px; opacity:.72}
+@media (max-width:640px){ .headline{grid-template-columns:1fr} .headline .hs{grid-column:1} }
+
+/* ---------- tabs & panels ---------- */
+.tabs{display:flex; gap:4px; margin-top:26px; border-bottom:1px solid var(--line); overflow-x:auto}
+.tab{border:0; background:transparent; padding:10px 14px 12px; font-weight:600; font-size:14px; color:var(--ink-3);
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--ink)}
+.tab .cnt{font-weight:500; color:var(--ink-3); margin-left:6px; font-variant-numeric:tabular-nums}
+.panel{padding-top:14px}
+.panel-intro{margin:0 0 12px; color:var(--ink-2); max-width:80ch; font-size:13.5px}
+.toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px}
+.search{height:36px; padding:0 12px 0 34px; border-radius:9px; border:1px solid var(--line); background:var(--surface);
+  width:min(300px,100%);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2377838C' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>");
+  background-repeat:no-repeat; background-position:10px center; background-size:16px}
+.seg{display:inline-flex; padding:3px; gap:2px; border-radius:9px; background:var(--sunk)}
+.seg button{border:0; background:transparent; height:30px; padding:0 11px; border-radius:7px; font-size:12.5px;
+  font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.toolbar .grow{flex:1}
+.summary-line{font-size:12.5px; color:var(--ink-3)}
+
+/* ---------- tables ---------- */
+.tbl-wrap{overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; min-width:760px; font-size:13px}
+th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line-2); vertical-align:middle}
+th{position:sticky; top:0; background:var(--surface-2); font-size:11.5px; font-weight:700; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--ink-3); white-space:nowrap; z-index:1}
+th button{all:unset; cursor:pointer; display:inline-flex; gap:4px; align-items:center}
+th button:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
+th .arrow{opacity:.35}
+th[aria-sort] .arrow{opacity:1; color:var(--ink)}
+td.n, th.n{text-align:right; font-variant-numeric:tabular-nums}
+tbody tr:hover td{background:var(--surface-2)}
+.mat{font-family:var(--mono); font-size:12.5px; white-space:nowrap}
+.desc{max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.muted{color:var(--ink-3)}
+.more{display:flex; justify-content:center; padding:12px}
+.nodata{padding:28px; text-align:center; color:var(--ink-3)}
+
+/* ---------- clusters ---------- */
+.clusters{display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:14px}
+@media (max-width:520px){ .clusters{grid-template-columns:1fr} }
+.cl{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:grid; gap:10px}
+.cl-head{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap}
+.cl-head h3{margin:0; font:600 14.5px/1.3 var(--display)}
+.cl-head span{font-size:12px; color:var(--ink-3)}
+.cl-advice{font-size:12.5px; color:var(--ink-2); background:var(--surface-2); border-radius:8px; padding:8px 10px}
+.cl-advice b{color:var(--ink)}
+.cl-items{display:grid; gap:0}
+.cl-item{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; padding:6px 0;
+  border-top:1px solid var(--line-2); font-size:12.5px}
+.cl-item .who{min-width:0}
+.cl-item .who div{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cl-item .who .mat{color:var(--ink-3); font-size:11.5px}
+.cl-foot{font-size:12px; color:var(--ink-3)}
+
+.footnote{margin-top:28px; font-size:12px; color:var(--ink-3); border-top:1px solid var(--line); padding-top:14px}
+
+/* ---------- toast & drag ---------- */
+.toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px); opacity:0;
+  background:var(--ink); color:var(--paper); padding:10px 16px; border-radius:10px; font-size:13px; max-width:min(560px,calc(100vw - 32px));
+  box-shadow:var(--shadow); transition:opacity .2s, transform .2s; z-index:50; pointer-events:none}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.warn{background:var(--up); color:#fff}
+.dropveil{position:fixed; inset:0; z-index:40; display:none; place-items:center; background:rgb(var(--zone-rgb) / .18);
+  backdrop-filter:blur(2px)}
+.dropveil.on{display:grid}
+.dropveil div{background:var(--surface); border:2px dashed var(--focus); border-radius:16px; padding:28px 36px;
+  font:600 18px/1.3 var(--display)}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+
+/* ---------- bản đồ vùng ---------- */
+.mapgrid{display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px; align-items:start}
+@media (max-width:1100px){ .mapgrid{grid-template-columns:1fr} }
+.map-card{padding:12px; overflow-x:auto}
+.map-card svg{display:block; width:100%; min-width:760px; height:auto}
+.map-card svg text{font-family:var(--sans)}
+.map-legend{margin:8px 4px 0; font-size:12px; color:var(--ink-3)}
+.map-side{display:grid; gap:12px}
+.mbox{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+.mbox h3{margin:0 0 9px; font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.bincode{display:flex; justify-content:center; gap:4px; font:700 26px/1 var(--mono); margin:2px 0 8px}
+.bincode span{padding:5px 7px; border-radius:6px; background:var(--tag-bg); border:1.5px solid var(--tag-line); color:var(--tag-ink)}
+.bincode span.dash{background:transparent; border-color:transparent; padding-inline:0; color:var(--ink-3)}
+.bincode span.vt{outline:3px solid var(--t-a); outline-offset:1px}
+.parts{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; text-align:center; font-size:12px; color:var(--ink-2)}
+.parts b{display:block; color:var(--ink); font-size:13px}
+.note-vt{margin:9px 0 0; font-size:12.5px; text-align:center}
+.rules{display:grid; gap:7px}
+.rule{display:grid; grid-template-columns:48px 1fr; gap:10px; align-items:center; padding:8px 9px; border-radius:9px; background:var(--surface-2)}
+.rule b{display:block; font-size:13.5px}
+.rule span{font-size:12px; color:var(--ink-2)}
+.rule .no{color:var(--up); font-weight:700}
+.rule span b.tk{display:inline; font-size:inherit; font-weight:800; color:var(--ink)}
+.zsw{width:44px; height:34px; border-radius:7px; border:1px solid var(--line)}
+.rule-no{margin:9px 2px 0; font-size:12.5px; font-weight:700; color:var(--up)}
+.tier::before{flex:none}
+.mbox table{min-width:0; font-size:12.5px}
+.mbox th,.mbox td{padding:6px 4px; position:static}
+.mbox th{background:transparent}
+.sw{display:inline-block; width:11px; height:11px; border-radius:3px; vertical-align:-1px; margin-right:6px}
+.notes{margin:0; padding-left:18px; display:grid; gap:4px; font-size:12.5px; color:var(--ink-2)}
+.notes b{color:var(--ink)}
+.map-print-title{display:none}
+.suggest{display:inline-flex; gap:6px; align-items:center; white-space:nowrap}
+
+@page{ size:A3 landscape; margin:9mm }
+@media print{
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"]{
+    --paper:#FFFFFF; --surface:#FFFFFF; --surface-2:#F3F5F7; --sunk:#E6EAED;
+    --ink:#12181D; --ink-2:#44505A; --ink-3:#77838C; --line:#D5DBE0; --line-2:#EAEEF1;
+    --t-ap:#184f95; --t-a:#2a78d6; --t-b:#5598e7; --t-c:#b7d3f6;
+    --on-ap:#FFFFFF; --on-b:#0d2a4f; --on-c:#0d2a4f; --hatch:#B8C1C8;
+    --up:#B42318; --tag-bg:#FFF3C4; --tag-line:#E1C35A; --tag-ink:#3A2F07; --shadow:none;
+  }
+  body{-webkit-print-color-adjust:exact; print-color-adjust:exact; background:#fff}
+  body.print-map .top, body.print-map .sources, body.print-map .overview, body.print-map .headline,
+  body.print-map .tabs, body.print-map .footnote, body.print-map .panel:not(#panel-map),
+  body.print-map .map-tools, body.print-map .toast, body.print-map .dropveil, body.print-map .empty{display:none !important}
+  body.print-map #panel-map{display:block !important; padding:0}
+  body.print-map .wrap{max-width:none; padding:0}
+  body.print-map .map-print-title{display:block; margin:0 0 6px; padding-bottom:6px; border-bottom:2.5px solid #12181D}
+  body.print-map .map-print-title h1{margin:0; font:700 24px/1.15 var(--display)}
+  body.print-map .map-print-title p{margin:2px 0 0; font-size:12px; color:#44505A}
+  body.print-map .mapgrid{grid-template-columns:minmax(0,1fr) 88mm; gap:6mm}
+  body.print-map .map-card{box-shadow:none; border:0; padding:0; overflow:visible}
+  body.print-map .map-card svg{min-width:0}
+  body.print-map .mbox{break-inside:avoid; padding:7px 9px}
+  body.print-map .map-side{gap:7px}
+}
+
+/* ===== xếp theo tầng ===== */
+.tg{display:inline-flex; align-items:center; gap:5px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.tg .now{color:var(--ink-3)}
+.tg .arr{color:var(--ink-3)}
+.tg .rec{font-weight:700; color:var(--ink)}
+.tg-bad .rec,.tg-down .rec{color:var(--up)}
+.tg-ok .rec{color:var(--ok)}
+.tg-up .rec{color:var(--yield)}
+.tg .lim{font-size:11px; padding:1px 5px; border-radius:5px; background:var(--up-bg); color:var(--up); font-weight:700}
+.tgrid{width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; margin-top:4px}
+.tgrid th,.tgrid td{border:1px solid var(--line); padding:7px 10px; text-align:right}
+.tgrid th:first-child,.tgrid td:first-child{text-align:left; font-weight:600}
+.tgrid thead th{background:var(--surface-2); text-align:center; font-weight:600; color:var(--ink-2)}
+.tgrid td.cell{position:relative; isolation:isolate}
+.tgrid td.cell i{position:absolute; left:0; top:0; bottom:0; background:rgba(42,120,214,.18); z-index:-1}
+.tgrid td.cell.full i{background:rgba(42,120,214,.34)}
+.tgrid tr.off td{color:var(--ink-3); background:var(--surface-2)}
+.tgcards{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; margin-bottom:16px}
+.tgcards .mbox b{display:block; font:700 23px/1.25 var(--display); color:var(--ink)}
+.tgcards .mbox small{display:block; color:var(--ink-3); font-size:11.5px; margin-top:2px}
+.tgsec{margin-top:22px}
+.tgsec h3{margin:0 0 6px; font:600 14px/1.3 var(--display)}
+.tgsec p{margin:0 0 8px; color:var(--ink-3); font-size:12.5px}
+.tgwrap{overflow:auto; max-height:420px; border:1px solid var(--line); border-radius:10px}
+.tgwrap .tgrid{margin:0; border:0}
+.tgwrap .tgrid th{position:sticky; top:0; z-index:2}
+.tgnote{margin-top:10px; font-size:12px; color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21V4M21 21V4M3 9h18M3 15h18"/><path d="M6 6.5h3M13 12h4M7 18h3"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Gợi ý vị trí lưu kho</h1>
+        <p>Kho C · phân tích lịch sử phiếu TO: nhóm tần suất, vùng nên lưu, món hay đi chung</p>
+      </div>
+    </div>
+    <div class="actions">
+      <label class="btn primary" for="fTO" tabindex="0" id="lblTO">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        Tải file TO
+      </label>
+      <input class="hidden-input" id="fTO" type="file" multiple accept=".csv,.txt,.xlsx,.xls">
+      <label class="btn" for="fQC" tabindex="0" id="lblQC">Quy cách pallet</label>
+      <input class="hidden-input" id="fQC" type="file" accept=".xlsx,.xls,.csv">
+      <label class="btn" for="fCAPA" tabindex="0" id="lblCAPA">Capa BIN</label>
+      <input class="hidden-input" id="fCAPA" type="file" accept=".xlsx,.xls,.csv">
+      <label class="btn" for="fMASTER" tabindex="0" id="lblMASTER" title="Bản xuất SAP có cột Storage Section Ind. — dùng để biết nhóm hàng nào không được xếp lên tầng cao">Master vật tư</label>
+      <input class="hidden-input" id="fMASTER" type="file" accept=".xlsx,.xls,.csv">
+      <button class="btn" id="btnExport" type="button" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+        Xuất Excel
+      </button>
+    </div>
+  </header>
+
+  <div class="sources" id="sources">
+    <span class="src-note" id="srcNote">Chưa có dữ liệu.</span>
+    <div class="settings-wrap settings">
+      <details class="settings" id="settings">
+        <summary>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+          Ngưỡng phân tích
+        </summary>
+        <div class="settings-body">
+          <div class="set-group">
+            <h4>Chia nhóm theo % lượt lấy cộng dồn</h4>
+            <div class="set-row">
+              <label>Hết nhóm A+ tại (%)<input id="sAP" type="number" min="1" max="98" step="1" value="50"></label>
+              <label>Hết nhóm A tại (%)<input id="sA" type="number" min="2" max="99" step="1" value="80"></label>
+              <label>Hết nhóm B tại (%)<input id="sB" type="number" min="3" max="99.9" step="0.5" value="95"></label>
+            </div>
+          </div>
+          <div class="set-group">
+            <h4>Món hay đi chung</h4>
+            <div class="set-row two">
+              <label>Đi chung ít nhất (phiếu)<input id="sPM" type="number" min="2" max="100" step="1" value="5"></label>
+              <label>Gom cụm khi tỷ lệ từ (%)<input id="sPR" type="number" min="10" max="100" step="5" value="60"></label>
+            </div>
+          </div>
+          <div class="set-group">
+            <h4>Số ngày tồn</h4>
+            <div class="set-row two">
+              <label>Dữ liệu TO dài bao nhiêu ngày<input id="sDays" type="number" min="1" max="3660" step="1" placeholder="tự tính: 31 ngày mỗi file"></label>
+            </div>
+          </div>
+          <p class="set-hint">Tỷ lệ đi chung = số phiếu có cả hai món, chia cho số phiếu của món ít xuất hơn. Số ngày tồn = tồn hiện tại chia lượng xuất bình quân mỗi ngày; để trống ô số ngày thì app tính 31 ngày cho mỗi file TO.</p>
+          <p class="set-err" id="setErr" hidden></p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <section class="empty" id="empty">
+    <p class="big">Kéo thả file TO vào đây, hoặc bấm “Tải file TO”</p>
+    <p>Dùng file xuất danh sách Transfer Order từ SAP, dạng CSV như <code class="mat">03-DuLieu-TO/TO tháng 07.csv</code>. Chọn nhiều file cùng lúc để gộp nhiều tháng; phiếu trùng giữa các file chỉ tính một lần.</p>
+    <dl class="req">
+      <div><dt>Bắt buộc</dt><dd><code>Transfer Order Number</code> <code>Material</code> <code>Source Storage Bin</code></dd></div>
+      <div><dt>Nên có</dt><dd><code>Material Description</code> để hiện tên hàng, <code>Dest.target quantity</code> để quy ra pallet</dd></div>
+      <div><dt>Tuỳ chọn</dt><dd>File <b>Quy cách pallet</b> (cột <code>Material</code>, <code>Numerat.</code>) để tính số pallet mỗi nhóm</dd></div>
+      <div><dt>Tuỳ chọn</dt><dd>File <b>Capa BIN</b> (cột <code>Storage Bin</code>, <code>Total capacity</code>, <code>Putaway block</code>, <code>Cap.usage quant</code>) để gợi ý dãy còn chỗ và xem độ đầy trên bản đồ</dd></div>
+    </dl>
+  </section>
+
+  <div id="result" hidden>
+    <section class="overview">
+      <div class="card">
+        <div class="card-head">
+          <h2>Đường cong Pareto</h2>
+          <p>Bao nhiêu phần trăm số mã gánh bao nhiêu phần trăm lượt lấy</p>
+        </div>
+        <div class="chart" id="pareto"><div class="tip" id="tip"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Bốn nhóm tần suất</h2>
+          <p id="tierMeta"></p>
+        </div>
+        <div class="tiers-body">
+          <div class="tier-list" id="tierList"></div>
+          <p class="tiers-foot" id="tierFoot"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="headline" id="headline" aria-live="polite"></section>
+
+    <nav class="tabs" role="tablist" aria-label="Kết quả">
+      <button class="tab" role="tab" id="tab-zone" aria-controls="panel-zone" aria-selected="true">Nên lưu ở đâu<span class="cnt" id="cntZone"></span></button>
+      <button class="tab" role="tab" id="tab-tier" aria-controls="panel-tier" aria-selected="false" tabindex="-1">Nhóm tần suất<span class="cnt" id="cntTier"></span></button>
+      <button class="tab" role="tab" id="tab-tang" aria-controls="panel-tang" aria-selected="false" tabindex="-1">Xếp theo tầng<span class="cnt" id="cntTang"></span></button>
+      <button class="tab" role="tab" id="tab-pair" aria-controls="panel-pair" aria-selected="false" tabindex="-1">Món hay đi chung<span class="cnt" id="cntPair"></span></button>
+      <button class="tab" role="tab" id="tab-map" aria-controls="panel-map" aria-selected="false" tabindex="-1">Bản đồ vùng<span class="cnt" id="cntMap"></span></button>
+    </nav>
+
+    <section class="panel" role="tabpanel" id="panel-zone" aria-labelledby="tab-zone">
+      <p class="panel-intro" id="zoneIntro">Mỗi mã hàng: vùng nên lưu theo nhóm, và hàng đang nằm ở vùng nào (theo tồn thật nếu có file Capa BIN có mã hàng, không thì theo lượt lấy trong dữ liệu TO). Khi nhập hàng mới, ưu tiên xử lý các mã <b>“Nên đưa lên gần cửa”</b> ở đầu bảng — đó là những mã đang bắt xe chạy xa nhiều nhất.</p>
+      <div class="toolbar">
+        <div class="seg" id="fZoneView" role="group" aria-label="Kiểu xem">
+          <button type="button" data-v="item" aria-pressed="true">Theo mã hàng</button>
+          <button type="button" data-v="free" aria-pressed="false">Bin đầu kho nên giải phóng</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input class="search" id="qZone" type="search" placeholder="Tìm mã hoặc tên hàng" aria-label="Tìm mã hoặc tên hàng">
+        <div class="seg" id="fZoneStatus" role="group" aria-label="Lọc theo trạng thái">
+          <button type="button" data-v="" aria-pressed="true">Tất cả</button>
+          <button type="button" data-v="up" aria-pressed="false">Nên đưa lên</button>
+          <button type="button" data-v="ok" aria-pressed="false">Đúng vùng</button>
+          <button type="button" data-v="yield" aria-pressed="false">Nên nhường chỗ</button>
+        </div>
+        <div class="seg" id="fZoneTier" role="group" aria-label="Lọc theo nhóm"></div>
+        <span class="grow"></span>
+        <span class="summary-line" id="freeSummary" hidden></span>
+        <span class="zs-legend" id="zsLegend" aria-hidden="true"><span>Đầu</span><span>Giữa</span><span>Cuối</span></span>
+      </div>
+      <p class="panel-intro" id="freeIntro" hidden>Các bin ở đầu kho đang chứa hàng <b>không xuất lần nào trong dữ liệu TO đã tải</b>. Hàng này không tự nhường chỗ khi nhập hàng mới, nên nếu muốn dành đầu kho cho hàng A+ thì đây là các bin nên xem xét dời đi — ngày cất cũ nhất xếp trước. Dời hay không là quyết định của kho.</p>
+      <div class="tbl-wrap" id="tblZone"></div>
+      <div class="tbl-wrap" id="tblFree" hidden></div>
+      <p class="set-hint" id="farNote" hidden style="margin-top:8px">* Có tồn thật: “Ở xa hơn cần” = lượt lấy của mã × phần tồn đang nằm ngoài vùng nên lưu. “Số ngày tồn” = tồn hiện tại chia lượng xuất bình quân mỗi ngày trong dữ liệu TO.</p>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-tier" aria-labelledby="tab-tier" hidden>
+      <p class="panel-intro">Toàn bộ mã hàng xếp theo số lượt lấy, từ nhiều đến ít. Một lượt lấy là một dòng TO — tức một lần xe phải chạy tới bin.</p>
+      <div class="toolbar">
+        <input class="search" id="qTier" type="search" placeholder="Tìm mã hoặc tên hàng" aria-label="Tìm mã hoặc tên hàng">
+        <div class="seg" id="fTierTier" role="group" aria-label="Lọc theo nhóm"></div>
+      </div>
+      <div class="tbl-wrap" id="tblTier"></div>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-tang" aria-labelledby="tab-tang" hidden>
+      <p class="panel-intro">Cùng một vùng kho, mã lấy nhiều hơn nên nằm ở tầng thấp hơn để đỡ phải gọi reach truck hạ xuống. Trần tầng của từng nhóm hàng được <b>suy từ tồn kho thực tế</b>, không gán cứng theo mã.</p>
+      <div id="tangBody"></div>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-pair" aria-labelledby="tab-pair" hidden>
+      <p class="panel-intro" id="pairIntro"></p>
+      <div class="toolbar">
+        <input class="search" id="qPair" type="search" placeholder="Tìm mã hoặc tên hàng" aria-label="Tìm mã hoặc tên hàng">
+        <div class="seg" id="fPairView" role="group" aria-label="Kiểu xem">
+          <button type="button" data-v="cl" aria-pressed="true">Theo cụm</button>
+          <button type="button" data-v="pr" aria-pressed="false">Từng cặp</button>
+        </div>
+        <span class="grow"></span>
+        <span class="summary-line" id="pairSummary"></span>
+      </div>
+      <div id="pairCl"></div>
+      <div class="tbl-wrap" id="pairTbl" hidden></div>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-map" aria-labelledby="tab-map" hidden>
+      <div class="map-print-title">
+        <h1>Kho C · Vùng cất hàng theo tần suất xuất</h1>
+        <p>Hàng xuất càng nhiều, cất càng gần cửa. Áp dụng khi nhập hàng mới — không cần dời hàng đang có.</p>
+      </div>
+      <div class="toolbar map-tools">
+        <p class="panel-intro" style="margin:0">Sơ đồ Kho C nhìn từ trên xuống, cửa xuất ở bên trái. Mỗi vùng dành cho một nhóm hàng. In ra khổ A3 ngang để dán ở khu nhập hàng.</p>
+        <span class="grow"></span>
+        <button class="btn primary" type="button" id="btnPrintMap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+          In bản đồ (A3 ngang)
+        </button>
+      </div>
+      <div class="mapgrid">
+        <div class="card map-card">
+          <svg id="map" role="img" aria-label="Sơ đồ Kho C: 35 dãy kệ, 18 lối, cửa xuất ở phía đầu dãy. Đầu kho VT 1 đến 33, giữa kho VT 34 đến 74, cuối kho từ VT 75."></svg>
+          <p class="map-legend" id="mapLegend"></p>
+        </div>
+        <aside class="map-side">
+          <section class="mbox">
+            <h3>Cách đọc mã bin</h3>
+            <div class="bincode" aria-label="Ví dụ mã bin CDT-015-4"><span>CDT</span><span class="dash">-</span><span class="vt">015</span><span class="dash">-</span><span>4</span></div>
+            <div class="parts"><div><b>Dãy</b>CDT</div><div><b>Vị trí (VT)</b>015</div><div><b>Tầng</b>4</div></div>
+            <p class="note-vt"><b>Chỉ cần nhìn số ở giữa</b> để biết bin thuộc vùng nào.</p>
+          </section>
+          <section class="mbox">
+            <h3>Nhập hàng: cất vào đâu</h3>
+            <div class="rules">
+              <div class="rule"><span class="zsw" style="background:var(--t-ap)"></span><div><b>Đầu kho · VT 001–033</b><span>Cất hàng <b class="tk">A+</b>, và hàng <b class="tk">A</b> nếu còn chỗ. Ưu tiên VT nhỏ trước.</span></div></div>
+              <div class="rule"><span class="zsw" style="background:var(--t-b)"></span><div><b>Giữa kho · VT 034–074</b><span>Cất hàng <b class="tk">B</b>, và hàng <b class="tk">A</b> khi đầu kho hết chỗ.</span></div></div>
+              <div class="rule"><span class="zsw" style="background:var(--t-c)"></span><div><b>Cuối kho · VT 075 trở lên</b><span>Cất hàng <b class="tk">C</b>.</span></div></div>
+            </div>
+            <p class="rule-no">Hàng B và C không cất ở đầu kho.</p>
+          </section>
+          <section class="mbox">
+            <h3>Sức chứa từng vùng</h3>
+            <div id="mapCap"></div>
+          </section>
+          <section class="mbox">
+            <h3>Lưu ý</h3>
+            <ul class="notes">
+              <li><b>Mã thuộc nhóm nào?</b> Xem thẻ “Nên lưu ở đâu” trong app này hoặc file Excel xuất ra.</li>
+              <li><b>Tầng 1 không cất hàng</b> (đang khoá trong SAP); tầng 2 phần lớn cũng khoá.</li>
+              <li id="noteLocked"><b>Dãy CAT</b> đang khoá cất hàng toàn bộ.</li>
+              <li>Sáu dãy ngắn <b>CAT–CDP</b> gần như không có vùng cuối kho.</li>
+              <li>Hai đường hầm ở tầng sàn (VT 33–35 và 74–76) là ranh giới giữa các vùng.</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <p class="footnote">Vùng chia theo hai đường hầm cắt ngang: đầu kho VT 0–33, giữa kho VT 34–74, cuối kho từ VT 75. Khoảng cách tính theo đường xe chạy thật (đi qua lối cắt), cùng công thức với app lộ trình. Dữ liệu chỉ xử lý trên máy này, không gửi đi đâu.</p>
+  </div>
+</div>
+
+<div class="dropveil" id="dropveil"><div>Thả file vào đây</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= HÌNH HỌC KHO C (giữ đúng như app lộ trình) ================= */
+var VTW = 1.4, PITCH = 8.65, CROSS = [0, 34, 75];
+var DAY = {
+  CAT:[1,'T',76],   CBP:[1,'P',76],   CBT:[2,'T',76],   CCP:[2,'P',76],
+  CCT:[3,'T',80],   CDP:[3,'P',80],   CDT:[4,'T',104],  CEP:[4,'P',104],
+  CET:[5,'T',104],  CFP:[5,'P',104],  CFT:[6,'T',104],  CGP:[6,'P',104],
+  CGT:[7,'T',104],  CHP:[7,'P',104],  CHT:[8,'T',104],  CIP:[8,'P',104],
+  CIT:[9,'T',104],  CKP:[9,'P',104],  CKT:[10,'T',104], CLP:[10,'P',104],
+  CLT:[11,'T',104], CMP:[11,'P',104], CMT:[12,'T',104], CNP:[12,'P',104],
+  CNT:[13,'T',104], COP:[13,'P',104], COT:[14,'T',104], CPP:[14,'P',104],
+  CPT:[15,'T',104], CQP:[15,'P',104], CQT:[16,'T',104], CRP:[16,'P',104],
+  CRT:[17,'T',104], CSP:[17,'P',104], CTP:[18,'P',96]
+};
+var AMAX = {};
+Object.keys(DAY).forEach(function(d){ var a = DAY[d][0]; AMAX[a] = Math.max(AMAX[a] || 0, DAY[d][2]); });
+function aisleY(a){ return (a - 1) * PITCH; }
+function maxBetween(a1, a2){
+  var lo = Math.min(a1, a2), hi = Math.max(a1, a2), m = 0;
+  for (var k = lo; k <= hi; k++) m = Math.max(m, AMAX[k] || 0);
+  return m;
+}
+function dist(a1, v1, a2, v2){
+  if (a1 === a2) return Math.abs(v1 - v2) * VTW;
+  var dy = Math.abs(aisleY(a1) - aisleY(a2)), best = Infinity;
+  CROSS.concat([maxBetween(a1, a2) + 1]).forEach(function(p){
+    var d = (Math.abs(v1 - p) + Math.abs(v2 - p)) * VTW + dy;
+    if (d < best) best = d;
+  });
+  return best;
+}
+
+/* ================= QUY ƯỚC ================= */
+var BIN_RX = /^([A-Z]{3})-(\d{1,3})-(\d{1,2})$/;
+var ZONES = [
+  { label:'Đầu kho',  short:'Đầu',  range:'VT 0–33' },
+  { label:'Giữa kho', short:'Giữa', range:'VT 34–74' },
+  { label:'Cuối kho', short:'Cuối', range:'VT 75 trở đi' }
+];
+function zoneOf(vt){ return vt < 34 ? 0 : (vt < 75 ? 1 : 2); }
+var TIERS = [
+  { k:'A+', cls:'t-ap', rec:[0,0], recLabel:'Đầu kho' },
+  { k:'A',  cls:'t-a',  rec:[0,1], recLabel:'Đầu hoặc giữa kho' },
+  { k:'B',  cls:'t-b',  rec:[1,1], recLabel:'Giữa kho' },
+  { k:'C',  cls:'t-c',  rec:[2,2], recLabel:'Cuối kho' }
+];
+var STATUS = {
+  up:    { label:'Nên đưa lên gần cửa', cls:'st-up',
+           icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>' },
+  ok:    { label:'Đúng vùng', cls:'st-ok',
+           icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' },
+  yield: { label:'Nên nhường chỗ', cls:'st-yield',
+           icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>' },
+  none:  { label:'Ngoài kệ', cls:'st-none', icon:'' },
+  nostock: { label:'Đang hết tồn', cls:'st-none',
+           icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></svg>' }
+};
+var ZSPAN = [[1, 33], [34, 74], [75, 104]];
+/* ===== TẦNG (chiều cao) ===== */
+var TANG_MIN = 3, TANG_MAX = 7;        // tầng thực tế cất được (T1 bị chặn nhập 100%, T2 chặn 89%)
+var TANG_H = 1.65, TANG_MULT = 7;      // một tầng cao 1,65 m; leo cao "đắt" gấp 7 lần đi ngang
+var TANG_COST = TANG_H * TANG_MULT;    // ≈ 11,55 m quy đổi cho mỗi tầng
+var TANG_HIGH = 6;                     // từ T6 trở lên coi là tầng cao
+var TANG_HIGH_PCT = 15;                // nhóm có dưới 15% tồn ở tầng cao ⇒ coi như bị cấm lên cao
+// CÁCH VIẾT TẦNG — sửa ở đây là đổi toàn bộ màn hình và file Excel
+function tangTxt(t){ return t == null ? '–' : 'T' + t; }
+function tangAvgTxt(x){ return x == null ? '–' : tangTxt(Math.round(x * 10) / 10); }
+function tangListTxt(m){            // các tầng đang có hàng, ví dụ "T3, T4, T6"
+  if (!m) return '';
+  return Object.keys(m).map(Number).sort(function(a, b){ return a - b; }).map(tangTxt).join(', ');
+}
+var TSTATUS = {
+  bad:  { label:'Sai quy tắc tầng — phải hạ xuống', cls:'tg-bad' },
+  down: { label:'Nên hạ xuống tầng thấp hơn', cls:'tg-down' },
+  ok:   { label:'Đã đúng tầng', cls:'tg-ok' },
+  up:   { label:'Đang chiếm tầng thấp, có thể nhường', cls:'tg-up' }
+};
+var ZONE_VT = ['001–033', '034–074', '075 trở lên'];
+var ZCOL = ['var(--t-ap)', 'var(--t-b)', 'var(--t-c)'], ZON = ['var(--on-ap)', 'var(--on-b)', 'var(--on-c)'];
+// dãy từ trên xuống dưới; số = lối đi. Dãy A nằm dưới cùng, cửa ở phía VT 0.
+var MAP_ORDER = ['CTP',18,'CSP',17,'CRT','CRP',16,'CQT','CQP',15,'CPT','CPP',14,'COT','COP',13,'CNT','CNP',12,
+  'CMT','CMP',11,'CLT','CLP',10,'CKT','CKP',9,'CIT','CIP',8,'CHT','CHP',7,'CGT','CGP',6,'CFT','CFP',5,
+  'CET','CEP',4,'CDT','CDP',3,'CCT','CCP',2,'CBT','CBP',1,'CAT'];
+var MAP_GAPS = { CAT:[[9, 14]] };
+
+/* ================= TIỆN ÍCH ================= */
+var nf0 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits:0 });
+var nf1 = new Intl.NumberFormat('vi-VN', { minimumFractionDigits:1, maximumFractionDigits:1 });
+function n0(x){ return nf0.format(x); }
+function p1(x){ return nf1.format(x) + '%'; }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function pad3(v){ return String(v).padStart(3, '0'); }
+function $(id){ return document.getElementById(id); }
+function norm(s){
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ').trim();
+}
+var toastTimer;
+function toast(msg, warn){
+  var t = $('toast'); t.textContent = msg; t.className = 'toast on' + (warn ? ' warn' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.className = 'toast'; }, warn ? 6500 : 3800);
+}
+function debounce(fn, ms){ var h; return function(){ var a = arguments; clearTimeout(h); h = setTimeout(function(){ fn.apply(null, a); }, ms); }; }
+
+function parseNum(v, euro){
+  if (typeof v === 'number') return v;
+  var s = String(v == null ? '' : v).trim();
+  if (!s) return 0;
+  s = euro ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  var x = parseFloat(s);
+  return isFinite(x) ? x : 0;
+}
+
+// CSV có ngoặc kép; tự nhận dấu phân cách từ dòng tiêu đề
+function parseDelimited(text){
+  text = text.replace(/^﻿/, '');
+  var firstLine = text.slice(0, text.indexOf('\n') > -1 ? text.indexOf('\n') : text.length);
+  var cands = [';', ',', '\t'], delim = ';', best = -1;
+  cands.forEach(function(c){ var n = firstLine.split(c).length; if (n > best){ best = n; delim = c; } });
+  var rows = [], row = [], cell = '', q = false, i = 0, L = text.length;
+  while (i < L){
+    var ch = text[i];
+    if (q){
+      if (ch === '"'){ if (text[i + 1] === '"'){ cell += '"'; i += 2; continue; } q = false; i++; continue; }
+      cell += ch; i++; continue;
+    }
+    if (ch === '"' && cell === ''){ q = true; i++; continue; }
+    if (ch === delim){ row.push(cell); cell = ''; i++; continue; }
+    if (ch === '\r'){ i++; continue; }
+    if (ch === '\n'){ row.push(cell); rows.push(row); row = []; cell = ''; i++; continue; }
+    cell += ch; i++;
+  }
+  if (cell !== '' || row.length){ row.push(cell); rows.push(row); }
+  return { rows: rows, euro: delim === ';' };
+}
+
+function findCol(headers, exact, contains, exclude){
+  var H = headers.map(norm);
+  for (var e = 0; e < exact.length; e++){ var i = H.indexOf(exact[e]); if (i > -1) return i; }
+  for (var k = 0; k < H.length; k++){
+    var h = H[k];
+    if (exclude && exclude.some(function(x){ return h.indexOf(x) > -1; })) continue;
+    if (contains.some(function(c){ return h.indexOf(c) > -1; })) return k;
+  }
+  return -1;
+}
+
+/* ---------- thư viện đọc/ghi Excel: chỉ tải khi cần ---------- */
+var xlsxPromise = null;
+function loadXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxPromise) return xlsxPromise;
+  xlsxPromise = new Promise(function(res, rej){
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = function(){ res(window.XLSX); };
+    s.onerror = function(){ xlsxPromise = null; rej(new Error('offline')); };
+    document.head.appendChild(s);
+  });
+  return xlsxPromise;
+}
+function readFileRows(file){
+  var isX = /\.xlsx?$/i.test(file.name);
+  if (!isX){
+    return file.text().then(function(t){ return parseDelimited(t); });
+  }
+  return Promise.all([loadXLSX(), file.arrayBuffer()]).then(function(r){
+    var wb = r[0].read(r[1], { type:'array', cellDates:true });
+    var ws = wb.Sheets[wb.SheetNames[0]];
+    return { rows: r[0].utils.sheet_to_json(ws, { header:1, raw:true, defval:'' }), euro:false };
+  });
+}
+
+/* ================= TRẠNG THÁI ================= */
+var S = {
+  files: [], fileSeq: 0,
+  lines: [],
+  qc: null, qcName: '', qcCount: 0,
+  capa: null,
+  set: { ap:50, a:80, b:95, pairMin:5, pairRate:60 },
+  base: null, view: null,
+  tab: 'zone',
+  f: { zoneView:'item', zoneStatus:'', zoneTier:'', tierTier:'', pairView:'cl', qZone:'', qTier:'', qPair:'' }
+};
+
+/* ---------- nạp file TO ---------- */
+function ingestTO(name, size, parsed){
+  var rows = parsed.rows;
+  if (!rows.length) throw new Error('File trống.');
+  var H = rows[0];
+  var cTO  = findCol(H, ['transfer order number','transfer order','to number','so to','số to'], ['transfer order']);
+  var cMat = findCol(H, ['material','ma hang','mã hàng'], ['material'], ['desc','number of','group']);
+  var cDes = findCol(H, ['material description','ten hang','description'], ['description','ten hang']);
+  var cBin = findCol(H, ['source storage bin','source bin','bin xuat','storage bin'], ['source storage bin','bin']);
+  var cQty = findCol(H, ['dest.target quantity','target quantity','qty','so luong'], ['target quantity','so luong']);
+  var miss = [];
+  if (cTO < 0) miss.push('Transfer Order Number');
+  if (cMat < 0) miss.push('Material');
+  if (cBin < 0) miss.push('Source Storage Bin');
+  if (miss.length) throw new Error('Thiếu cột: ' + miss.join(', ') + '.');
+  var recs = [];
+  for (var r = 1; r < rows.length; r++){
+    var f = rows[r]; if (!f || f.length < 2) continue;
+    var to = String(f[cTO] == null ? '' : f[cTO]).trim();
+    var mat = String(f[cMat] == null ? '' : f[cMat]).trim();
+    if (!to || !mat) continue;
+    recs.push({
+      to: to, mat: mat,
+      desc: cDes > -1 ? String(f[cDes] == null ? '' : f[cDes]).trim() : '',
+      bin: String(f[cBin] == null ? '' : f[cBin]).trim().toUpperCase(),
+      qty: cQty > -1 ? parseNum(f[cQty], parsed.euro) : 0
+    });
+  }
+  if (!recs.length) throw new Error('Không có dòng dữ liệu nào.');
+  var file = { id: ++S.fileSeq, name: name, size: size, recs: recs, hasQty: cQty > -1 };
+  S.files.push(file);
+  return file;
+}
+
+function rebuildLines(){
+  var owner = new Map(), lines = [];
+  S.files.forEach(function(f){
+    f.dup = new Set(); f.tos = new Set();
+    f.recs.forEach(function(r){
+      var o = owner.get(r.to);
+      if (o === undefined) owner.set(r.to, f.id);
+      else if (o !== f.id){ f.dup.add(r.to); return; }
+      f.tos.add(r.to);
+      var m = BIN_RX.exec(r.bin), l = { to:r.to, mat:r.mat, desc:r.desc, qty:r.qty, day:null, vt:null, zone:null };
+      if (m){ l.day = m[1]; l.vt = +m[2]; l.zone = zoneOf(l.vt); l.tang = +m[3]; }
+      lines.push(l);
+    });
+  });
+  S.lines = lines;
+}
+
+/* ---------- nạp quy cách ---------- */
+function ingestQC(name, parsed){
+  var rows = parsed.rows; if (!rows.length) throw new Error('File trống.');
+  var H = rows[0];
+  var cMat = findCol(H, ['material','ma hang'], ['material'], ['desc','number','group']);
+  var cNum = findCol(H, ['numerat.','numerat','numerator','quy cach','sl/pallet'], ['numerat','quy cach']);
+  var cDen = findCol(H, ['denom.','denom','denominator'], ['denom']);
+  var cAUn = findCol(H, ['aun','alt. unit','don vi'], ['alt. unit']);
+  if (cMat < 0 || cNum < 0) throw new Error('Cần cột Material và Numerat. (số sản phẩm trên một pallet).');
+  var qc = new Map();
+  for (var r = 1; r < rows.length; r++){
+    var f = rows[r]; if (!f) continue;
+    if (cAUn > -1 && String(f[cAUn]).trim().toUpperCase() !== 'PAL') continue;
+    var m = String(f[cMat] == null ? '' : f[cMat]).trim();
+    var num = parseNum(f[cNum], parsed.euro), den = cDen > -1 ? parseNum(f[cDen], parsed.euro) : 1;
+    if (!m || !(num > 0)) continue;
+    qc.set(m, num / (den > 0 ? den : 1));
+  }
+  if (!qc.size) throw new Error('Không đọc được quy cách nào.');
+  S.qc = qc; S.qcName = name; S.qcCount = qc.size;
+}
+
+/* ---------- nạp Capa BIN: sức chứa, chỗ trống, và tồn theo mã nếu file có ---------- */
+function toDate(v){
+  if (v instanceof Date) return isNaN(v) ? null : v;
+  if (typeof v === 'number' && v > 20000) return new Date(Math.round((v - 25569) * 864e5));
+  var s = String(v == null ? '' : v).trim(), m;
+  if ((m = /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/.exec(s))) return new Date(+m[3], +m[2] - 1, +m[1]);
+  if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s))) return new Date(+m[1], +m[2] - 1, +m[3]);
+  return null;
+}
+function fmtDate(d){ return d ? String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() : ''; }
+function cellStr(f, c){ return c > -1 ? String(f[c] == null ? '' : f[c]).trim() : ''; }
+
+function secOf(mat){
+  if (!S.master) return null;
+  return S.master.sec.get(String(mat == null ? '' : mat).replace(/^0+/, '')) || null;
+}
+
+function ingestMaster(name, parsed){
+  var rows = parsed.rows; if (!rows.length) throw new Error('File trống.');
+  var H = rows[0];
+  var cMat = findCol(H, ['material'], [], []);
+  var cSec = findCol(H, ['storage section ind.'], ['storage section ind'], []);
+  var cDes = findCol(H, ['storage section ind desc.'], ['storage section ind desc'], []);
+  var cDel = findCol(H, ['del.flag:warehse no.'], ['del.flag'], []);
+  if (cMat < 0 || cSec < 0) throw new Error('Cần cột Material và Storage Section Ind.');
+  var sec = new Map(), desc = new Map(), nDel = 0;
+  for (var r = 1; r < rows.length; r++){
+    var f = rows[r]; if (!f) continue;
+    var m = cellStr(f, cMat).replace(/^0+/, ''); if (!m) continue;
+    var c = cellStr(f, cSec); if (!c) continue;
+    sec.set(m, c);
+    if (cDes > -1 && !desc.has(c)) desc.set(c, cellStr(f, cDes));
+    if (cDel > -1 && cellStr(f, cDel)) nDel++;
+  }
+  if (!sec.size) throw new Error('Không đọc được mã hàng nào.');
+  S.master = { name:name, sec:sec, desc:desc, n:sec.size, nDel:nDel };
+}
+
+/* Suy quy tắc tầng TỪ DỮ LIỆU: nhóm nào thực tế gần như không bao giờ nằm ở T6–T7
+   thì coi như bị cấm lên cao. Không gán cứng theo chữ cái đầu của mã. */
+function deriveTangRule(){
+  S.tangRule = null;
+  if (!S.master || !S.capa || !S.capa.hasStock) return;
+  var agg = new Map();
+  S.capa.bins.forEach(function(b){
+    if (!b.lots.length) return;
+    b.lots.forEach(function(l){
+      var c = secOf(l.mat); if (!c) return;
+      var a = agg.get(c); if (!a){ a = { n:0, hi:0 }; agg.set(c, a); }
+      a.n++; if (b.tang >= TANG_HIGH) a.hi++;
+    });
+  });
+  if (!agg.size) return;
+  var rule = new Map();
+  agg.forEach(function(a, c){
+    var pct = a.n ? a.hi / a.n * 100 : 0;
+    rule.set(c, { code:c, desc:S.master.desc.get(c) || '', n:a.n, hi:a.hi, pct:pct,
+      max: pct < TANG_HIGH_PCT ? TANG_HIGH - 1 : TANG_MAX,
+      conf: a.n >= 50 ? 'cao' : (a.n >= 15 ? 'vừa' : 'thấp') });
+  });
+  S.tangRule = rule;
+}
+
+function ingestCapa(name, parsed, fileDate){
+  var rows = parsed.rows; if (!rows.length) throw new Error('File trống.');
+  var H = rows[0];
+  var cBin = findCol(H, ['storage bin'], ['storage bin']);
+  var cCap = findCol(H, ['total capacity'], ['total capacity']);
+  var cUse = findCol(H, ['cap.usage quant', 'capacity usage'], ['cap.usage', 'capacity usage']);
+  var cBlk = findCol(H, ['putaway block'], ['putaway block']);
+  var cSec = findCol(H, ['storage section'], ['storage section']);
+  var cMat = findCol(H, ['material'], [], []);
+  var cDes = findCol(H, ['material description'], ['material description']);
+  var cQty = findCol(H, ['available stock'], ['available stock']);
+  var cLast = findCol(H, ['last stock placement'], ['last stock placement']);
+  var cGR = findCol(H, ['gr date'], ['gr date']);
+  var cDays = findCol(H, ['no. of days since last stock placement'], ['days since last']);
+  var cSpec = findCol(H, ['special stock'], []);
+  var cCat = findCol(H, ['stock category'], ['stock category']);
+  if (cBin < 0 || cCap < 0) throw new Error('Cần cột Storage Bin và Total capacity.');
+  // Một bin có thể có nhiều lô hàng → nhiều dòng. Sức chứa và cờ khoá là của bin; phần chiếm chỗ là của từng lô.
+  var binMap = new Map();
+  for (var r = 1; r < rows.length; r++){
+    var f = rows[r]; if (!f) continue;
+    var b = cellStr(f, cBin).toUpperCase(), m = BIN_RX.exec(b);
+    if (!m) continue;
+    var rec = binMap.get(b);
+    if (!rec){
+      rec = { bin:b, day:m[1], vt:+m[2], tang:+m[3], zone:zoneOf(+m[2]), cap:parseNum(f[cCap], parsed.euro), used:0,
+              blk:cellStr(f, cBlk).toUpperCase() === 'X', sec:cellStr(f, cSec), lots:[] };
+      binMap.set(b, rec);
+    }
+    var use = cUse > -1 ? parseNum(f[cUse], parsed.euro) : 0;
+    rec.used += use;
+    var mat = cellStr(f, cMat);
+    if (cMat > -1 && mat && mat !== '<<empty>>'){
+      rec.lots.push({ mat:mat, desc:cellStr(f, cDes), qty:cQty > -1 ? parseNum(f[cQty], parsed.euro) : 0, pal:use,
+        last:toDate(cLast > -1 ? f[cLast] : null) || toDate(cGR > -1 ? f[cGR] : null),
+        days:cDays > -1 && cellStr(f, cDays) !== '' ? parseNum(f[cDays], false) : null,
+        spec:cellStr(f, cSpec), cat:cellStr(f, cCat) });
+    }
+  }
+  var bins = Array.from(binMap.values());
+  if (!bins.length) throw new Error('Không có bin nào đúng dạng DÃY-VT-TẦNG.');
+  var zone = [0, 1, 2].map(function(){ return { n:0, cap:0, used:0, free:0, empty:0 }; });
+  var dz = new Map(), days = new Map();
+  var zt = [0, 1, 2].map(function(){ var a = {}; for (var t = 1; t <= 9; t++) a[t] = { n:0, cap:0, used:0, free:0 }; return a; });
+  var tAll = {};
+  bins.forEach(function(b){
+    var d = days.get(b.day) || { all:0, usable:0 }; d.all++; days.set(b.day, d);
+    var ta = tAll[b.tang] || (tAll[b.tang] = { n:0, blk:0, cap:0, used:0, free:0 });
+    ta.n++; if (b.blk) ta.blk++;
+    b.ok = !b.blk && b.cap > 0;
+    if (!b.ok) return;
+    d.usable++;
+    b.free = Math.max(0, b.cap - b.used);
+    ta.cap += b.cap; ta.used += b.used; ta.free += b.free;
+    var z = zone[b.zone]; z.n++; z.cap += b.cap; z.used += b.used; z.free += b.free; if (b.used === 0) z.empty++;
+    var k = b.day + '|' + b.zone, e = dz.get(k) || { n:0, cap:0, used:0, free:0 };
+    e.n++; e.cap += b.cap; e.used += b.used; e.free += b.free; dz.set(k, e);
+    var q = zt[b.zone][b.tang];
+    if (q){ q.n++; q.cap += b.cap; q.used += b.used; q.free += b.free; }
+  });
+  var best = [null, null, null];
+  dz.forEach(function(e, k){ var p = k.split('|'), z = +p[1]; if (!best[z] || e.free > best[z].free) best[z] = { day:p[0], free:e.free }; });
+  var locked = {};
+  days.forEach(function(d, k){ if (!d.usable) locked[k] = true; });
+  // tồn theo mã: số pallet đang chiếm, số lượng, và nằm ở vùng nào
+  var stock = new Map(), nLots = 0;
+  bins.forEach(function(b){
+    b.lots.forEach(function(l){
+      nLots++;
+      var s = stock.get(l.mat);
+      if (!s){ s = { pal:0, qty:0, z:[0, 0, 0], loc:new Map(), desc:l.desc, nb:0, tsum:0, hiB:0, tmax:0 }; stock.set(l.mat, s); }
+      s.pal += l.pal; s.qty += l.qty; s.z[b.zone] += l.pal;
+      s.nb++; s.tsum += b.tang; if (b.tang >= TANG_HIGH) s.hiB++; if (b.tang > s.tmax) s.tmax = b.tang;
+      s.tl = s.tl || {}; s.tl[b.tang] = (s.tl[b.tang] || 0) + 1;
+      var k = b.day + '|' + b.vt; s.loc.set(k, (s.loc.get(k) || 0) + l.pal);
+    });
+  });
+  S.capa = { name:name, bins:bins, zone:zone, dz:dz, best:best, locked:locked, zt:zt, tAll:tAll,
+             hasStock:cMat > -1 && nLots > 0, stock:stock, nLots:nLots, date:fileDate || null, nRows:rows.length - 1 };
+}
+
+// gợi ý chỗ cất: ưu tiên dãy mã đang nằm (đúng vùng, còn chỗ), không thì dãy còn nhiều chỗ nhất trong vùng
+function suggest(it){
+  var R = it.rec, c = S.capa, z;
+  if (!c) return null;
+  for (z = R[0]; z <= R[1]; z++){
+    if (it.vday && !c.locked[it.vday]){ var e = c.dz.get(it.vday + '|' + z); if (e && e.free >= 2) return { day:it.vday, z:z, free:e.free, same:true }; }
+  }
+  for (z = R[0]; z <= R[1]; z++){ var b = c.best[z]; if (b && b.free >= 2) return { day:b.day, z:z, free:b.free, same:false }; }
+  return null;
+}
+function suggestCell(it){
+  var R = it.rec;
+  if (!S.capa){
+    return 'VT ' + ZONE_VT[R[0]] + (R[1] > R[0] ? ', hết chỗ thì ' + ZONE_VT[R[1]] : '') + ' <span class="muted">· mọi dãy</span>';
+  }
+  var g = suggest(it);
+  if (!g) return '<span class="muted">vùng đã đầy</span>';
+  return '<span class="suggest"><span class="bin">' + g.day + ' ' + ZONE_VT[g.z].replace(' trở lên', '+') + '</span><span class="muted">còn ' + n0(g.free) + ' chỗ' + (g.same ? '' : ' · dãy khác') + '</span></span>';
+}
+function suggestText(it){
+  var g = suggest(it); if (!g) return S.capa ? 'vùng đã đầy' : 'VT ' + ZONE_VT[it.rec[0]] + ', mọi dãy';
+  return g.day + ' VT ' + ZONE_VT[g.z] + ' (còn ' + Math.round(g.free) + ' chỗ)';
+}
+
+/* ================= TÍNH TOÁN ================= */
+function buildBase(){
+  var items = new Map(), toSets = new Map(), outside = 0;
+  S.lines.forEach(function(l){
+    var it = items.get(l.mat);
+    if (!it){ it = { mat:l.mat, desc:l.desc, picks:0, qty:0, z:[0,0,0], loc:new Map(), out:0 }; items.set(l.mat, it); }
+    else if (!it.desc && l.desc) it.desc = l.desc;
+    it.picks++; it.qty += l.qty || 0;
+    if (l.day){ it.z[l.zone]++; var k = l.day + '|' + l.vt; it.loc.set(k, (it.loc.get(k) || 0) + 1); }
+    else { it.out++; outside++; }
+    var s = toSets.get(l.to); if (!s){ s = new Set(); toSets.set(l.to, s); } s.add(l.mat);
+  });
+  // xếp giảm dần theo lượt lấy; bằng nhau thì giữ thứ tự xuất hiện trong file
+  var ranked = Array.from(items.values()).sort(function(a, b){ return b.picks - a.picks; });
+  ranked.forEach(function(it, i){
+    it.rank = i + 1;
+    var best = null, bn = -1;
+    it.loc.forEach(function(n, k){ if (n > bn){ bn = n; best = k; } });
+    if (best){ var p = best.split('|'); it.mday = p[0]; it.mvt = +p[1]; it.mlane = DAY[p[0]] ? DAY[p[0]][0] : null; }
+    var zs = it.z[0] + it.z[1] + it.z[2], mz = null, mzn = -1;
+    for (var z = 0; z < 3; z++) if (it.z[z] > mzn){ mzn = it.z[z]; mz = z; }
+    it.zsum = zs; it.mainZone = zs ? mz : null;
+  });
+  var inTo = new Map(), pairs = new Map(), single = 0;
+  toSets.forEach(function(s){
+    var arr = Array.from(s).sort();
+    if (arr.length === 1) single++;
+    for (var i = 0; i < arr.length; i++){
+      inTo.set(arr[i], (inTo.get(arr[i]) || 0) + 1);
+      for (var j = i + 1; j < arr.length; j++){
+        var key = arr[i] + '\u0001' + arr[j];
+        pairs.set(key, (pairs.get(key) || 0) + 1);
+      }
+    }
+  });
+  S.base = { items:items, ranked:ranked, T:S.lines.length, nTO:toSets.size, single:single, inTo:inTo, pairs:pairs, outside:outside };
+}
+
+function dataDays(){ return S.set.days || 31 * Math.max(1, S.files.length); }
+function hasStock(){ return !!(S.capa && S.capa.hasStock); }
+
+function applySettings(){
+  var b = S.base, st = S.set, cuts = [st.ap, st.a, st.b], cum = 0, stk = hasStock();
+  var ts = TIERS.map(function(){ return { n:0, picks:0, pal:0, palN:0, inRec:0, zsum:0, far:0, up:0, endRank:0, endCum:0, stock:0 }; });
+  // lượt 1: chia nhóm theo lượt lấy cộng dồn
+  b.ranked.forEach(function(it){
+    var before = cum / b.T * 100; cum += it.picks;
+    it.tier = before < cuts[0] ? 0 : (before < cuts[1] ? 1 : (before < cuts[2] ? 2 : 3));
+    it.pct = it.picks / b.T * 100; it.cumPct = cum / b.T * 100;
+    it.pal = (S.qc && S.qc.has(it.mat)) ? it.qty / S.qc.get(it.mat) : null;
+    it.stock = stk ? (S.capa.stock.get(it.mat) || null) : undefined;
+  });
+  // lượt 2: có tồn thật thì chia sức chứa đầu kho — A+ trước, rồi các mã A xuất nhiều nhất cho tới khi hết chỗ
+  var fit = null;
+  if (stk){
+    var frontCap = S.capa.zone[0].cap, apStock = 0;
+    b.ranked.forEach(function(it){ if (it.tier === 0 && it.stock) apStock += it.stock.pal; });
+    var left = frontCap - apStock, aIn = 0, aPal = 0, open = left > 0;
+    b.ranked.forEach(function(it){
+      if (it.tier !== 1) return;
+      var p = it.stock ? it.stock.pal : 0;
+      if (open && p <= left){ it.aFront = true; left -= p; aIn++; aPal += p; } else { it.aFront = false; open = false; }
+    });
+    fit = { frontCap:frontCap, apStock:apStock, aIn:aIn, aPal:aPal, left:Math.max(0, left), over:Math.max(0, apStock - frontCap) };
+  }
+  var nd = dataDays();
+  b.ranked.forEach(function(it){
+    var t = it.tier, T = TIERS[t], rec = T.rec, recLabel = T.recLabel;
+    if (stk && t === 1){ rec = it.aFront ? [0, 0] : [1, 1]; recLabel = it.aFront ? 'Đầu kho' : 'Giữa kho'; }
+    it.rec = rec; it.recLabel = recLabel; it.sec = secOf(it.mat);
+    // vị trí: có tồn thật thì theo tồn đang nằm, không thì theo lượt lấy trong dữ liệu TO
+    var z, s;
+    if (stk && it.stock && it.stock.pal > 0){
+      s = it.stock; it.basis = 'stock'; it.vz = s.z; it.vsum = s.pal;
+      var best = null, bn = -1; s.loc.forEach(function(n, k){ if (n > bn){ bn = n; best = k; } });
+      var p = best.split('|'); it.vday = p[0]; it.vvt = +p[1];
+    } else if (stk){
+      it.basis = 'nostock'; it.vz = [0, 0, 0]; it.vsum = 0; it.vday = null; it.vvt = null;
+    } else {
+      it.basis = 'picks'; it.vz = it.z; it.vsum = it.zsum; it.vday = it.mday || null; it.vvt = it.mvt;
+    }
+    it.vlane = it.vday && DAY[it.vday] ? DAY[it.vday][0] : null;
+    var mz = null, mzn = -1;
+    if (it.vsum) for (z = 0; z < 3; z++) if (it.vz[z] > mzn){ mzn = it.vz[z]; mz = z; }
+    var outShare = 0, inShare = 0;
+    if (it.vsum){ for (z = rec[1] + 1; z < 3; z++) outShare += it.vz[z]; for (z = rec[0]; z <= rec[1]; z++) inShare += it.vz[z]; }
+    it.far = it.basis === 'picks' ? outShare : (it.vsum ? Math.round(it.picks * outShare / it.vsum) : 0);
+    it.inRec = inShare;
+    it.status = it.basis === 'nostock' ? 'nostock' : (mz == null ? 'none' : (mz > rec[1] ? 'up' : (mz < rec[0] ? 'yield' : 'ok')));
+    it.dos = (stk && it.qty > 0) ? (it.stock ? it.stock.qty : 0) / (it.qty / nd) : null;
+    var x = ts[t];
+    x.n++; x.picks += it.picks; if (it.pal != null){ x.pal += it.pal; x.palN++; }
+    x.inRec += it.inRec; x.zsum += it.vsum; x.far += it.far; if (it.status === 'up') x.up++;
+    if (it.stock) x.stock += it.stock.pal;
+    x.endRank = it.rank; x.endCum = it.cumPct;
+  });
+  S.fit = fit;
+  assignTang();
+
+  var list = [];
+  b.pairs.forEach(function(c, key){
+    if (c < st.pairMin) return;
+    var p = key.split('\u0001'), A = b.items.get(p[0]), B = b.items.get(p[1]);
+    var rate = c / Math.min(b.inTo.get(p[0]), b.inTo.get(p[1]));
+    if (B.picks > A.picks){ var tmp = A; A = B; B = tmp; }
+    var d = (A.vlane && B.vlane) ? dist(A.vlane, A.vvt, B.vlane, B.vvt) : null;
+    list.push({ a:A, b:B, c:c, rate:rate, d:d });
+  });
+  list.sort(function(x, y){ return (y.rate - x.rate) || (y.c - x.c); });
+
+  // gom cụm: nối các cặp đủ mạnh
+  var par = new Map();
+  function find(x){ if (!par.has(x)) par.set(x, x); while (par.get(x) !== x){ par.set(x, par.get(par.get(x))); x = par.get(x); } return x; }
+  var strong = list.filter(function(p){ return p.rate * 100 >= st.pairRate; });
+  strong.forEach(function(p){ par.set(find(p.a.mat), find(p.b.mat)); });
+  var groups = new Map();
+  par.forEach(function(_, m){ var r = find(m); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(b.items.get(m)); });
+  var clusters = [];
+  groups.forEach(function(mem){
+    mem.sort(function(x, y){ return y.picks - x.picks; });
+    var set = new Set(mem.map(function(x){ return x.mat; }));
+    var edges = strong.filter(function(p){ return set.has(p.a.mat); });
+    var maxC = 0; edges.forEach(function(e){ if (e.c > maxC) maxC = e.c; });
+    var days = new Set(), maxD = 0;
+    mem.forEach(function(x){ if (x.vday) days.add(x.vday); });
+    for (var i = 0; i < mem.length; i++) for (var j = i + 1; j < mem.length; j++){
+      var x = mem[i], y = mem[j];
+      if (x.vlane && y.vlane){ var dd = dist(x.vlane, x.vvt, y.vlane, y.vvt); if (dd > maxD) maxD = dd; }
+    }
+    clusters.push({ mem:mem, anchor:mem[0], maxC:maxC, days:days.size, maxD:maxD });
+  });
+  clusters.sort(function(x, y){ return (y.maxC - x.maxC) || (y.mem.length - x.mem.length); });
+  clusters.forEach(function(c, i){ c.id = i + 1; });
+
+  S.view = { ts:ts, pairs:list, clusters:clusters };
+}
+
+/* ================= HIỂN THỊ ================= */
+function tierChip(t, big){ var T = TIERS[t]; return '<span class="tier ' + T.cls + (big ? ' big' : '') + '">' + T.k + '</span>'; }
+function binTag(it){
+  if (it.vday) return '<span class="bin">' + it.vday + '-' + pad3(it.vvt) + '</span>';
+  return '<span class="bin none">' + (it.basis === 'nostock' ? 'hết tồn' : 'ngoài kệ') + '</span>';
+}
+function locText(it){ return it.vday ? it.vday + '-' + pad3(it.vvt) : (it.basis === 'nostock' ? 'hết tồn' : 'ngoài kệ'); }
+function statusChip(s){ var x = STATUS[s]; return '<span class="st ' + x.cls + '">' + x.icon + esc(x.label) + '</span>'; }
+function zoneStrip(it){
+  var h = '<span class="zs" role="img" aria-label="' +
+    esc(it.vsum ? 'Đầu ' + Math.round(share(it, 0)) + '%, giữa ' + Math.round(share(it, 1)) + '%, cuối ' + Math.round(share(it, 2)) + '%; nên lưu ' + it.recLabel : 'Không có dữ liệu vị trí; nên lưu ' + it.recLabel) + '">';
+  for (var z = 0; z < 3; z++){
+    var a = it.vsum ? it.vz[z] / it.vsum : 0, cls = [];
+    if (z >= it.rec[0] && z <= it.rec[1]) cls.push('rec');
+    if (a > .55) cls.push('hi');
+    h += '<span class="' + cls.join(' ') + '" style="--a:' + a.toFixed(3) + '">' + (it.vsum ? Math.round(a * 100) : '–') + '</span>';
+  }
+  return h + '</span>';
+}
+function share(it, z){ return it.vsum ? it.vz[z] / it.vsum * 100 : 0; }
+
+function renderSources(){
+  var host = $('sources'), note = $('srcNote');
+  host.querySelectorAll('.src').forEach(function(n){ n.remove(); });
+  var frag = document.createDocumentFragment();
+  S.files.forEach(function(f){
+    var el = document.createElement('span'); el.className = 'src';
+    el.innerHTML = '<b title="' + esc(f.name) + '">' + esc(f.name) + '</b><span class="num">' + n0(f.tos.size) + ' phiếu' +
+      (f.dup.size ? ' · bỏ ' + n0(f.dup.size) + ' phiếu trùng' : '') + '</span>' +
+      '<button type="button" aria-label="Bỏ file ' + esc(f.name) + '" data-rm="' + f.id + '">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+    frag.appendChild(el);
+  });
+  if (S.capa){
+    var cz = S.capa.zone, tot = cz[0].n + cz[1].n + cz[2].n;
+    var cp = document.createElement('span'); cp.className = 'src qc';
+    cp.innerHTML = '<b title="' + esc(S.capa.name) + '">' + esc(S.capa.name) + '</b><span class="num">' + n0(tot) + ' bin dùng được' +
+      (S.capa.hasStock ? ' · tồn ' + n0(S.capa.stock.size) + ' mã' : ' · chưa có mã hàng') + (S.capa.date ? ' · ' + fmtDate(S.capa.date) : '') + '</span>' +
+      '<button type="button" aria-label="Bỏ file Capa BIN" data-rmcapa="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+    frag.appendChild(cp);
+  }
+  if (S.qc){
+    var q = document.createElement('span'); q.className = 'src qc';
+    q.innerHTML = '<b title="' + esc(S.qcName) + '">' + esc(S.qcName) + '</b><span class="num">quy cách ' + n0(S.qcCount) + ' mã</span>' +
+      '<button type="button" aria-label="Bỏ file quy cách" data-rmqc="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+    frag.appendChild(q);
+  }
+  host.insertBefore(frag, note);
+  note.textContent = S.files.length ? '' : ((S.qc || S.capa) ? 'Đã có dữ liệu phụ — hãy tải file TO.' : 'Chưa có dữ liệu.');
+  note.hidden = !!S.files.length;
+}
+
+function renderAll(){
+  renderSources();
+  var has = S.files.length && S.lines.length;
+  $('empty').hidden = !!has; $('result').hidden = !has; $('btnExport').disabled = !has;
+  if (!has) return;
+  renderTiers(); renderHeadline(); renderPareto(); renderTabs();
+}
+
+function renderTiers(){
+  var b = S.base, v = S.view, N = b.ranked.length;
+  $('tierMeta').textContent = n0(N) + ' mã · ' + n0(b.T) + ' lượt lấy · ' + n0(b.nTO) + ' phiếu';
+  var h = '';
+  var stk = hasStock(), fit = S.fit;
+  v.ts.forEach(function(s, t){
+    var inRecPct = s.zsum ? s.inRec / s.zsum * 100 : 0;
+    var recLabel = TIERS[t].recLabel;
+    if (stk && t === 1) recLabel = fit.aIn ? n0(fit.aIn) + ' mã đầu kho, còn lại giữa kho' : 'Giữa kho';
+    h += '<div class="tier-row">' + tierChip(t, true) +
+      '<div><div class="nums"><span><b class="num">' + n0(s.n) + '</b> mã · ' + p1(s.n / N * 100) + '</span>' +
+      '<span><b class="num">' + p1(s.picks / b.T * 100) + '</b> lượt lấy</span>' +
+      (stk ? '<span><b class="num">' + n0(s.stock) + '</b> pallet tồn</span>' : (S.qc ? '<span><b class="num">' + n0(s.pal) + '</b> pallet xuất</span>' : '')) + '</div>' +
+      '<div class="bar" title="' + esc(p1(inRecPct) + (stk ? ' số pallet tồn của nhóm' : ' lượt lấy của nhóm') + ' đang nằm đúng vùng nên lưu') + '"><i style="width:' + inRecPct.toFixed(1) + '%;background:var(--' + TIERS[t].cls + ')"></i></div>' +
+      '</div><div class="rec"><b>' + recLabel + '</b><span class="num">' + p1(inRecPct) + ' đang đúng vùng</span></div></div>';
+  });
+  $('tierList').innerHTML = h;
+  var fitTxt = '';
+  if (stk){
+    fitTxt = fit.over
+      ? ' Đầu kho chứa ' + n0(fit.frontCap) + ' pallet nhưng hàng A+ đang tồn ' + n0(fit.apStock) + ' pallet — vượt ' + n0(fit.over) + ', nên cả nhóm A cất giữa kho.'
+      : ' Đầu kho chứa ' + n0(fit.frontCap) + ' pallet: A+ tồn ' + n0(fit.apStock) + ' (' + p1(fit.apStock / fit.frontCap * 100) + '), phần còn lại vừa cho ' + n0(fit.aIn) + ' mã A xuất nhiều nhất (' + n0(fit.aPal) + ' pallet).';
+  }
+  $('tierFoot').textContent = (stk ? 'Thanh màu: phần pallet tồn của nhóm đang nằm ở đúng vùng nên lưu.' : 'Thanh màu: phần lượt lấy của nhóm đang diễn ra ở đúng vùng nên lưu.') + fitTxt +
+    (!stk && S.qc ? ' Pallet xuất = tổng số lượng xuất chia quy cách.' : '') +
+    (!stk && !S.qc ? ' Tải file quy cách hoặc Capa BIN để xem số pallet.' : '') +
+    (b.outside ? ' ' + n0(b.outside) + ' dòng lấy ngoài kệ không tính vào vùng.' : '');
+}
+
+function renderHeadline(){
+  var b = S.base, v = S.view, ap = v.ts[0], a = v.ts[1];
+  var far = ap.far + a.far, stk = hasStock();
+  var aps = b.ranked.filter(function(it){ return it.tier === 0 && it.dos != null; }).map(function(it){ return it.dos; }).sort(function(x, y){ return x - y; });
+  var med = aps.length ? aps[Math.floor(aps.length / 2)] : null;
+  $('headline').innerHTML =
+    '<div class="hn">' + p1(far / b.T * 100) + '</div>' +
+    '<div class="ht">số lượt lấy trong dữ liệu là <b>hàng nhóm A+ và A ' + (stk ? 'mà tồn hiện đang nằm' : 'đang nằm') + ' sâu hơn vùng nên lưu</b> — khoảng ' + n0(far) + ' lượt. ' +
+    '<b>' + n0(ap.up) + ' / ' + n0(ap.n) + '</b> mã A+ đang nằm chủ yếu ở giữa hoặc cuối kho.</div>' +
+    '<div class="hs">' + (med != null
+      ? 'Tồn hàng A+ quay vòng nhanh: một nửa số mã hết tồn trong khoảng ' + n0(Math.max(1, med)) + ' ngày, nên chỉ cần cất đúng vùng khi nhập là phần lớn hàng A+ sẽ nằm đúng chỗ sau vài tuần.'
+      : 'Đây là phần quãng đường sẽ giảm dần khi hàng mới được cất đúng vùng.') + '</div>';
+}
+
+/* ---------- biểu đồ Pareto ---------- */
+function renderPareto(){
+  var host = $('pareto'), tip = $('tip');
+  var old = host.querySelector('svg'); if (old) old.remove();
+  var b = S.base, v = S.view, N = b.ranked.length;
+  var W = Math.max(320, host.clientWidth - 20), Hh = W < 520 ? 260 : 300;
+  var m = { l:44, r:18, t:26, b:40 }, iw = W - m.l - m.r, ih = Hh - m.t - m.b;
+  function X(p){ return m.l + p / 100 * iw; }
+  function Y(p){ return m.t + ih - p / 100 * ih; }
+  var s = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="Đường cong Pareto: phần trăm số mã so với phần trăm lượt lấy cộng dồn">';
+  // dải nhóm
+  var start = 0;
+  v.ts.forEach(function(t, i){
+    if (!t.n) return;
+    var end = t.endRank / N * 100, x0 = X(start), x1 = X(end);
+    s += '<rect x="' + x0.toFixed(1) + '" y="' + m.t + '" width="' + Math.max(0, x1 - x0 - 2).toFixed(1) + '" height="' + ih + '" fill="var(--' + TIERS[i].cls + ')" opacity=".10"/>';
+    s += '<rect x="' + x0.toFixed(1) + '" y="' + (m.t + ih + 3) + '" width="' + Math.max(0, x1 - x0 - 2).toFixed(1) + '" height="5" rx="2" fill="var(--' + TIERS[i].cls + ')"/>';
+    if (x1 - x0 > 26) s += '<text x="' + ((x0 + x1) / 2).toFixed(1) + '" y="' + (m.t - 9) + '" text-anchor="middle" class="lbl-strong">' + TIERS[i].k + '</text>';
+    start = end;
+  });
+  // lưới + trục
+  [0, 20, 40, 60, 80, 100].forEach(function(p){
+    s += '<line x1="' + m.l + '" x2="' + (m.l + iw) + '" y1="' + Y(p).toFixed(1) + '" y2="' + Y(p).toFixed(1) + '" stroke="var(--grid)" stroke-width="1"/>';
+    s += '<text x="' + (m.l - 8) + '" y="' + (Y(p) + 3.5).toFixed(1) + '" text-anchor="end" class="num">' + p + '%</text>';
+    s += '<text x="' + X(p).toFixed(1) + '" y="' + (m.t + ih + 22) + '" text-anchor="middle" class="num">' + p + '%</text>';
+  });
+  s += '<text x="' + (m.l + iw) + '" y="' + (Hh - 2) + '" text-anchor="end">phần trăm số mã, xếp từ xuất nhiều nhất →</text>';
+  s += '<text x="' + m.l + '" y="' + (m.t - 9) + '" text-anchor="start" class="lbl-2" transform="translate(-40 0)">lượt lấy</text>';
+  // đường chéo tham chiếu
+  s += '<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(100) + '" y2="' + Y(100) + '" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/>';
+  s += '<text x="' + X(71).toFixed(1) + '" y="' + (Y(58)).toFixed(1) + '" text-anchor="start">nếu mọi mã xuất đều nhau</text>';
+  // đường cong
+  var pts = [X(0).toFixed(1) + ',' + Y(0).toFixed(1)], cum = 0, step = Math.max(1, Math.floor(N / 1400));
+  b.ranked.forEach(function(it, i){
+    cum += it.picks;
+    if (i % step === 0 || i === N - 1) pts.push(X((i + 1) / N * 100).toFixed(1) + ',' + Y(cum / b.T * 100).toFixed(1));
+  });
+  s += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--curve)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  // điểm cắt: dẫn chiếu L + nhãn trực tiếp
+  v.ts.slice(0, 3).forEach(function(t){
+    if (!t.n) return;
+    var px = X(t.endRank / N * 100), py = Y(t.endCum);
+    s += '<path d="M' + m.l + ' ' + py.toFixed(1) + 'H' + px.toFixed(1) + 'V' + (m.t + ih) + '" fill="none" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="2 3"/>';
+    s += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="4.5" fill="var(--curve)" stroke="var(--surface)" stroke-width="2"/>';
+    var lx = px + 9, anchor = 'start';
+    if (lx > m.l + iw - 150){ lx = px - 9; anchor = 'end'; }
+    s += '<text x="' + lx.toFixed(1) + '" y="' + (py + 15).toFixed(1) + '" text-anchor="' + anchor + '" class="lbl-2 num">' +
+      n0(t.endRank) + ' mã (' + p1(t.endRank / N * 100) + ') → ' + p1(t.endCum) + '</text>';
+  });
+  // lớp rê chuột
+  s += '<line id="hvLine" x1="0" x2="0" y1="' + m.t + '" y2="' + (m.t + ih) + '" stroke="var(--ink-2)" stroke-width="1" opacity="0"/>';
+  s += '<circle id="hvDot" r="5" fill="var(--curve)" stroke="var(--surface)" stroke-width="2" opacity="0"/>';
+  s += '<rect id="hvHit" x="' + m.l + '" y="' + m.t + '" width="' + iw + '" height="' + ih + '" fill="transparent" style="cursor:crosshair"/>';
+  s += '</svg>';
+  host.insertAdjacentHTML('afterbegin', s);
+
+  var svg = host.querySelector('svg'), hit = svg.querySelector('#hvHit'), line = svg.querySelector('#hvLine'), dot = svg.querySelector('#hvDot');
+  var cumArr = []; var c2 = 0; b.ranked.forEach(function(it){ c2 += it.picks; cumArr.push(c2); });
+  function move(ev){
+    var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * (W / r.width);
+    var k = Math.min(N, Math.max(1, Math.round((sx - m.l) / iw * N)));
+    var it = b.ranked[k - 1], x = X(k / N * 100), y = Y(cumArr[k - 1] / b.T * 100);
+    line.setAttribute('x1', x); line.setAttribute('x2', x); line.setAttribute('opacity', '.5');
+    dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('opacity', '1');
+    tip.innerHTML = '<div class="t1 num">Top ' + n0(k) + ' mã · ' + p1(k / N * 100) + ' số mã</div>' +
+      '<div class="t2 num">gánh ' + p1(cumArr[k - 1] / b.T * 100) + ' lượt lấy</div>' +
+      '<div class="t3">Mã thứ ' + n0(k) + ': <span class="mat">' + esc(it.mat) + '</span> ' + esc(it.desc) + ' · ' + n0(it.picks) + ' lượt · nhóm ' + TIERS[it.tier].k + '</div>';
+    var hostR = host.getBoundingClientRect(), px = x * (r.width / W) + (r.left - hostR.left), py = y * (r.height / Hh) + (r.top - hostR.top);
+    var tw = tip.offsetWidth || 220, left = px + 14;
+    if (left + tw > host.clientWidth - 6) left = px - tw - 14;
+    tip.style.left = Math.max(4, left) + 'px'; tip.style.top = Math.max(4, py - 20) + 'px'; tip.classList.add('on');
+  }
+  function leave(){ tip.classList.remove('on'); line.setAttribute('opacity', '0'); dot.setAttribute('opacity', '0'); }
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerdown', move);
+  hit.addEventListener('pointerleave', leave);
+}
+
+/* ---------- bảng có sắp xếp + hiện thêm ---------- */
+function makeTable(host, cols, sortKey, sortDir){
+  var st = { rows:[], key:sortKey, dir:sortDir, limit:300 };
+  function colOf(k){ for (var i = 0; i < cols.length; i++) if (cols[i].key === k) return cols[i]; return cols[0]; }
+  function render(){
+    var c = colOf(st.key), dir = st.dir;
+    var rows = st.rows.slice().sort(function(x, y){
+      var a = c.sort(x), b2 = c.sort(y);
+      if (a === b2) return 0;
+      if (a == null) return 1; if (b2 == null) return -1;
+      return (a < b2 ? -1 : 1) * dir;
+    });
+    var h = '<table><thead><tr>';
+    cols.forEach(function(col){
+      var sorted = col.key === st.key, label = typeof col.label === 'function' ? col.label() : col.label;
+      h += '<th class="' + (col.n ? 'n' : '') + '"' + (sorted ? ' aria-sort="' + (st.dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' +
+        (col.sort ? '<button type="button" data-sort="' + col.key + '">' + label + '<span class="arrow">' + (sorted ? (st.dir > 0 ? '↑' : '↓') : '↕') + '</span></button>' : label) + '</th>';
+    });
+    h += '</tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="' + cols.length + '" class="nodata">Không có mã nào khớp bộ lọc.</td></tr>';
+    rows.slice(0, st.limit).forEach(function(r){
+      h += '<tr>'; cols.forEach(function(col){ h += '<td class="' + (col.n ? 'n' : '') + (col.cls ? ' ' + col.cls : '') + '">' + col.cell(r) + '</td>'; }); h += '</tr>';
+    });
+    h += '</tbody></table>';
+    if (rows.length > st.limit) h += '<div class="more"><button class="btn" type="button" data-more="1">Hiện thêm ' + n0(Math.min(300, rows.length - st.limit)) + ' dòng · còn ' + n0(rows.length - st.limit) + '</button></div>';
+    host.innerHTML = h;
+  }
+  host.addEventListener('click', function(e){
+    var sb = e.target.closest('[data-sort]');
+    if (sb){ var k = sb.getAttribute('data-sort'); if (st.key === k) st.dir = -st.dir; else { st.key = k; st.dir = colOf(k).n ? -1 : 1; } render(); return; }
+    if (e.target.closest('[data-more]')){ st.limit += 300; render(); }
+  });
+  return { set:function(rows){ st.rows = rows; st.limit = 300; render(); } };
+}
+
+function dosCell(r){
+  if (r.dos == null) return '<span class="muted">–</span>';
+  if (r.dos < .5) return '<span class="muted">dưới 1</span>';
+  return '≈ ' + n0(r.dos);
+}
+function matchQ(it, q){ return !q || it.mat.toLowerCase().indexOf(q) > -1 || norm(it.desc).indexOf(q) > -1; }
+
+var tblZone = makeTable($('tblZone'), [
+  { key:'mat', label:'Mã', cls:'mat', sort:function(r){ return r.mat; }, cell:function(r){ return esc(r.mat); } },
+  { key:'desc', label:'Tên hàng', cls:'desc', sort:function(r){ return norm(r.desc); }, cell:function(r){ return '<span title="' + esc(r.desc) + '">' + esc(r.desc) + '</span>'; } },
+  { key:'tier', label:'Nhóm', sort:function(r){ return r.tier; }, cell:function(r){ return tierChip(r.tier); } },
+  { key:'rec', label:'Nên lưu', sort:function(r){ return r.rec[0]; }, cell:function(r){ return esc(r.recLabel); } },
+  { key:'put', label:'Cất vào bin', sort:function(r){ var g = suggest(r); return g ? g.day + pad3(g.z) : (S.capa ? null : r.rec[0]); }, cell:suggestCell },
+  { key:'zone', label:function(){ return hasStock() ? 'Tồn đang nằm ở (%)' : 'Lượt lấy theo vùng (%)'; }, sort:function(r){ return r.vsum ? r.vz[0] / r.vsum : null; }, cell:zoneStrip },
+  { key:'loc', label:function(){ return hasStock() ? 'Nằm nhiều nhất ở' : 'Vị trí chính'; }, sort:function(r){ return r.vday ? r.vday + pad3(r.vvt) : null; }, cell:binTag },
+  { key:'tang', label:'Tầng', sort:function(r){ return r.tangStatus === 'bad' ? -99 : (r.tangNow == null ? null : r.recTang - r.tangNow); }, cell:tangCell },
+  { key:'picks', label:'Lượt lấy', n:true, sort:function(r){ return r.picks; }, cell:function(r){ return n0(r.picks); } },
+  { key:'far', label:function(){ return hasStock() ? 'Ở xa hơn cần*' : 'Ở xa hơn cần'; }, n:true, sort:function(r){ return r.far; }, cell:function(r){ return r.far ? '<b>' + n0(r.far) + '</b>' : '<span class="muted">0</span>'; } },
+  { key:'dos', label:'Số ngày tồn', n:true, sort:function(r){ return r.dos; }, cell:dosCell },
+  { key:'status', label:'Trạng thái', sort:function(r){ return {up:0, ok:1, yield:2, none:3}[r.status]; }, cell:function(r){ return statusChip(r.status); } }
+], 'far', -1);
+
+var tblTier = makeTable($('tblTier'), [
+  { key:'rank', label:'Hạng', n:true, sort:function(r){ return r.rank; }, cell:function(r){ return n0(r.rank); } },
+  { key:'mat', label:'Mã', cls:'mat', sort:function(r){ return r.mat; }, cell:function(r){ return esc(r.mat); } },
+  { key:'desc', label:'Tên hàng', cls:'desc', sort:function(r){ return norm(r.desc); }, cell:function(r){ return '<span title="' + esc(r.desc) + '">' + esc(r.desc) + '</span>'; } },
+  { key:'tier', label:'Nhóm', sort:function(r){ return r.tier; }, cell:function(r){ return tierChip(r.tier); } },
+  { key:'picks', label:'Lượt lấy', n:true, sort:function(r){ return r.picks; }, cell:function(r){ return n0(r.picks); } },
+  { key:'pct', label:'% lượt', n:true, sort:function(r){ return r.pct; }, cell:function(r){ return p1(r.pct); } },
+  { key:'cum', label:'% cộng dồn', n:true, sort:function(r){ return r.cumPct; }, cell:function(r){ return p1(r.cumPct); } },
+  { key:'pal', label:'Pallet xuất', n:true, sort:function(r){ return r.pal; }, cell:function(r){ return r.pal == null ? '<span class="muted">–</span>' : n0(r.pal); } },
+  { key:'dos', label:'Số ngày tồn', n:true, sort:function(r){ return r.dos; }, cell:dosCell },
+  { key:'loc', label:function(){ return hasStock() ? 'Nằm nhiều nhất ở' : 'Vị trí chính'; }, sort:function(r){ return r.vday ? r.vday + pad3(r.vvt) : null; }, cell:binTag }
+], 'rank', 1);
+
+var tblPair = makeTable($('pairTbl'), [
+    { key:'a', label:'Món xuất nhiều hơn', sort:function(p){ return norm(p.a.desc); }, cell:function(p){ return tierChip(p.a.tier) + ' <span class="mat">' + esc(p.a.mat) + '</span> ' + esc(p.a.desc); } },
+    { key:'b', label:'Đi chung với', sort:function(p){ return norm(p.b.desc); }, cell:function(p){ return tierChip(p.b.tier) + ' <span class="mat">' + esc(p.b.mat) + '</span> ' + esc(p.b.desc); } },
+    { key:'c', label:'Phiếu chung', n:true, sort:function(p){ return p.c; }, cell:function(p){ return n0(p.c); } },
+    { key:'rate', label:'Tỷ lệ', n:true, sort:function(p){ return p.rate; }, cell:function(p){ return '<b>' + Math.round(p.rate * 100) + '%</b>'; } },
+    { key:'loc', label:'Đang để ở', sort:function(p){ return p.a.vday || null; }, cell:function(p){ return binTag(p.a) + ' ↔ ' + binTag(p.b); } },
+    { key:'d', label:'Cách nhau', n:true, sort:function(p){ return p.d; }, cell:function(p){ return p.d == null ? '<span class="muted">–</span>' : n0(p.d) + ' m'; } }
+  ], 'rate', -1);
+
+function tierSeg(id, key){
+  var el = $(id);
+  if (!el.children.length){
+    el.innerHTML = '<button type="button" data-v="" aria-pressed="true">Mọi nhóm</button>' +
+      TIERS.map(function(t, i){ return '<button type="button" data-v="' + i + '" aria-pressed="false">' + t.k + '</button>'; }).join('');
+    wireSeg(el, key);
+  }
+}
+function wireSeg(el, key){
+  el.addEventListener('click', function(e){
+    var b = e.target.closest('button[data-v]'); if (!b) return;
+    el.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    S.f[key] = b.getAttribute('data-v'); renderTabs();
+  });
+}
+
+/* Xếp tầng — bố cục LÝ TƯỞNG:
+   - Xét mã theo lượt lấy giảm dần; mã lấy nhiều được rót vào tầng thấp trước.
+   - Dùng TỔNG sức chứa của bin dùng được (không phải chỗ đang trống), vì khi dời hàng
+     thì chỗ cũ cũng được giải phóng.
+   - Pallet của một mã có thể trải qua nhiều tầng; không bao giờ vượt trần tầng của nhóm hàng.
+   - Vùng khuyến nghị đầy thì tràn sang vùng khác theo thứ tự gần cửa. */
+function assignTang(){
+  var b = S.base; if (!b) return;
+  var hasCap = !!(S.capa && S.capa.zt), z, t;
+  var cap = [0, 1, 2].map(function(z){
+    var a = {}; for (var t = TANG_MIN; t <= TANG_MAX; t++) a[t] = hasCap && S.capa.zt[z][t] ? S.capa.zt[z][t].cap : 0; return a;
+  });
+  var capTot = [0, 1, 2].map(function(z){ var a = {}; for (var t = TANG_MIN; t <= TANG_MAX; t++) a[t] = cap[z][t]; return a; });
+  var plan = [0, 1, 2].map(function(){ var a = {}; for (var t = TANG_MIN; t <= TANG_MAX; t++) a[t] = 0; return a; });
+  var nBad = 0, nDown = 0, nUp = 0, nFull = 0, nSpill = 0, gainDown = 0, costUp = 0;
+
+  b.ranked.forEach(function(it){
+    var rule = S.tangRule ? S.tangRule.get(it.sec) : null;
+    it.tangRule = rule || null;
+    it.tangKnown = !!rule;
+    it.tangMax = rule ? rule.max : TANG_MAX;
+    var st = it.stock;
+    it.tangNow = (st && st.nb) ? st.tsum / st.nb : null;
+
+    var need = (st && st.pal > 0) ? st.pal : 1, left = need, wsum = 0, got = 0, zFirst = null;
+    var order = [];
+    for (z = it.rec[0]; z <= it.rec[1]; z++) order.push(z);
+    for (z = 0; z < 3; z++) if (order.indexOf(z) < 0) order.push(z);
+    if (hasCap){
+      for (var oi = 0; oi < order.length && left > 1e-9; oi++){
+        z = order[oi];
+        for (t = TANG_MIN; t <= it.tangMax && left > 1e-9; t++){
+          var take = Math.min(left, cap[z][t]);
+          if (take <= 0) continue;
+          cap[z][t] -= take; plan[z][t] += take; left -= take;
+          wsum += t * take; got += take;
+          if (zFirst === null) zFirst = z;
+        }
+      }
+    }
+    if (got > 0){
+      it.recTangAvg = wsum / got;
+      it.recTang = Math.round(it.recTangAvg);
+      it.recTangZone = zFirst;
+      it.tangSpill = zFirst < it.rec[0] || zFirst > it.rec[1];
+    } else {
+      it.recTangAvg = null;
+      it.recTang = Math.min(TANG_MIN, it.tangMax);
+      it.recTangZone = it.rec[0];
+      it.tangSpill = false;
+    }
+    it.tangFull = hasCap && left > 1e-9;
+    if (it.tangFull) nFull++;
+    if (it.tangSpill) nSpill++;
+
+    var ref = it.recTangAvg != null ? it.recTangAvg : it.recTang;
+    if (it.tangNow == null) it.tangStatus = null;
+    else if (st && st.tmax > it.tangMax) it.tangStatus = 'bad';
+    else if (it.tangNow > ref + .5) it.tangStatus = 'down';
+    else if (it.tangNow < ref - .5) it.tangStatus = 'up';
+    else it.tangStatus = 'ok';
+
+    var dlt = it.tangNow != null ? (it.tangNow - ref) * TANG_COST * it.picks : 0;
+    it.tangGain = dlt > 0 ? dlt : 0;
+    if (dlt > 0) gainDown += dlt; else costUp += -dlt;
+    if (it.tangStatus === 'bad') nBad++;
+    else if (it.tangStatus === 'down') nDown++;
+    else if (it.tangStatus === 'up') nUp++;
+  });
+
+  // lượt lấy thực tế ở tầng cao — đếm thẳng từ dòng TO
+  var picksHigh = 0, picksAll = 0;
+  S.lines.forEach(function(l){ if (l.tang){ picksAll++; if (l.tang >= TANG_HIGH) picksHigh++; } });
+
+  S.tang = { plan:plan, cap:capTot, nBad:nBad, nDown:nDown, nUp:nUp, nFull:nFull, nSpill:nSpill,
+             gainDown:gainDown, costUp:costUp, gain:gainDown - costUp, picksHigh:picksHigh, picksAll:picksAll };
+}
+
+function tangCell(r){
+  if (!S.capa) return '<span class="muted">–</span>';
+  var cls = r.tangStatus ? TSTATUS[r.tangStatus].cls : '';
+  var now = tangAvgTxt(r.tangNow);
+  var lim = r.tangMax < TANG_MAX ? ' <span class="lim" title="Nhóm ' + esc(r.sec || '') + ' thực tế không xếp lên tầng cao">≤' + tangTxt(r.tangMax) + '</span>' : '';
+  var tip = r.tangStatus ? TSTATUS[r.tangStatus].label : 'Chưa có tồn để so sánh';
+  if (r.tangStatus === 'bad' && r.stock) tip += ' — đang có pallet ở ' + tangTxt(r.stock.tmax) + ', trần cho phép ' + tangTxt(r.tangMax);
+  return '<span class="tg ' + cls + '" title="' + esc(tip) + '">' +
+    '<span class="now">' + now + '</span><span class="arr">→</span><span class="rec">' + tangTxt(r.recTang) + '</span></span>' + lim +
+    (r.tangSpill ? ' <span class="muted" title="Vùng khuyến nghị đã đầy ở các tầng được phép">· tràn vùng</span>' : '');
+}
+
+function renderTang(){
+  var host = $('tangBody'); if (!host) return;
+  if (!S.capa){ host.innerHTML = '<p class="panel-intro">Cần tải <b>file Capa BIN</b> để biết sức chứa từng tầng.</p>'; return; }
+  if (!S.master){
+    host.innerHTML = '<p class="panel-intro">Cần tải thêm <b>file master vật tư</b> — bản xuất SAP có cột <b>Storage Section Ind.</b> ' +
+      '(ví dụ <code>EXPORT_*.XLSX</code>). App dùng nó để biết nhóm hàng nào không được xếp lên tầng cao, rồi tự suy quy tắc từ tồn kho thực tế. Kéo file vào ô tải ở trên.</p>';
+    return;
+  }
+  var b = S.base, T = S.tang, h = '';
+  var nLim = 0; if (S.tangRule) S.tangRule.forEach(function(r){ if (r.max < TANG_MAX) nLim++; });
+
+  h += '<div class="tgcards">' +
+    '<div class="mbox"><h3>Sai quy tắc tầng</h3><b>' + n0(T.nBad) + '</b><small>mã đang nằm cao hơn mức cho phép</small></div>' +
+    '<div class="mbox"><h3>Nên hạ xuống</h3><b>' + n0(T.nDown) + '</b><small>mã lấy nhiều nhưng để quá cao</small></div>' +
+    '<div class="mbox"><h3>Lượt lấy ở T6–T7</h3><b>' + n0(T.picksHigh) + '</b><small>' + (T.picksAll ? p1(T.picksHigh / T.picksAll * 100) + ' tổng lượt — đều cần reach truck' : 'đều cần reach truck hạ xuống') + '</small></div>' +
+    '<div class="mbox"><h3>Tiết kiệm ròng</h3><b>' + n0(Math.round(T.gain)) + ' m</b><small>hạ được ' + n0(Math.round(T.gainDown)) + ' m, trừ ' + n0(Math.round(T.costUp)) + ' m phải đưa lên</small></div>' +
+    '</div>';
+
+  // lưới vùng × tầng
+  h += '<div class="tgsec"><h3>Sức chứa theo vùng và tầng</h3>' +
+    '<p>Bố cục lý tưởng: <b>số pallet nên xếp</b> / sức chứa của ô. Thanh màu là mức lấp đầy. Dòng nhỏ bên dưới là số chỗ <b>đang trống</b> ngay lúc này — dùng khi cất hàng mới.</p>' +
+    '<table class="tgrid"><thead><tr><th>Tầng</th>';
+  for (var z = 0; z < 3; z++) h += '<th>' + esc(ZONES[z].label) + '</th>';
+  h += '<th>Cả hàng tầng</th></tr></thead><tbody>';
+  for (var t = TANG_MAX; t >= 1; t--){
+    var ta = S.capa.tAll[t]; if (!ta) continue;
+    var off = t < TANG_MIN;
+    h += '<tr' + (off ? ' class="off"' : '') + '><td>' + tangTxt(t) + (off ? ' <span class="muted">· chặn nhập ' + Math.round(ta.blk / ta.n * 100) + '%</span>' : '') + '</td>';
+    var tot = 0, totCap = 0;
+    for (z = 0; z < 3; z++){
+      var q = S.capa.zt[z][t], free = q ? q.free : 0, cp = q ? q.cap : 0;
+      var want = (t >= TANG_MIN && T.plan[z][t]) ? T.plan[z][t] : 0;
+      tot += want; totCap += cp;
+      var pct = cp > 0 ? Math.min(100, want / cp * 100) : 0;
+      if (off) h += '<td><span class="muted">–</span></td>';
+      else h += '<td class="cell' + (pct > 98 ? ' full' : '') + '"><i style="width:' + pct.toFixed(1) + '%"></i>' +
+        '<span><b>' + n0(Math.round(want)) + '</b> <span class="muted">/ ' + n0(Math.round(cp)) + '</span><br>' +
+        '<small class="muted">trống ' + n0(Math.round(free)) + '</small></span></td>';
+    }
+    h += '<td>' + (off ? '<span class="muted">–</span>' : '<b>' + n0(Math.round(tot)) + '</b> <span class="muted">/ ' + n0(Math.round(totCap)) + '</span>') + '</td></tr>';
+  }
+  h += '</tbody></table></div>';
+
+  // quy tắc suy từ dữ liệu
+  var rules = []; if (S.tangRule) S.tangRule.forEach(function(r){ rules.push(r); });
+  rules.sort(function(x, y){ return (x.max - y.max) || (y.n - x.n); });
+  h += '<div class="tgsec"><h3>Quy tắc tầng suy từ tồn kho thực tế</h3>' +
+    '<p>Nhóm nào có dưới ' + TANG_HIGH_PCT + '% số bin nằm ở T6–T7 thì coi như không được xếp lên cao. ' +
+    n0(nLim) + '/' + n0(rules.length) + ' nhóm bị giới hạn.</p><div class="tgwrap"><table class="tgrid"><thead><tr>' +
+    '<th>Mã</th><th>Nhóm hàng</th><th>Bin đang chứa</th><th>Ở T6–T7</th><th>% cao</th><th>Trần tầng</th><th>Độ tin cậy</th></tr></thead><tbody>';
+  rules.forEach(function(r){
+    h += '<tr><td><span class="mat">' + esc(r.code) + '</span></td><td style="text-align:left">' + esc(r.desc) + '</td>' +
+      '<td>' + n0(r.n) + '</td><td>' + n0(r.hi) + '</td><td>' + p1(r.pct) + '</td>' +
+      '<td><b>' + tangTxt(r.max) + '</b></td><td>' + esc(r.conf) + '</td></tr>';
+  });
+  h += '</tbody></table></div></div>';
+
+  // danh sách cần hạ
+  var bad = b.ranked.filter(function(it){ return it.tangStatus === 'bad' || it.tangStatus === 'down'; })
+    .sort(function(x, y){ return (y.tangStatus === 'bad') - (x.tangStatus === 'bad') || y.tangGain - x.tangGain; });
+  h += '<div class="tgsec"><h3>Mã nên hạ xuống tầng thấp hơn</h3>' +
+    '<p>Xếp theo mức lợi thu được. Dòng <b>sai quy tắc</b> nằm trên cùng — đó là hàng cồng kềnh đang để quá cao.</p>' +
+    '<div class="tgwrap"><table class="tgrid"><thead><tr><th>Mã</th><th>Tên hàng</th><th>Nhóm SAP</th>' +
+    '<th>Trần tầng</th><th>Lượt lấy</th><th>Tầng hiện tại</th><th>Nên về</th><th>Quy đổi (m)</th><th>Trạng thái</th></tr></thead><tbody>';
+  if (!bad.length) h += '<tr><td colspan="9" style="text-align:center;color:var(--ink-3)">Không có mã nào cần hạ.</td></tr>';
+  bad.slice(0, 200).forEach(function(it){
+    h += '<tr><td><span class="mat">' + esc(it.mat) + '</span></td><td style="text-align:left">' + esc(it.desc) + '</td>' +
+      '<td>' + esc(it.sec || '–') + '</td><td>' + tangTxt(it.tangMax) + '</td><td>' + n0(it.picks) + '</td>' +
+      '<td>' + tangAvgTxt(it.tangNow) +
+        (it.stock && it.stock.tmax > it.tangMax ? ' <span class="lim" title="Có pallet đang nằm ở tầng này">cao nhất ' + tangTxt(it.stock.tmax) + '</span>' : '') +
+        '</td><td><b>' + tangTxt(it.recTang) + '</b></td>' +
+      '<td>' + n0(Math.round(it.tangGain)) + '</td>' +
+      '<td style="text-align:left"><span class="tg ' + TSTATUS[it.tangStatus].cls + '"><span class="rec">' + esc(TSTATUS[it.tangStatus].label) + '</span></span></td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if (bad.length > 200) h += '<p class="tgnote">Hiển thị 200 dòng đầu trong tổng số ' + n0(bad.length) + '.</p>';
+  h += '</div>';
+
+  if (T.nSpill || T.nFull) h += '<p class="tgnote">' + (T.nSpill ? n0(T.nSpill) + ' mã phải tràn sang vùng khác vì vùng khuyến nghị đã đầy ở các tầng được phép. ' : '') +
+    (T.nFull ? n0(T.nFull) + ' mã không còn đủ chỗ trong toàn kho.' : '') + '</p>';
+  h += '<p class="tgnote">Cách tính: một tầng cao ' + TANG_H.toString().replace('.', ',') + ' m, quy đổi gấp ' + TANG_MULT +
+    ' lần đi ngang ⇒ <b>' + TANG_COST.toFixed(2).replace('.', ',') + ' m</b> cho mỗi tầng. ' +
+    'Chỉ tính ' + tangTxt(TANG_MIN) + '–' + tangTxt(TANG_MAX) + ' vì ' + tangTxt(1) + ' bị chặn nhập toàn bộ và ' + tangTxt(2) + ' bị chặn gần hết.</p>';
+
+  host.innerHTML = h;
+}
+
+function renderTabs(){
+  var b = S.base, v = S.view, all = b.ranked;
+  $('cntZone').textContent = n0(all.filter(function(x){ return x.status === 'up'; }).length) + ' cần đưa lên';
+  $('cntTier').textContent = n0(all.length) + ' mã';
+  $('cntPair').textContent = n0(v.clusters.length) + ' cụm';
+  $('cntMap').textContent = S.capa ? 'có độ đầy' : '';
+  $('cntTang').textContent = S.tang ? (n0(S.tang.nBad + S.tang.nDown) + ' cần hạ') : (S.master ? '' : 'cần file master');
+  if (S.tab === 'map'){ renderMap(); return; }
+  if (S.tab === 'tang'){ renderTang(); return; }
+  if (S.tab === 'zone'){
+    var qz = norm(S.f.qZone), isFree = S.f.zoneView === 'free';
+    ['fZoneStatus', 'fZoneTier', 'zsLegend', 'tblZone', 'zoneIntro'].forEach(function(id){ $(id).hidden = isFree; });
+    ['freeIntro', 'freeSummary', 'tblFree'].forEach(function(id){ $(id).hidden = !isFree; });
+    $('farNote').hidden = isFree || !hasStock();
+    if (isFree){ renderFree(qz); return; }
+    tblZone.set(all.filter(function(it){
+      return (!S.f.zoneStatus || it.status === S.f.zoneStatus) && (S.f.zoneTier === '' || it.tier === +S.f.zoneTier) && matchQ(it, qz);
+    }));
+  } else if (S.tab === 'tier'){
+    var qt = norm(S.f.qTier);
+    tblTier.set(all.filter(function(it){ return (S.f.tierTier === '' || it.tier === +S.f.tierTier) && matchQ(it, qt); }));
+  } else {
+    renderPairs();
+  }
+}
+
+/* ---------- bin đầu kho đang chứa hàng không xuất ---------- */
+function freeRows(){
+  if (!hasStock()) return [];
+  var items = S.base.items, out = [], ref = S.capa.date || new Date();
+  S.capa.bins.forEach(function(b){
+    if (b.zone !== 0 || !b.ok) return;
+    b.lots.forEach(function(l){
+      if (items.has(l.mat)) return;
+      var days = l.days != null ? l.days : (l.last ? Math.round((ref - l.last) / 864e5) : null);
+      var note = [];
+      if (l.spec) note.push('hàng theo đơn (' + l.spec + ')');
+      if (l.cat) note.push('hàng bị chặn (' + l.cat + ')');
+      out.push({ bin:b.bin, day:b.day, vt:b.vt, tang:b.tang, mat:l.mat, desc:l.desc, pal:l.pal, qty:l.qty, last:l.last, days:days, note:note.join(', ') });
+    });
+  });
+  return out;
+}
+var tblFree = makeTable($('tblFree'), [
+  { key:'bin', label:'Bin', sort:function(r){ return r.bin; }, cell:function(r){ return '<span class="bin">' + esc(r.bin) + '</span>'; } },
+  { key:'mat', label:'Mã', cls:'mat', sort:function(r){ return r.mat; }, cell:function(r){ return esc(r.mat); } },
+  { key:'desc', label:'Tên hàng', cls:'desc', sort:function(r){ return norm(r.desc); }, cell:function(r){ return '<span title="' + esc(r.desc) + '">' + esc(r.desc) + '</span>'; } },
+  { key:'pal', label:'Pallet', n:true, sort:function(r){ return r.pal; }, cell:function(r){ return nf1.format(r.pal); } },
+  { key:'last', label:'Cất lần cuối', sort:function(r){ return r.last ? r.last.getTime() : null; }, cell:function(r){ return r.last ? fmtDate(r.last) : '<span class="muted">–</span>'; } },
+  { key:'days', label:'Đã nằm (ngày)', n:true, sort:function(r){ return r.days; }, cell:function(r){ return r.days == null ? '<span class="muted">–</span>' : '<b>' + n0(r.days) + '</b>'; } },
+  { key:'note', label:'Ghi chú', sort:function(r){ return r.note || null; }, cell:function(r){ return r.note ? '<span class="muted">' + esc(r.note) + '</span>' : ''; } }
+], 'days', -1);
+function renderFree(q){
+  if (!hasStock()){
+    $('freeSummary').textContent = '';
+    $('tblFree').innerHTML = '<div class="nodata">Cần file Capa BIN có cột <b>Material</b> (tồn theo mã) để biết bin nào đang chứa hàng gì.</div>';
+    return;
+  }
+  var rows = freeRows().filter(function(r){ return !q || r.mat.toLowerCase().indexOf(q) > -1 || norm(r.desc).indexOf(q) > -1 || r.bin.toLowerCase().indexOf(q) > -1; });
+  var bins = new Set(rows.map(function(r){ return r.bin; })), pal = rows.reduce(function(s, r){ return s + r.pal; }, 0);
+  $('freeSummary').textContent = n0(bins.size) + ' bin · ' + n0(pal) + ' pallet';
+  tblFree.set(rows);
+}
+
+function renderPairs(){
+  var b = S.base, v = S.view, q = norm(S.f.qPair), st = S.set;
+  $('pairIntro').innerHTML = 'Hai món <b>đi chung</b> khi cùng nằm trong một phiếu. Tỷ lệ = số phiếu có cả hai món, chia cho số phiếu của món ít xuất hơn. ' +
+    'Chỉ tính các cặp đi chung từ ' + n0(st.pairMin) + ' phiếu trở lên; các cặp có tỷ lệ từ ' + n0(st.pairRate) + '% được gom thành cụm. ' +
+    '<span class="muted">' + p1(b.single / b.nTO * 100) + ' số phiếu chỉ có một mã, nên phần này chỉ giúp được các phiếu còn lại.</span>';
+  var isPairs = S.f.pairView === 'pr';
+  $('pairTbl').hidden = !isPairs; $('pairCl').hidden = isPairs;
+  if (isPairs){
+    var rows = v.pairs.filter(function(p){ return matchQ(p.a, q) || matchQ(p.b, q); });
+    $('pairSummary').textContent = n0(rows.length) + ' cặp';
+    tblPair.set(rows);
+    return;
+  }
+  var cl = v.clusters.filter(function(c){ return !q || c.mem.some(function(it){ return matchQ(it, q); }); });
+  $('pairSummary').textContent = n0(cl.length) + ' cụm · ' + n0(cl.reduce(function(s, c){ return s + c.mem.length; }, 0)) + ' mã';
+  if (!cl.length){ $('pairCl').innerHTML = '<div class="tbl-wrap"><div class="nodata">Chưa có cụm nào ở ngưỡng hiện tại. Thử giảm tỷ lệ gom cụm hoặc số phiếu tối thiểu trong “Ngưỡng phân tích”.</div></div>'; return; }
+  var h = '<div class="clusters">';
+  cl.slice(0, 120).forEach(function(c){
+    var A = c.anchor, T = TIERS[A.tier];
+    h += '<article class="cl"><div class="cl-head"><h3>Cụm ' + c.id + ' · ' + n0(c.mem.length) + ' món</h3><span class="num">đi chung tới ' + n0(c.maxC) + ' phiếu</span></div>' +
+      '<div class="cl-advice">Nên đặt <b>cùng dãy, liền nhau</b> ở <b>' + esc(A.recLabel.toLowerCase()) + '</b> — theo món xuất nhiều nhất trong cụm.' +
+      (c.days > 1 ? ' Hiện đang rải ở <b>' + n0(c.days) + ' dãy</b>' + (c.maxD ? ', xa nhất cách nhau <b>' + n0(c.maxD) + ' m</b>.' : '.') : ' Hiện đã cùng một dãy.') + '</div>' +
+      '<div class="cl-items">';
+    c.mem.forEach(function(it){
+      h += '<div class="cl-item">' + tierChip(it.tier) + '<div class="who"><div title="' + esc(it.desc) + '">' + esc(it.desc || it.mat) + '</div><div class="mat">' + esc(it.mat) + ' · ' + n0(it.picks) + ' lượt</div></div>' + binTag(it) + '</div>';
+    });
+    h += '</div></article>';
+  });
+  h += '</div>';
+  if (cl.length > 120) h += '<p class="footnote">Đang hiện 120 cụm mạnh nhất. Dùng ô tìm kiếm hoặc xuất Excel để xem đủ ' + n0(cl.length) + ' cụm.</p>';
+  $('pairCl').innerHTML = h;
+}
+
+/* ---------- bản đồ vùng ---------- */
+function renderMap(){
+  var X0 = 118, SX = 10.4, RACK = 12, AISLE = 10, BACK = 3, TOP = 92, W = X0 + 104 * SX + 50;
+  var c = S.capa, locked = c ? c.locked : { CAT:true };
+  function X(vt){ return X0 + vt * SX; }
+  var s = [], y = TOP, rows = [], prevRack = false;
+  MAP_ORDER.forEach(function(it){
+    if (typeof it === 'number'){ rows.push({ lane:it, y:y, h:AISLE }); y += AISLE; prevRack = false; }
+    else { if (prevRack) y += BACK; rows.push({ day:it, y:y, h:RACK }); y += RACK; prevRack = true; }
+  });
+  var BOTTOM = y, H = BOTTOM + 58;
+  var heads = [['ĐẦU KHO', 'VT 001–033 · hàng A+ (và A nếu còn chỗ)'], ['GIỮA KHO', 'VT 034–074 · hàng A, B'], ['CUỐI KHO', 'VT 075 trở lên · hàng C']];
+  ZSPAN.forEach(function(z, i){
+    var x0 = X(z[0] - 1), x1 = X(z[1]);
+    s.push('<rect x="' + x0.toFixed(1) + '" y="8" width="' + (x1 - x0 - 3).toFixed(1) + '" height="48" rx="6" fill="' + ZCOL[i] + '"/>');
+    s.push('<text x="' + (x0 + 12).toFixed(1) + '" y="30" fill="' + ZON[i] + '" font-size="17" font-weight="800">' + heads[i][0] + '</text>');
+    s.push('<text x="' + (x0 + 12).toFixed(1) + '" y="48" fill="' + ZON[i] + '" font-size="12.5" font-weight="600">' + heads[i][1] + '</text>');
+  });
+  [1, 10, 20, 33, 50, 60, 74, 90, 104].forEach(function(v){
+    var x = X(v - 1) + SX / 2;
+    s.push('<text x="' + x.toFixed(1) + '" y="' + (TOP - 12) + '" text-anchor="middle" font-size="11.5" fill="var(--ink-2)" font-family="Consolas,monospace">' + pad3(v) + '</text>');
+    s.push('<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + (TOP - 8) + '" y2="' + (TOP - 3) + '" stroke="var(--ink-3)"/>');
+  });
+  [[33, 35, 'Hầm 1'], [74, 76, 'Hầm 2']].forEach(function(t){
+    var x0 = X(t[0] - 1), x1 = X(t[1]), xm = (x0 + x1) / 2;
+    s.push('<rect x="' + x0.toFixed(1) + '" y="' + (TOP - 2) + '" width="' + (x1 - x0).toFixed(1) + '" height="' + (BOTTOM - TOP + 4) + '" fill="var(--ink)" opacity=".06"/>');
+    s.push('<line x1="' + xm.toFixed(1) + '" x2="' + xm.toFixed(1) + '" y1="' + (TOP - 2) + '" y2="' + (BOTTOM + 2) + '" stroke="var(--ink-2)" stroke-dasharray="3 3"/>');
+    s.push('<text x="' + xm.toFixed(1) + '" y="' + (BOTTOM + 16) + '" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-2)">' + t[2] + ' (VT ' + t[0] + '–' + t[1] + ')</text>');
+  });
+  s.push('<rect x="10" y="' + TOP + '" width="14" height="' + (BOTTOM - TOP) + '" rx="4" fill="var(--surface-2)" stroke="var(--line)"/>');
+  for (var i = 0; i < 25; i++){
+    var cy = TOP + 4 + i * (BOTTOM - TOP - 8) / 24;
+    s.push('<rect x="12" y="' + (cy - 4).toFixed(1) + '" width="10" height="8" rx="1.5" fill="var(--door)"/>');
+  }
+  s.push('<text transform="translate(40 ' + ((TOP + BOTTOM) / 2) + ') rotate(-90)" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)" letter-spacing="1.5">25 CỬA XUẤT ←</text>');
+  rows.forEach(function(r){
+    if (r.lane){ s.push('<text x="' + (X(104) + 8).toFixed(1) + '" y="' + (r.y + r.h - 2) + '" font-size="10" fill="var(--ink-2)">Lối ' + r.lane + '</text>'); return; }
+    var max = DAY[r.day] ? DAY[r.day][2] : 104;
+    s.push('<text x="' + (X0 - 8) + '" y="' + (r.y + r.h - 2.5) + '" text-anchor="end" font-size="12" font-weight="700" fill="var(--ink)" font-family="Consolas,monospace">' + r.day + '</text>');
+    if (locked[r.day]){
+      s.push('<rect x="' + X(0).toFixed(1) + '" y="' + r.y + '" width="' + (X(max) - X(0)).toFixed(1) + '" height="' + r.h + '" fill="url(#hatch)" stroke="var(--hatch)" stroke-width=".8"/>');
+      s.push('<text x="' + (X(0) + 6).toFixed(1) + '" y="' + (r.y + r.h - 2.5) + '" font-size="9.5" font-weight="700" fill="var(--ink-2)">' + r.day + ' · đang khoá cất hàng</text>');
+    } else {
+      ZSPAN.forEach(function(z, zi){
+        var a = z[0], b = Math.min(z[1], max);
+        if (a > max) return;
+        var x0 = X(a - 1), w = X(b) - x0, e = c ? c.dz.get(r.day + '|' + zi) : null;
+        if (c && !e){
+          s.push('<rect x="' + x0.toFixed(1) + '" y="' + r.y + '" width="' + w.toFixed(1) + '" height="' + r.h + '" fill="url(#hatch)"><title>' + r.day + ' · ' + ZONES[zi].label + ': không có bin cất được</title></rect>');
+          return;
+        }
+        var freeShare = e && e.cap ? Math.min(1, e.free / e.cap) : 0, wf = w * freeShare;
+        var tip = e ? '<title>' + r.day + ' · ' + ZONES[zi].label + ': ' + n0(e.n) + ' bin, ' + n0(e.cap) + ' chỗ pallet, còn trống ' + n0(e.free) + '</title>' : '';
+        s.push('<g>' + tip + '<rect x="' + x0.toFixed(1) + '" y="' + r.y + '" width="' + (w - wf).toFixed(1) + '" height="' + r.h + '" fill="' + ZCOL[zi] + '"/>' +
+          (wf > .5 ? '<rect x="' + (x0 + w - wf).toFixed(1) + '" y="' + r.y + '" width="' + wf.toFixed(1) + '" height="' + r.h + '" fill="' + ZCOL[zi] + '" opacity=".32"/>' : '') + '</g>');
+      });
+    }
+    (MAP_GAPS[r.day] || []).forEach(function(g){
+      s.push('<rect x="' + X(g[0] - 1).toFixed(1) + '" y="' + (r.y - .5) + '" width="' + (X(g[1]) - X(g[0] - 1)).toFixed(1) + '" height="' + (r.h + 1) + '" fill="var(--surface)"/>');
+    });
+  });
+  s.push('<text x="' + X(0) + '" y="' + (BOTTOM + 40) + '" font-size="12" font-weight="700" fill="var(--ink)">← Gần cửa</text>');
+  s.push('<text x="' + X(104) + '" y="' + (BOTTOM + 40) + '" text-anchor="end" font-size="12" font-weight="700" fill="var(--ink)">Xa cửa →</text>');
+  var defs = '<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+    '<rect width="6" height="6" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--hatch)" stroke-width="2"/></pattern></defs>';
+  var svg = $('map');
+  svg.setAttribute('viewBox', '0 0 ' + W.toFixed(0) + ' ' + H);
+  svg.innerHTML = defs + s.join('');
+
+  $('mapLegend').textContent = c
+    ? 'Phần nhạt ở cuối mỗi đoạn kệ = tỷ lệ chỗ còn trống của đoạn đó, theo file ' + c.name + (c.date ? ' (ngày ' + fmtDate(c.date) + ')' : '') + '. Rê chuột lên đoạn kệ để xem số bin và chỗ trống. Đoạn gạch chéo là không có bin cất được.'
+    : 'Tải file Capa BIN để xem mỗi dãy còn trống bao nhiêu chỗ.';
+  var lockedList = Object.keys(locked);
+  $('noteLocked').innerHTML = lockedList.length ? '<b>Dãy ' + lockedList.join(', ') + '</b> đang khoá cất hàng toàn bộ.' : 'Không có dãy nào bị khoá toàn bộ.';
+  $('noteLocked').hidden = false;
+  if (c){
+    var h = '<table><thead><tr><th>Vùng</th><th class="n">Bin</th><th class="n">Chỗ pallet</th><th class="n">Còn trống</th></tr></thead><tbody>';
+    c.zone.forEach(function(z, i){
+      h += '<tr><td><span class="sw" style="background:' + ZCOL[i] + '"></span>' + ZONES[i].label + '</td><td class="n">' + n0(z.n) + '</td><td class="n">' + n0(z.cap) + '</td><td class="n">' + n0(z.free) + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    $('mapCap').innerHTML = h;
+  } else {
+    $('mapCap').innerHTML = '<p class="set-hint">Tải file Capa BIN để xem số bin, sức chứa và chỗ còn trống của từng vùng.</p>';
+  }
+}
+
+/* ================= XUẤT EXCEL ================= */
+function sheets(){
+  var b = S.base, v = S.view, N = b.ranked.length;
+  var stk = hasStock(), fit = S.fit;
+  var sum = [['Nhóm','Số mã','% số mã','% lượt lấy','Pallet xuất','Pallet tồn','Nên lưu', stk ? '% tồn đang đúng vùng' : '% lượt lấy đang đúng vùng']];
+  v.ts.forEach(function(s, t){
+    var rl = TIERS[t].recLabel; if (stk && t === 1) rl = fit.aIn + ' mã đầu kho, còn lại giữa kho';
+    sum.push([TIERS[t].k, s.n, +(s.n / N * 100).toFixed(1), +(s.picks / b.T * 100).toFixed(1), S.qc ? Math.round(s.pal) : '', stk ? Math.round(s.stock) : '', rl, s.zsum ? +(s.inRec / s.zsum * 100).toFixed(1) : '']);
+  });
+  sum.push([]); sum.push(['Ngưỡng A+ / A / B (%)', S.set.ap + ' / ' + S.set.a + ' / ' + S.set.b]);
+  sum.push(['File đã tải', S.files.map(function(f){ return f.name; }).join(', ')]);
+  sum.push(['Tổng mã / lượt lấy / phiếu', N + ' / ' + b.T + ' / ' + b.nTO]);
+  sum.push(['Số ngày của dữ liệu TO', dataDays()]);
+  if (stk) sum.push(['Sức chứa đầu kho / A+ tồn / số mã A vào đầu kho', Math.round(fit.frontCap) + ' / ' + Math.round(fit.apStock) + ' / ' + fit.aIn]);
+  var t1 = [['Hạng','Mã','Tên hàng','Nhóm','Lượt lấy','% lượt','% cộng dồn','Pallet xuất','Pallet tồn','Số ngày tồn', stk ? 'Nằm nhiều nhất ở' : 'Vị trí chính']];
+  b.ranked.forEach(function(it){ t1.push([it.rank, it.mat, it.desc, TIERS[it.tier].k, it.picks, +it.pct.toFixed(2), +it.cumPct.toFixed(2), it.pal == null ? '' : Math.round(it.pal), stk ? +(it.stock ? it.stock.pal : 0).toFixed(1) : '', it.dos == null ? '' : Math.round(it.dos), locText(it)]); });
+  var tg = !!S.tang;
+  var t2 = [['Mã','Tên hàng','Nhóm','Nên lưu','Cất vào bin','Lượt lấy','Lượt ở đầu kho','Lượt ở giữa kho','Lượt ở cuối kho','Tồn đầu kho (pallet)','Tồn giữa kho (pallet)','Tồn cuối kho (pallet)','Lượt ở xa hơn cần','Số ngày tồn', stk ? 'Nằm nhiều nhất ở' : 'Vị trí chính','Trạng thái']
+    .concat(tg ? ['Nhóm SAP','Trần tầng','Tầng đang có hàng','Tầng TB hiện tại','Nên về tầng','Trạng thái tầng'] : [])];
+  b.ranked.slice().sort(function(x, y){ return y.far - x.far; }).forEach(function(it){
+    var sz = stk && it.stock ? it.stock.z : null;
+    t2.push([it.mat, it.desc, TIERS[it.tier].k, it.recLabel, suggestText(it), it.picks, it.z[0], it.z[1], it.z[2],
+      sz ? +sz[0].toFixed(1) : '', sz ? +sz[1].toFixed(1) : '', sz ? +sz[2].toFixed(1) : '', it.far, it.dos == null ? '' : Math.round(it.dos), locText(it), STATUS[it.status].label]
+      .concat(tg ? [it.sec || '', tangTxt(it.tangMax), it.stock ? tangListTxt(it.stock.tl) : '', it.tangNow == null ? '' : tangAvgTxt(it.tangNow),
+        tangTxt(it.recTang), it.tangStatus ? TSTATUS[it.tangStatus].label : 'Chưa có tồn'] : []));
+  });
+  var t3 = [['Món xuất nhiều hơn','Tên','Nhóm','Đi chung với','Tên','Nhóm','Phiếu chung','Tỷ lệ (%)','Vị trí 1','Vị trí 2','Cách nhau (m)']];
+  v.pairs.forEach(function(p){ t3.push([p.a.mat, p.a.desc, TIERS[p.a.tier].k, p.b.mat, p.b.desc, TIERS[p.b.tier].k, p.c, Math.round(p.rate * 100), locText(p.a), locText(p.b), p.d == null ? '' : Math.round(p.d)]); });
+  var t4 = [['Cụm','Số món','Nên đặt ở','Mã','Tên hàng','Nhóm','Lượt lấy','Vị trí chính','Số dãy đang rải','Xa nhất (m)']];
+  v.clusters.forEach(function(c){ c.mem.forEach(function(it){ t4.push([c.id, c.mem.length, c.anchor.recLabel, it.mat, it.desc, TIERS[it.tier].k, it.picks, locText(it), c.days, Math.round(c.maxD)]); }); });
+  var out = [['Tổng quan', sum], ['Nên lưu ở đâu', t2], ['Nhóm tần suất', t1], ['Đi chung - cụm', t4], ['Đi chung - cặp', t3]];
+  if (tg){
+    var T = S.tang, L = [], lv;
+    for (lv = TANG_MIN; lv <= TANG_MAX; lv++) L.push(lv);
+    sum.push([]);
+    sum.push(['XẾP THEO TẦNG']);
+    sum.push(['File master vật tư', S.master.name + ' (' + S.master.n + ' mã)']);
+    sum.push(['Quy đổi 1 tầng (m)', +TANG_COST.toFixed(2) + ' = ' + TANG_H + ' m × ' + TANG_MULT]);
+    sum.push(['Tầng dùng để tính', tangTxt(TANG_MIN) + '–' + tangTxt(TANG_MAX)]);
+    sum.push(['Lượt lấy ở ' + tangTxt(TANG_HIGH) + '–' + tangTxt(TANG_MAX), T.picksHigh + ' / ' + T.picksAll + ' lượt (' + (T.picksAll ? (T.picksHigh / T.picksAll * 100).toFixed(1) : 0) + '%)']);
+    sum.push(['Mã sai quy tắc tầng / nên hạ / có thể nhường', T.nBad + ' / ' + T.nDown + ' / ' + T.nUp]);
+    sum.push(['Tiết kiệm ròng (m quy đổi)', Math.round(T.gain)]);
+    sum.push(['  Hạ xuống được (m)', Math.round(T.gainDown)]);
+    sum.push(['  Phải đưa lên (m)', Math.round(T.costUp)]);
+    sum.push(['Mã tràn sang vùng khác / không đủ chỗ', T.nSpill + ' / ' + T.nFull]);
+
+    var stOrd = { bad:0, down:1, up:2, ok:3 };
+    var t8 = [['Mã','Tên hàng','Nhóm tần suất','Nhóm SAP','Trần tầng','Lượt lấy','Tồn (pallet)']
+      .concat(L.map(function(x){ return 'Số lô ở ' + tangTxt(x); }))
+      .concat(['Tầng đang có hàng','Tầng TB hiện tại','Tầng cao nhất','Nên về tầng','Vùng nên lưu','Tràn vùng','Quy đổi tiết kiệm (m)','Trạng thái tầng'])];
+    b.ranked.filter(function(it){ return it.tangStatus; })
+      .sort(function(x, y){ return (stOrd[x.tangStatus] - stOrd[y.tangStatus]) || (y.tangGain - x.tangGain) || (y.picks - x.picks); })
+      .forEach(function(it){
+        var tl = it.stock && it.stock.tl ? it.stock.tl : {};
+        t8.push([it.mat, it.desc, TIERS[it.tier].k, it.sec || '', tangTxt(it.tangMax), it.picks, it.stock ? +it.stock.pal.toFixed(1) : '']
+          .concat(L.map(function(x){ return tl[x] || ''; }))
+          .concat([tangListTxt(tl), tangAvgTxt(it.tangNow), it.stock ? tangTxt(it.stock.tmax) : '', tangTxt(it.recTang),
+            ZONES[it.recTangZone].label, it.tangSpill ? 'có' : '', Math.round(it.tangGain), TSTATUS[it.tangStatus].label]));
+      });
+
+    var t9 = [['Mã SAP','Nhóm hàng','Bin đang chứa','Bin ở ' + tangTxt(TANG_HIGH) + '–' + tangTxt(TANG_MAX),'% ở tầng cao','Trần tầng','Độ tin cậy']];
+    var rl = []; S.tangRule.forEach(function(r){ rl.push(r); });
+    rl.sort(function(x, y){ return (x.max - y.max) || (y.n - x.n); })
+      .forEach(function(r){ t9.push([r.code, r.desc, r.n, r.hi, +r.pct.toFixed(1), tangTxt(r.max), r.conf]); });
+    t9.push([]);
+    t9.push(['Cách suy: nhóm có dưới ' + TANG_HIGH_PCT + '% số bin nằm ở ' + tangTxt(TANG_HIGH) + '–' + tangTxt(TANG_MAX) + ' thì trần là ' + tangTxt(TANG_HIGH - 1) + ', còn lại trần ' + tangTxt(TANG_MAX) + '.']);
+
+    var t10 = [['Tầng'].concat([0, 1, 2].map(function(z){ return ZONES[z].label + ' - nên xếp'; }))
+      .concat([0, 1, 2].map(function(z){ return ZONES[z].label + ' - sức chứa'; }))
+      .concat([0, 1, 2].map(function(z){ return ZONES[z].label + ' - đang trống'; }))];
+    for (lv = TANG_MAX; lv >= TANG_MIN; lv--){
+      var row = [tangTxt(lv)];
+      [0, 1, 2].forEach(function(z){ row.push(Math.round(T.plan[z][lv] || 0)); });
+      [0, 1, 2].forEach(function(z){ var q = S.capa.zt[z][lv]; row.push(q ? Math.round(q.cap) : 0); });
+      [0, 1, 2].forEach(function(z){ var q = S.capa.zt[z][lv]; row.push(q ? Math.round(q.free) : 0); });
+      t10.push(row);
+    }
+    out.push(['Xếp theo tầng', t8], ['Quy tắc tầng', t9], ['Sức chứa theo tầng', t10]);
+  }
+  if (S.capa){
+    var c = S.capa;
+    var t5 = [['Vùng','Đoạn VT','Số bin dùng được','Sức chứa (pallet)','Đang dùng (pallet)','Còn trống (pallet)','Bin trống hẳn']];
+    c.zone.forEach(function(z, i){ t5.push([ZONES[i].label, ZONE_VT[i], z.n, Math.round(z.cap), Math.round(z.used), Math.round(z.free), z.empty]); });
+    t5.push([]); t5.push(['Dãy','Lối','Vùng','Số bin','Sức chứa (pallet)','Còn trống (pallet)']);
+    var keys = Array.from(c.dz.keys()).sort(function(x, y){
+      var p = x.split('|'), q = y.split('|'), lx = DAY[p[0]] ? DAY[p[0]][0] : 99, ly = DAY[q[0]] ? DAY[q[0]][0] : 99;
+      return (+p[1] - +q[1]) || (lx - ly) || (p[0] < q[0] ? -1 : 1);
+    });
+    keys.forEach(function(k){ var p = k.split('|'), e = c.dz.get(k); t5.push([p[0], DAY[p[0]] ? DAY[p[0]][0] : '', ZONES[+p[1]].label, e.n, Math.round(e.cap), Math.round(e.free)]); });
+    var t6 = [['Bin','Dãy','Lối','VT','Tầng','Vùng','Sức chứa','Đang dùng','Còn trống','Section']];
+    c.bins.filter(function(x){ return x.ok && x.free > 0; })
+      .sort(function(x, y){ return (x.zone - y.zone) || (x.vt - y.vt) || (x.tang - y.tang) || ((DAY[x.day] ? DAY[x.day][0] : 99) - (DAY[y.day] ? DAY[y.day][0] : 99)); })
+      .forEach(function(x){ t6.push([x.bin, x.day, DAY[x.day] ? DAY[x.day][0] : '', x.vt, x.tang, ZONES[x.zone].label, x.cap, x.used, +x.free.toFixed(3), x.sec]); });
+    out.push(['Sức chứa theo vùng', t5], ['Bin còn trống', t6]);
+    if (stk){
+      var t7 = [['Bin','Dãy','VT','Tầng','Mã','Tên hàng','Pallet','Số lượng','Cất lần cuối','Đã nằm (ngày)','Ghi chú']];
+      freeRows().sort(function(x, y){ return (y.days == null ? -1 : y.days) - (x.days == null ? -1 : x.days); })
+        .forEach(function(r){ t7.push([r.bin, r.day, r.vt, r.tang, r.mat, r.desc, +r.pal.toFixed(3), r.qty, r.last ? fmtDate(r.last) : '', r.days == null ? '' : r.days, r.note]); });
+      out.push(['Bin đầu kho nên giải phóng', t7]);
+    }
+  }
+  return out;
+}
+function download(name, blob){
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function exportExcel(){
+  var sh = sheets(), stamp = new Date().toISOString().slice(0, 10);
+  var btn = $('btnExport'); btn.disabled = true;
+  loadXLSX().then(function(X){
+    var wb = X.utils.book_new();
+    sh.forEach(function(s){ var ws = X.utils.aoa_to_sheet(s[1]); X.utils.book_append_sheet(wb, ws, s[0]); });
+    X.writeFile(wb, 'goi-y-vi-tri-luu-kho_' + stamp + '.xlsx');
+    toast('Đã xuất file Excel với ' + sh.length + ' trang.');
+  }).catch(function(){
+    sh.forEach(function(s){
+      var csv = s[1].map(function(r){ return r.map(function(c){ c = String(c == null ? '' : c); return /[;"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(';'); }).join('\r\n');
+      download('goi-y-vi-tri-luu-kho_' + stamp + '_' + norm(s[0]).replace(/[^a-z0-9]+/g, '-') + '.csv', new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8' }));
+    });
+    toast('Máy không có mạng để tạo file Excel, nên đã xuất ' + sh.length + ' file CSV thay thế.', true);
+  }).then(function(){ btn.disabled = false; });
+}
+
+/* ================= SỰ KIỆN ================= */
+function recompute(){ rebuildLines(); deriveTangRule(); if (S.lines.length){ buildBase(); applySettings(); } else { S.base = null; S.view = null; } renderAll(); }
+
+function handleFiles(list, kind){
+  var files = Array.from(list || []); if (!files.length) return;
+  var jobs = files.map(function(f){
+    if (kind !== 'qc' && S.files.some(function(x){ return x.name === f.name && x.size === f.size; })){
+      return Promise.resolve({ skip:f.name });
+    }
+    return readFileRows(f).then(function(parsed){
+      var head = parsed.rows.length ? parsed.rows[0] : [];
+      var isMaster = kind === 'master' || (kind !== 'qc' && kind !== 'capa' && findCol(head, ['storage section ind.'], ['storage section ind'], []) > -1);
+      if (isMaster){ ingestMaster(f.name, parsed); return { master:f.name }; }
+      var isCapa = kind === 'capa' || (kind === 'auto' && findCol(head, ['total capacity'], ['total capacity']) > -1);
+      var guessQC = kind === 'qc' || (kind === 'auto' && findCol(head, ['numerat.','numerat'], ['numerat']) > -1);
+      if (isCapa){ ingestCapa(f.name, parsed, f.lastModified ? new Date(f.lastModified) : null); return { capa:f.name }; }
+      if (guessQC){ ingestQC(f.name, parsed); return { qc:f.name }; }
+      var file = ingestTO(f.name, f.size, parsed); return { to:file };
+    }).catch(function(err){
+      return { err: f.name + ': ' + (err.message === 'offline' ? 'cần mạng để đọc file Excel — lưu file thành CSV rồi tải lại.' : err.message) };
+    });
+  });
+  Promise.all(jobs).then(function(res){
+    recompute();
+    var errs = res.filter(function(r){ return r.err; }).map(function(r){ return r.err; });
+    var skips = res.filter(function(r){ return r.skip; }).map(function(r){ return r.skip; });
+    var tos = res.filter(function(r){ return r.to; }).map(function(r){ return r.to; });
+    var qcs = res.filter(function(r){ return r.qc; });
+    if (errs.length){ toast('Không đọc được ' + errs.join(' · '), true); return; }
+    var msg = [];
+    tos.forEach(function(f){ msg.push('Đã tải ' + f.name + ': ' + n0(f.tos.size) + ' phiếu, ' + n0(f.recs.length - countDupLines(f)) + ' dòng' + (f.dup.size ? ' (bỏ ' + n0(f.dup.size) + ' phiếu trùng với file khác)' : '')); });
+    if (qcs.length) msg.push('Đã tải quy cách ' + n0(S.qcCount) + ' mã');
+    if (res.some(function(r){ return r.master; })){
+      var nl = 0; if (S.tangRule) S.tangRule.forEach(function(x){ if (x.max < TANG_MAX) nl++; });
+      msg.push('Đã tải master vật tư: ' + n0(S.master.n) + ' mã' +
+        (S.tangRule ? ', suy được quy tắc tầng cho ' + n0(S.tangRule.size) + ' nhóm (' + n0(nl) + ' nhóm bị giới hạn)' : ' — cần thêm Capa BIN có mã hàng để suy quy tắc tầng'));
+    }
+    if (res.some(function(r){ return r.capa; })){
+      var cz = S.capa.zone;
+      msg.push('Đã tải Capa BIN: ' + n0(cz[0].n + cz[1].n + cz[2].n) + ' bin dùng được, còn trống ' + n0(cz[0].free + cz[1].free + cz[2].free) + ' chỗ pallet');
+    }
+    if (skips.length) msg.push('Bỏ qua file đã tải rồi: ' + skips.join(', '));
+    if (tos.some(function(f){ return !f.hasQty; })) msg.push('Lưu ý: file không có cột số lượng nên không quy ra pallet được');
+    if (msg.length) toast(msg.join('. ') + '.', !!skips.length);
+  });
+}
+function countDupLines(f){ var n = 0; f.recs.forEach(function(r){ if (f.dup.has(r.to)) n++; }); return n; }
+
+$('fTO').addEventListener('change', function(e){ handleFiles(e.target.files, 'to'); e.target.value = ''; });
+$('fQC').addEventListener('change', function(e){ handleFiles(e.target.files, 'qc'); e.target.value = ''; });
+$('fCAPA').addEventListener('change', function(e){ handleFiles(e.target.files, 'capa'); e.target.value = ''; });
+$('fMASTER').addEventListener('change', function(e){ handleFiles(e.target.files, 'master'); e.target.value = ''; });
+[['lblTO', 'fTO'], ['lblQC', 'fQC'], ['lblCAPA', 'fCAPA']].forEach(function(p){
+  $(p[0]).addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $(p[1]).click(); } });
+});
+$('btnExport').addEventListener('click', exportExcel);
+$('btnPrintMap').addEventListener('click', function(){
+  document.body.classList.add('print-map');
+  renderMap();
+  window.print();
+});
+window.addEventListener('afterprint', function(){ document.body.classList.remove('print-map'); });
+$('sources').addEventListener('click', function(e){
+  var rm = e.target.closest('[data-rm]');
+  if (rm){ var id = +rm.getAttribute('data-rm'); S.files = S.files.filter(function(f){ return f.id !== id; }); recompute(); return; }
+  if (e.target.closest('[data-rmqc]')){ S.qc = null; S.qcName = ''; S.qcCount = 0; if (S.base){ applySettings(); } renderAll(); }
+  if (e.target.closest('[data-rmcapa]')){ S.capa = null; if (S.base) applySettings(); renderAll(); }
+});
+
+// kéo thả
+var dragDepth = 0, veil = $('dropveil');
+window.addEventListener('dragenter', function(e){ if (e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') > -1){ dragDepth++; veil.classList.add('on'); } });
+window.addEventListener('dragleave', function(){ dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) veil.classList.remove('on'); });
+window.addEventListener('dragover', function(e){ e.preventDefault(); });
+window.addEventListener('drop', function(e){ e.preventDefault(); dragDepth = 0; veil.classList.remove('on'); if (e.dataTransfer) handleFiles(e.dataTransfer.files, 'auto'); });
+
+// ngưỡng
+function readSettings(){
+  var ap = +$('sAP').value, a = +$('sA').value, bb = +$('sB').value, pm = Math.round(+$('sPM').value), pr = +$('sPR').value;
+  var dRaw = $('sDays').value.trim(), dd = dRaw ? Math.round(+dRaw) : null;
+  var err = '';
+  if (!(ap > 0 && ap < a && a < bb && bb < 100)) err = 'Ba mốc phải tăng dần: A+ < A < B < 100.';
+  else if (!(pm >= 2)) err = 'Số phiếu đi chung tối thiểu phải từ 2.';
+  else if (!(pr > 0 && pr <= 100)) err = 'Tỷ lệ gom cụm phải từ 1 đến 100%.';
+  else if (dRaw && !(dd >= 1)) err = 'Số ngày của dữ liệu phải từ 1 trở lên, hoặc để trống.';
+  $('setErr').hidden = !err; $('setErr').textContent = err;
+  if (err) return;
+  S.set = { ap:ap, a:a, b:bb, pairMin:pm, pairRate:pr, days:dd };
+  if (S.base){ applySettings(); renderAll(); }
+}
+['sAP', 'sA', 'sB', 'sPM', 'sPR', 'sDays'].forEach(function(id){ $(id).addEventListener('input', debounce(readSettings, 250)); });
+document.addEventListener('click', function(e){ var d = $('settings'); if (d.open && !d.contains(e.target)) d.open = false; });
+
+// tìm kiếm & lọc
+$('qZone').addEventListener('input', debounce(function(e){ S.f.qZone = e.target.value; renderTabs(); }, 200));
+$('qTier').addEventListener('input', debounce(function(e){ S.f.qTier = e.target.value; renderTabs(); }, 200));
+$('qPair').addEventListener('input', debounce(function(e){ S.f.qPair = e.target.value; renderTabs(); }, 200));
+wireSeg($('fZoneStatus'), 'zoneStatus');
+wireSeg($('fZoneView'), 'zoneView');
+wireSeg($('fPairView'), 'pairView');
+tierSeg('fZoneTier', 'zoneTier');
+tierSeg('fTierTier', 'tierTier');
+
+// thẻ
+var TABS = ['zone', 'tier', 'tang', 'pair', 'map'];
+function selectTab(k, focus){
+  S.tab = k;
+  TABS.forEach(function(t){
+    var b = $('tab-' + t), on = t === k;
+    b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+    $('panel-' + t).hidden = !on;
+    if (on && focus) b.focus();
+  });
+  if (S.base) renderTabs();
+}
+TABS.forEach(function(t, i){
+  var b = $('tab-' + t);
+  b.addEventListener('click', function(){ selectTab(t); });
+  b.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+      e.preventDefault(); selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length], true);
+    }
+  });
+});
+
+// vẽ lại biểu đồ khi đổi kích thước
+if (window.ResizeObserver){
+  var lastW = 0;
+  new ResizeObserver(debounce(function(){ var w = $('pareto').clientWidth; if (S.base && Math.abs(w - lastW) > 4){ lastW = w; renderPareto(); } }, 120)).observe($('pareto'));
+}
+
+// cho phép nạp dữ liệu bằng mã (dùng khi kiểm thử)
+window.KhoSlotting = {
+  loadTOText: function(name, text){ ingestTO(name, text.length, parseDelimited(text)); recompute(); return S.base && { items:S.base.ranked.length, T:S.base.T, nTO:S.base.nTO }; },
+  loadQCRows: function(name, rows){ ingestQC(name, { rows:rows, euro:false }); if (S.base) applySettings(); renderAll(); return S.qcCount; },
+  state: function(){ return S; },
+  sheets: function(){ return S.base ? sheets() : null; }
+};
+
+renderAll();
+})();
+</script>
+</body>
+</html>
