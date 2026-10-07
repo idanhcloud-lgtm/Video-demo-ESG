@@ -21,7 +21,10 @@ npm install
 
 - `src/Root.tsx` – registers compositions
 - `src/theme.ts` – colors, video size, font loading
-- `src/scenes/` – one file per scene
+- `src/scenes/` – one file per scene (`TitleScene`, `Problem02`)
+- `src/map/khoC.ts` – Kho C floor plan and the app's distance formula (bin 1.4 m, aisle pitch 8.65 m)
+- `src/map/route.ts` – current A→T order, S-shape + 2-opt, route polylines
+- `src/components/` – shared map, route panel and problem tabs
 - `public/fonts/` – Be Vietnam Pro (latin + vietnamese), bundled so renders work offline
 
 `remotion.config.ts` points Remotion at the preinstalled Chromium headless shell when it exists (cloud sessions cannot download one); on a normal machine Remotion downloads its own.

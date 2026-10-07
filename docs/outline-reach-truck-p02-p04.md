@@ -11,19 +11,17 @@ Nguồn: video phần 1 (vấn đề 01) và `Slide_ESG_Project_V3.pptx` (slide 
 | c. Minh họa | 12s | Callout "CURRENT · HIỆN TẠI" (đỏ) và "ALGORITHM · THUẬT TOÁN" (xanh), có số liệu |
 | d. Kết luận | 4s | Tick vào thanh tiêu đề, dòng chú thích "→ problem 0x solved" |
 
-## Vấn đề 02 – Cross aisles underused / Lối ngang chưa tận dụng (~25s)
+## Vấn đề 02 – Cross aisles not optimally utilized / Lối đi ngang chưa được sử dụng tối ưu (~30s) – ĐÃ DỰNG
 
-- Thẻ vấn đề: "Trucks switch aisles only at the door or row end".
-  Xe chỉ đổi dãy ở đầu cửa hoặc cuối dãy.
-- Minh họa: dùng ví dụ slide 25 (A: dãy 3, BIN 10 → B: dãy 5, BIN 14).
-  - Lần lượt vẽ 3 đường qua 3 điểm cắt và đếm số mét từng đường:
-    - Đầu cửa: 50,9 m (đỏ)
-    - Cuối dãy: 91,7 m (đỏ)
-    - Đường hầm: 37,7 m (xanh, được chọn)
-  - Callout hiện tại: "Goes back to the door to change aisle".
-  - Callout thuật toán: "Tests all 3 cross points, keeps the shortest".
-  - Hiện công thức `d = |x₁ − x₂| + minₚ(|y₁ − yₚ| + |y₂ − yₚ|)` ở góc màn hình, chỉ 2–3 giây.
-- Kết luận: "Cross aisles used → problem 02 solved".
+Composition `Problem02` (`src/scenes/Problem02.tsx`), dữ liệu `src/data/problem02.ts`.
+
+- Bản đồ Kho C thật (`src/map/khoC.ts`), ô BIN 1,4 m, tim lối 8,65 m. Quãng đường tính đúng công thức app.
+- Phiếu mẫu: 14 điểm trên dãy CDT, CET, CFT, CGT, CHT (lối 4–8), xuất phát cửa D06.
+- Hiện tại (A→T, mỗi dãy VT tăng dần): 469,6 m. Thuật toán (S-shape + 2-opt): 335,2 m. Chênh −134,4 m (−28,6%).
+- Hai lộ trình qua cùng các hầm. Chênh lệch nằm ở lúc sang lối 6→7 và 7→8:
+  - Hiện tại: qua hầm 2 rồi chạy ngược về VT 36 (84,3 m), sau đó qua hầm 1 rồi chạy ngược về VT 12 (89,8 m).
+  - Thuật toán: qua hầm 2 rồi đi tiếp cùng chiều (36,7 m), sau đó qua hầm 1 (22,6 m).
+- Nhịp: thẻ vấn đề (0–4,5s) → bản đồ zoom và nháy 3 điểm sang lối (5–7s) → hai xe chạy cùng tốc độ (7–21s) → callout và tô sáng đoạn chênh lệch (21,5–26,5s) → tick "solved" (26,5–30s).
 
 ## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (~25s)
 
