@@ -1,5 +1,6 @@
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
-import {colors, fontFamily} from '../theme';
+import {AbsoluteFill, interpolate, spring} from 'remotion';
+import {useTimelineFrame} from '../timeline';
+import {TIMELINE_FPS, colors, fontFamily} from '../theme';
 
 const stats = [
   {value: '30,900 m²', en: 'B2C warehouse', vi: 'Diện tích kho B2C'},
@@ -9,8 +10,8 @@ const stats = [
 ];
 
 export const TitleScene: React.FC = () => {
-  const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
+  const frame = useTimelineFrame();
+  const fps = TIMELINE_FPS;
   const intro = spring({frame, fps, config: {damping: 200}});
 
   return (

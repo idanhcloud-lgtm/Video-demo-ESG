@@ -37,4 +37,8 @@ export const colors = {
   amber: '#d9a93f',
 };
 
-export const VIDEO = {width: 1920, height: 1080, fps: 30};
+export const VIDEO = {width: 1920, height: 1080, fps: 60};
+
+// Scene timelines are written in 30-per-second units so they stay valid at any output fps.
+export const TIMELINE_FPS = 30;
+export const toFrames = (timelineUnits: number) => Math.round((timelineUnits * VIDEO.fps) / TIMELINE_FPS);

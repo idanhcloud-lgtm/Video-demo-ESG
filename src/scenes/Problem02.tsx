@@ -1,4 +1,5 @@
-import {AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
+import {useTimelineFrame} from '../timeline';
 import {Background} from '../components/Background';
 import {CaptionBar} from '../components/CaptionBar';
 import {ProblemTabs} from '../components/ProblemTabs';
@@ -6,9 +7,9 @@ import {Callout, RoutePanel, VsBadge} from '../components/RoutePanel';
 import {TO28, TO28_DOOR, TO28_OPTIMIZED} from '../data/to28';
 import {LAYOUT} from '../layout';
 import {aisleOrder} from '../map/route';
-import {colors, fontFamily} from '../theme';
+import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
 
-// Timeline (frames @30fps), same beats as problem 01 in video part 1.
+// Timeline (30 units per second), same beats as problem 01 in video part 1.
 const T = {
   glow: 20,
   cardIn: 45,
@@ -21,7 +22,7 @@ const T = {
   solved: 540,
   end: 630,
 };
-export const PROBLEM02_DURATION = T.end;
+export const PROBLEM02_DURATION = toFrames(T.end);
 
 const current = aisleOrder(TO28);
 const algo = TO28_OPTIMIZED;
@@ -38,8 +39,8 @@ const ZOOM = {k: 1.45, tx: -1.45 * 60, ty: 240 - 1.45 * 500};
 const Hl: React.FC<{c: string; children: React.ReactNode}> = ({c, children}) => <span style={{color: c}}>{children}</span>;
 
 export const Problem02: React.FC = () => {
-  const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
+  const frame = useTimelineFrame();
+  const fps = TIMELINE_FPS;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
   const glow = interpolate(frame, [T.glow, T.glow + 15], [0, 1], clamp);

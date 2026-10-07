@@ -1,6 +1,6 @@
 # Video demo ESG – Reach Truck Route Optimization
 
-Remotion project (1920×1080, 30 fps) for the DTLA warehouse route-optimization video.
+Remotion project (1920×1080, 60 fps) for the DTLA warehouse route-optimization video.
 
 ## Setup
 
@@ -20,7 +20,8 @@ npm install
 ## Structure
 
 - `src/Root.tsx` – registers compositions
-- `src/theme.ts` – colors, video size, font loading
+- `src/theme.ts` – colors, video size (1920×1080, 60 fps), font loading
+- `src/timeline.ts` – scene timelines are written in 30-per-second units; `useTimelineFrame()` converts, so changing the output fps does not change timing
 - `src/scenes/` – one file per scene (`TitleScene`, `Problem02`)
 - `src/map/khoC.ts` – Kho C floor plan and the app's distance formula (bin 1.4 m, aisle pitch 8.65 m)
 - `src/map/route.ts` – current A→T order, S-shape + 2-opt, route polylines
