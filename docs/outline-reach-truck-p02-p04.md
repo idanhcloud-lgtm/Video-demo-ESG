@@ -61,7 +61,7 @@ Composition `Problem04` (`src/scenes/Problem04.tsx`). Theo slide 8: 9:00 sáng, 
   - Thuật toán: cùng 4 xe đi tới lối 1, 3, 5, 7 (điểm đầu riêng của mỗi phiếu) và tiếp tục chạy.
   - 2 xe ở khu khác (lối 10, 13) giống nhau ở hai bên, cho cảnh sinh động.
 - Đầu panel đếm số xe trong dãy A theo thời gian thực: 4 vs 1.
-- Nhịp: thẻ vấn đề (0–5s) → banner đỏ "9:00 AM" (6,3–8,7s) → xe chạy, nhìn toàn kho (8,7–14,2s) → zoom 1,9× vào khu dãy A, lối 1–7 (14,2–15,3s) → nhấp nháy dãy A + nhãn "4 TRUCKS · 1 AISLE" / "1 TRUCK PER AISLE" (15,5s) → callout (16,5–21,3s) → thu về toàn kho (21,3–22,5s) → SOLVED (22,7–25,7s).
+- Nhịp: thẻ vấn đề (0–5s) → banner đỏ "9:00 AM" (6,3–8,7s) → xe chạy, nhìn toàn kho (8,7–14,2s) → zoom 1,9× vào khu dãy A, lối 1–7, chỉ panel hiện tại; panel thuật toán giữ toàn kho (14,2–15,3s) → nhấp nháy dãy A + nhãn "4 TRUCKS · 1 AISLE" / "1 TRUCK PER AISLE" (15,5s) → callout (16,5–21,3s) → thu về toàn kho (21,3–22,5s) → SOLVED (22,7–25,7s).
 - Lưu ý: thuật toán tối ưu từng phiếu, không điều phối nhiều xe. Việc xe tỏa ra là hệ quả của việc mỗi phiếu bắt đầu ở điểm hàng của nó.
 
 ## Phần kết (~25s)

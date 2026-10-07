@@ -99,7 +99,7 @@ export const trucksInAisleA = (trips: Trip[], kind: 'algo' | 'current', frame: n
 const SPEED = 4.2; // px per timeline unit
 const STAGGER = 14;
 
-// Camera on the aisle A area (lanes 1–7, front half), keeping the jam below the top callouts.
+// Camera on the aisle A jam (current route only; lanes 1–7, front half), keeping it below the top callouts.
 const ZOOM = {k: 1.9, tx: -1.9 * 60, ty: 580 - 1.9 * 596};
 
 const MapBadge: React.FC<{x: number; y: number; text: string; sub: string; accent: string; p: number; k: number}> = ({x, y, text, sub, accent, p, k}) => (
@@ -250,7 +250,7 @@ export const Problem04: React.FC = () => {
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
         <PanelShell kind="algo" value={String(trucksInAisleA(ALGO, 'algo', frame))} unit={trucksInAisleA(ALGO, 'algo', frame) === 1 ? 'truck' : 'trucks'} sub="in aisle A · xe trong dãy A">
-          <TrafficMap kind="algo" frame={frame} jam={jam} badge={badge} zoom={zoom} />
+          <TrafficMap kind="algo" frame={frame} jam={jam} badge={badge} zoom={0} />
           <Callout
             kind="algo"
             placement="top"
