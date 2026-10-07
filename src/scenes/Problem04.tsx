@@ -19,10 +19,12 @@ const T = {
   panelsIn: 175,
   clock: 190,
   drive: 260,
-  jam: 430,
-  callout: 470,
-  solved: 640,
-  end: 730,
+  zoomIn: 425,
+  jam: 465,
+  callout: 495,
+  zoomOut: 640,
+  solved: 680,
+  end: 770,
 };
 export const PROBLEM04_DURATION = toFrames(T.end);
 
@@ -97,8 +99,11 @@ export const trucksInAisleA = (trips: Trip[], kind: 'algo' | 'current', frame: n
 const SPEED = 4.2; // px per timeline unit
 const STAGGER = 14;
 
-const MapBadge: React.FC<{x: number; y: number; text: string; sub: string; accent: string; p: number}> = ({x, y, text, sub, accent, p}) => (
-  <g transform={`translate(${x} ${y}) scale(${0.85 + 0.15 * p})`} opacity={p}>
+// Camera on the aisle A area (lanes 1–7, front half), keeping the jam below the top callouts.
+const ZOOM = {k: 1.9, tx: -1.9 * 60, ty: 580 - 1.9 * 596};
+
+const MapBadge: React.FC<{x: number; y: number; text: string; sub: string; accent: string; p: number; k: number}> = ({x, y, text, sub, accent, p, k}) => (
+  <g transform={`translate(${x} ${y}) scale(${(0.85 + 0.15 * p) / k})`} opacity={p}>
     <rect x={0} y={-26} width={250} height={52} rx={12} fill="#ffffff" stroke={accent} strokeWidth={3} />
     <text x={125} y={-3} textAnchor="middle" fontSize={21} fontWeight={800} fill={accent === colors.red ? '#d23c3a' : '#0a8f5a'}>
       {text}
@@ -109,13 +114,15 @@ const MapBadge: React.FC<{x: number; y: number; text: string; sub: string; accen
   </g>
 );
 
-const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number; badge: number}> = ({kind, frame, jam, badge}) => {
+const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number; badge: number; zoom: number}> = ({kind, frame, jam, badge, zoom}) => {
+  const cam = {k: 1 + (ZOOM.k - 1) * zoom, tx: ZOOM.tx * zoom, ty: ZOOM.ty * zoom};
   const trips = kind === 'algo' ? ALGO : CURRENT;
   const accent = kind === 'algo' ? colors.green : colors.red;
   const pulse = 0.55 + 0.45 * Math.sin(frame / 4);
   const laneA = laneYpx(1);
   return (
     <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
+      <g transform={`translate(${cam.tx} ${cam.ty}) scale(${cam.k})`}>
       <MapBase startDoor="" />
       {/* aisle A highlight */}
       <rect
@@ -151,10 +158,11 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
         );
       })}
       {kind === 'current' ? (
-        <MapBadge x={vtX(34)} y={laneA - 52} text={`${IN_AISLE_A(CURRENT)} TRUCKS · 1 AISLE`} sub="4 xe dồn vào dãy A" accent={colors.red} p={badge} />
+        <MapBadge x={vtX(6)} y={laneA - 44} text={`${IN_AISLE_A(CURRENT)} TRUCKS · 1 AISLE`} sub="4 xe dồn vào dãy A" accent={colors.red} p={badge} k={cam.k} />
       ) : (
-        <MapBadge x={vtX(34)} y={laneA - 52} text="1 TRUCK PER AISLE" sub="mỗi lối 1 xe" accent={colors.green} p={badge} />
+        <MapBadge x={vtX(6)} y={laneA - 44} text="1 TRUCK PER AISLE" sub="mỗi lối 1 xe" accent={colors.green} p={badge} k={cam.k} />
       )}
+      </g>
       <g opacity={0.9}>
         <rect x={MAP.w - 214} y={MAP.h - 40} width={200} height={28} rx={8} fill="#0b1222" stroke="#2a3654" />
         <text x={MAP.w - 114} y={MAP.h - 21} textAnchor="middle" fontSize={13} fontWeight={700} letterSpacing={1.5} fill={colors.muted}>
@@ -205,8 +213,10 @@ export const Problem04: React.FC = () => {
   const clockMini = interpolate(frame, [T.drive - 25, T.drive], [0, 1], ease);
   const clockOut = interpolate(frame, [T.jam - 10, T.jam + 5], [1, 0], clamp);
   const jam = interpolate(frame, [T.jam, T.jam + 15], [0, 1], clamp);
+  const zoom =
+    interpolate(frame, [T.zoomIn, T.zoomIn + 35], [0, 1], ease) - interpolate(frame, [T.zoomOut, T.zoomOut + 35], [0, 1], ease);
   const badge = spring({frame: frame - T.jam - 10, fps, config: {damping: 200}});
-  const callout = spring({frame: frame - T.callout, fps, config: {damping: 200}}) * interpolate(frame, [T.solved - 15, T.solved], [1, 0], clamp);
+  const callout = spring({frame: frame - T.callout, fps, config: {damping: 200}}) * interpolate(frame, [T.zoomOut - 10, T.zoomOut + 5], [1, 0], clamp);
   const solved = frame >= T.solved;
   const check = spring({frame: frame - T.solved, fps, config: {damping: 12}});
 
@@ -240,7 +250,7 @@ export const Problem04: React.FC = () => {
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
         <PanelShell kind="algo" value={String(trucksInAisleA(ALGO, 'algo', frame))} unit={trucksInAisleA(ALGO, 'algo', frame) === 1 ? 'truck' : 'trucks'} sub="in aisle A · xe trong dãy A">
-          <TrafficMap kind="algo" frame={frame} jam={jam} badge={badge} />
+          <TrafficMap kind="algo" frame={frame} jam={jam} badge={badge} zoom={zoom} />
           <Callout
             kind="algo"
             placement="top"
@@ -250,7 +260,7 @@ export const Problem04: React.FC = () => {
           />
         </PanelShell>
         <PanelShell kind="current" value={String(trucksInAisleA(CURRENT, 'current', frame))} unit={trucksInAisleA(CURRENT, 'current', frame) === 1 ? 'truck' : 'trucks'} sub="in aisle A · xe trong dãy A">
-          <TrafficMap kind="current" frame={frame} jam={jam} badge={badge} />
+          <TrafficMap kind="current" frame={frame} jam={jam} badge={badge} zoom={zoom} />
           <Callout
             kind="current"
             placement="top"
