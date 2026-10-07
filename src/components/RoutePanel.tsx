@@ -137,6 +137,8 @@ export interface RoutePanelProps {
   splitMix?: number;
   /** 0–1: fade the route so highlighted parts stand out. */
   dim?: number;
+  /** false: header shows the stop count instead of metres (keeps totals consistent with video part 1). */
+  showDistance?: boolean;
   /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
   underlay?: React.ReactNode;
   overlay?: React.ReactNode;
@@ -155,6 +157,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   splitStop,
   splitMix = 0,
   dim = 0,
+  showDistance = true,
   underlay,
   overlay,
   children,
@@ -188,7 +191,12 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   const textOnFill = kind === 'algo' ? '#062016' : '#ffffff';
 
   return (
-    <PanelShell kind={kind} value={Math.round(d).toLocaleString('en-US')} unit="m" sub={`${visited} / ${stops.length} stops · điểm`}>
+    <PanelShell
+      kind={kind}
+      value={showDistance ? Math.round(d).toLocaleString('en-US') : String(visited)}
+      unit={showDistance ? 'm' : `/ ${stops.length}`}
+      sub={showDistance ? `${visited} / ${stops.length} stops · điểm` : 'stops visited · điểm đã ghé'}
+    >
       <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
           <MapBase startDoor={doorId} />

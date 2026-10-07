@@ -73,8 +73,7 @@ const PairMarks: React.FC<{p: number}> = ({p}) => (
 const BarRow: React.FC<{kind: 'algo' | 'current'; grow: number}> = ({kind, grow}) => {
   const bd = BD[kind];
   const accent = kind === 'algo' ? colors.green : colors.red;
-  const scale = 980 / BD.current.between / (1 + (BD.current.within + BD.current.door) / BD.current.between);
-  const total = bd.between + bd.within + bd.door;
+  const scale = 1180 / BD.current.between / (1 + (BD.current.within + BD.current.door) / BD.current.between);
   let acc = 0;
   return (
     <div style={{display: 'flex', alignItems: 'center', gap: 24, height: 96}}>
@@ -82,7 +81,7 @@ const BarRow: React.FC<{kind: 'algo' | 'current'; grow: number}> = ({kind, grow}
         <div style={{fontSize: 16, fontWeight: 700, letterSpacing: 2.5, color: kind === 'algo' ? '#0a8f5a' : '#d23c3a'}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
         <div style={{fontSize: 26, fontWeight: 700, color: '#141a2b'}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
       </div>
-      <div style={{position: 'relative', width: 980, height: 72}}>
+      <div style={{position: 'relative', width: 1180, height: 72}}>
         {SEG.map((sg) => {
           const v = bd[sg.key];
           const left = acc * scale;
@@ -126,7 +125,6 @@ const BarRow: React.FC<{kind: 'algo' | 'current'; grow: number}> = ({kind, grow}
           );
         })}
       </div>
-      <div style={{fontSize: 46, fontWeight: 800, color: accent, opacity: grow, WebkitTextStroke: '0.5px #0003'}}>{m(total)} m</div>
     </div>
   );
 };
@@ -227,7 +225,7 @@ export const Problem03: React.FC = () => {
   const capStart = [T.panelsIn, T.within, T.chart, T.solved][phase];
   const capOpacity = interpolate(frame, [capStart, capStart + 12], [0, 1], clamp);
 
-  const common = {doorId: TO28_DOOR, traveled: Infinity, dim, underlay: <PairMarks p={scatter} />};
+  const common = {showDistance: false, doorId: TO28_DOOR, traveled: Infinity, dim, underlay: <PairMarks p={scatter} />};
 
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>

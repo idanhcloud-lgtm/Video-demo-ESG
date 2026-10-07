@@ -86,7 +86,7 @@ export const Problem02: React.FC = () => {
       />
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
-        <RoutePanel kind="algo" stops={algo} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={ALGO_LEGS} focusProgress={traceAlgo} hideOthers={hideOthers}>
+        <RoutePanel kind="algo" stops={algo} showDistance={false} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={ALGO_LEGS} focusProgress={traceAlgo} hideOthers={hideOthers}>
           <Callout
             kind="algo"
             p={callout}
@@ -94,7 +94,7 @@ export const Problem02: React.FC = () => {
             vi="Đổi lối ngay ở hầm 2; các điểm đầu dãy lấy trên đường về"
           />
         </RoutePanel>
-        <RoutePanel kind="current" stops={current} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={CURRENT_LEGS} focusProgress={traceCur} hideOthers={hideOthers}>
+        <RoutePanel kind="current" stops={current} showDistance={false} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={CURRENT_LEGS} focusProgress={traceCur} hideOthers={hideOthers}>
           <Callout
             kind="current"
             p={callout}
