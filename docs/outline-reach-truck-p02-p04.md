@@ -51,18 +51,18 @@ Lập luận: hàng rải theo hai chiều (15/18 lối, hai điểm cùng dãy 
 | 14–21s | Thẻ trắng "Where do the metres go?": hai thanh cột chồng 3 màu mọc lên, rồi 3 ô chênh lệch +149 / −346 / −233 |
 | 21–24s | Tab 03 SOLVED – "Vào dãy vừa đủ tới điểm cần lấy" |
 
-## Vấn đề 04 – Morning congestion / Ùn tắc dãy đầu buổi sáng (25,7s) – ĐÃ DỰNG
+## Vấn đề 04 – Morning congestion / Ùn tắc dãy đầu buổi sáng (27,3s) – ĐÃ DỰNG (bản 4)
 
-Composition `Problem04` (`src/scenes/Problem04.tsx`). Theo slide 8: 9:00 sáng, xe dồn vào dãy A.
+Composition `Problem04` (`src/scenes/Problem04.tsx`). Theo slide 8 và góp ý: 9:00 sáng, các TO đều bắt đầu từ dãy A, B.
 
 - **Minh họa, không phải số đo**: góc mỗi bản đồ có nhãn "ILLUSTRATION · MINH HỌA".
-- 6 xe rời cửa D01–D04, D13, D19 cùng lúc, cùng tốc độ.
-  - Hiện tại: phiếu in luôn bắt đầu từ dãy A → 4 xe (D01–D04) vào lối 1 (dãy CAT/CBP), xếp hàng ở VT 24/17/10/3 và đứng chờ (vòng đỏ nhấp nháy).
-  - Thuật toán: cùng 4 xe đi tới lối 1, 3, 5, 7 (điểm đầu riêng của mỗi phiếu) và tiếp tục chạy.
-  - 2 xe ở khu khác (lối 10, 13) giống nhau ở hai bên, cho cảnh sinh động.
-- Đầu panel đếm số xe trong dãy A theo thời gian thực: 4 vs 1.
-- Nhịp: thẻ vấn đề (0–5s) → banner đỏ "9:00 AM" (6,3–8,7s) → xe chạy, nhìn toàn kho (8,7–14,2s) → zoom 1,9× vào khu dãy A, lối 1–7, chỉ panel hiện tại; panel thuật toán giữ toàn kho (14,2–15,3s) → nhấp nháy dãy A + nhãn "4 TRUCKS · 1 AISLE" / "1 TRUCK PER AISLE" (15,5s) → callout (16,5–21,3s) → thu về toàn kho (21,3–22,5s) → SOLVED (22,7–25,7s).
-- Lưu ý: thuật toán tối ưu từng phiếu, không điều phối nhiều xe. Việc xe tỏa ra là hệ quả của việc mỗi phiếu bắt đầu ở điểm hàng của nó.
+- 9 xe rời cửa D01–D09, cùng tốc độ, đều chạy vào lối A (lối 1) và B (lối 2).
+  - Hiện tại: 3 xe kẹt ở lối A, 3 xe kẹt ở lối B, đoạn giữa dãy (VT 40–54, qua hầm 1); chỉ 3 xe rẽ được ở hầm 1.
+  - Thuật toán: cả 9 xe vẫn vào A, B, tới hầm 1 hoặc hầm 2 thì rẽ ra khắp kho, không xe nào đứng kẹt.
+- Đầu panel: số xe kẹt ở dãy A, B (hiện tại 6, thuật toán 0), đếm theo thời gian thực.
+- Chỉ panel hiện tại zoom 1,9× vào chỗ kẹt; panel thuật toán giữ toàn kho.
+- Câu chữ: hiện tại "Ùn tắc do các TO đều bắt đầu từ dãy A, B"; thuật toán "Giảm ùn tắc dãy A, B khi các xe bắt đầu rẽ qua các lối ngang". Nhãn: "6 XE KẸT ở dãy A, B" / "GIẢM ÙN TẮC dãy A, B".
+- Nhịp: thẻ vấn đề (0–5s) → banner "9:00 AM" (6,3–8,7s) → xe chạy, toàn kho (8,7–15,7s) → zoom panel hiện tại (15,7–16,8s) → nhãn + callout (16,8–23s) → thu zoom (23–24,3s) → SOLVED (24,3–27,3s).
 
 ## Phần kết (~25s)
 

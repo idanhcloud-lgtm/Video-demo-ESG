@@ -294,12 +294,13 @@ export const VsBadge: React.FC = () => (
   </div>
 );
 
-export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; vi: string; p: number; placement?: 'top' | 'bottom'}> = ({
+export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; vi: string; p: number; placement?: 'top' | 'bottom'; large?: boolean}> = ({
   kind,
   en,
   vi,
   p,
   placement = 'bottom',
+  large = false,
 }) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
   return (
@@ -321,8 +322,8 @@ export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; v
         {kind === 'algo' ? 'ALGORITHM · THUẬT TOÁN' : 'CURRENT · HIỆN TẠI'}
       </div>
       <div style={{background: '#f3f5f9', padding: '16px 24px 18px'}}>
-        <div style={{fontSize: 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{en}</div>
-        <div style={{fontSize: 20, color: '#5b6478', marginTop: 6}}>{vi}</div>
+        <div style={{fontSize: large ? 33 : 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{en}</div>
+        <div style={{fontSize: large ? 25 : 20, color: '#5b6478', marginTop: 6}}>{vi}</div>
       </div>
     </div>
   );
