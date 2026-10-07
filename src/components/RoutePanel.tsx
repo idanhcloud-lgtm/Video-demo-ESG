@@ -78,6 +78,8 @@ export interface RoutePanelProps {
   /** Stop (1-based) where the way back starts; from there the route is drawn in a lighter tint. */
   splitStop?: number;
   splitMix?: number;
+  /** 0–1: fade the route so highlighted parts stand out. */
+  dim?: number;
   /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
   underlay?: React.ReactNode;
   overlay?: React.ReactNode;
@@ -95,6 +97,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   hideOthers = 0,
   splitStop,
   splitMix = 0,
+  dim = 0,
   underlay,
   overlay,
   children,
@@ -184,7 +187,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
             strokeWidth={5.5}
             strokeLinejoin="round"
             strokeLinecap="round"
-            opacity={1 - 0.75 * splitMix}
+            opacity={1 - 0.75 * Math.max(splitMix, dim)}
             style={{filter: `drop-shadow(0 0 5px ${accent})`}}
           />
           {splitStop && splitMix > 0 ? (

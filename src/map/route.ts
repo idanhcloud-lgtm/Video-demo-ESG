@@ -102,3 +102,28 @@ export function routePolyline(stops: Stop[], doorId: string) {
 }
 
 export const stopPoint = (s: Stop): [number, number] => [xOfVT(s.vt), aisleY(laneOf(s.rack))];
+
+/** Split a route's distance (same formula as routeLength) by kind of movement. */
+export function routeBreakdown(stops: Stop[], doorId: string) {
+  const dy = doorY(doorId);
+  let between = 0;
+  let changes = 0;
+  let within = 0;
+  const withinLegs: number[] = [];
+  for (let i = 1; i < stops.length; i++) {
+    const la = laneOf(stops[i - 1].rack);
+    const lb = laneOf(stops[i].rack);
+    const d = dist(la, stops[i - 1].vt, lb, stops[i].vt);
+    if (la === lb) {
+      within += d;
+      withinLegs.push(i);
+    } else {
+      between += d;
+      changes++;
+    }
+  }
+  const first = stops[0];
+  const last = stops[stops.length - 1];
+  const door = distFromDoor(dy, laneOf(first.rack), first.vt) + distFromDoor(dy, laneOf(last.rack), last.vt);
+  return {between, changes, within, door, withinLegs};
+}

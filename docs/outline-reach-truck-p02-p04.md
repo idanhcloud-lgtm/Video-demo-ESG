@@ -24,41 +24,32 @@ Composition `Problem02` (`src/scenes/Problem02.tsx`).
 - Đồ họa giữ đúng video phần 1 (`src/layout.ts`, `src/components/`): bố cục panel, thanh vấn đề SOLVING/SOLVED, ô kệ màu, cột cửa D1–D25, nhãn CROSS AISLE, callout, thanh chú thích, font Lexend.
 - Nhịp: tab 02 sáng (0,7s) → thẻ vấn đề (1,5–5s) → thẻ thu vào tab → hai tuyến đầy đủ (5,8s) → zoom lối 2–6 (7,2s) → vệt trắng chạy trên đoạn so sánh (8,5–11s) → callout (11–16,7s) → thu zoom, ẩn điểm khác (16,7s) → SOLVED (18s) → hết (21s).
 
-## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (23s) – ĐÃ DỰNG
+## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (24s) – ĐÃ DỰNG (bản 2)
 
-Composition `Problem03` (`src/scenes/Problem03.tsx`).
+Composition `Problem03` (`src/scenes/Problem03.tsx`). Cùng phiếu 28 điểm, hằng số mới.
 
-Cùng phiếu 28 điểm (`src/data/to28.ts`), hằng số mới (1,4 m / 8,65 m), cùng khung đồ họa vấn đề 02.
+### Chứng minh: tách 100% quãng đường theo loại di chuyển
+Bản 1 so riêng đoạn về cửa (283 m vs 50 m) dễ bị xem là chọn số có lợi và không bám đề bài, nên đã thay.
 
-### Thông điệp
-Phiếu B2C rải trên 15/18 lối. Thuật toán không làm hàng bớt rải rác (hai xe ghé cùng 15 lối); nó xếp thứ tự thành **một vòng đi – về**:
-lượt đi qua vùng sâu, lượt về qua vùng gần cửa. Xe hiện tại quét lần lượt A→T nên kết thúc ở góc xa nhất và chạy không về cửa.
+| Loại di chuyển | Hiện tại (A→T) | Thuật toán | Chênh |
+|---|---|---|---|
+| Đổi lối (giữa các dãy) | 776 m (14 lần) | 925 m (19 lần) | +149 m |
+| Chạy dọc trong cùng dãy | 505 m | 159 m | −346 m |
+| Cửa ↔ điểm đầu/cuối | 315 m | 82 m | −233 m |
+| Tổng | 1.596 m | 1.166 m | −430 m |
 
-### Số liệu (đã tính bằng công thức app)
-| | Hiện tại | Thuật toán |
-|---|---|---|
-| Điểm cuối | CTP-92 (lối 18, VT 92) | CDT-12 (lối 4, VT 12) |
-| Chạy không về cửa | 282,9 m | 49,8 m |
-| Chạm lối 18 | điểm #27, sau 1.268 m | điểm #12, sau 434 m |
-| Tổng | 1.596 m | 1.166 m |
+Làm tròn theo phần dư lớn nhất để ba phần luôn cộng đúng bằng tổng. Số tính tự động bằng `routeBreakdown()` (`src/map/route.ts`).
 
-Chênh lệch chạy không: 233 m, hơn một nửa mức tiết kiệm 430 m của phiếu.
+Lập luận: hàng rải theo hai chiều (15/18 lối, hai điểm cùng dãy cách xa nhau). A→T bắt xe chạy hết từng dãy giữa hai điểm và kết thúc ở góc xa. Thuật toán chấp nhận đổi lối nhiều hơn 5 lần nhưng mỗi lần vào dãy chỉ chạy tới điểm cần lấy.
 
 ### Nhịp cảnh
 | Thời điểm | Nội dung |
 |---|---|
-| 0–1,5s | Tab 03 sáng, chip SOLVING |
-| 1,5–5s | Thẻ "PROBLEM 03 · VẤN ĐỀ 03 – Scattered items / Hàng rải rác nhiều dãy". Mô tả: "One TO touches 15 of 18 aisles – the printed order sweeps them one by one" / "Một phiếu rải 15/18 lối – phiếu in quét lần lượt từng dãy" |
-| 5–6s | Thẻ thu vào tab, hai panel hiện tuyến đầy đủ (không zoom, cả kho) |
-| 6–7,5s | Đánh dấu 15 lối có hàng ở cả hai panel. Caption: "Same TO on both routes: 15 of 18 aisles to visit" |
-| 7,5–11s | Tô hai màu: lượt đi (màu xe) tới điểm xa nhất CTP-92, lượt về (xanh dương) từ đó về cửa. Đỏ: lượt đi #1–#28, lượt về chỉ là đoạn chạy không. Xanh lá: lượt đi #1–#13 qua vùng sâu, lượt về #14–#28 qua vùng gần cửa |
-| 11–16,5s | Vệt trắng chạy trên đoạn về cửa của mỗi xe + nhãn số mét ngay trên đường: đỏ "282,9 m – no stops", xanh "49,8 m". Callout: đỏ "Ends at the far corner (lane 18, VT 92) → 283 m back empty"; xanh "Out through the deep zone, back through the front – last stop next to the door" |
-| 16,5–18s | Bỏ tô, ẩn điểm khác, giữ đoạn về cửa |
-| 18–21s | Tab 03 SOLVED. Caption: "One loop out and back – no long empty return → problem 03 solved" / "Một vòng đi – về, không chạy không đường dài → vấn đề 03 đã giải quyết" |
-
-### Lưu ý
-- Không nói "gom hàng lại" hay "giảm số dãy phải ghé" vì không đúng: hai xe ghé cùng số lối.
-- Không trùng ví dụ của vấn đề 01 (#19–#24) và 02 (lối 3–5): vấn đề 03 nhìn toàn kho, không zoom.
+| 0–5s | Tab 03 sáng, thẻ "Scattered items" – "phiếu in bắt xe chạy hết từng dãy" |
+| 5,8–10s | Hai tuyến đầy đủ, vạch vàng nối hai điểm cùng dãy (thấy hàng cách xa nhau trong dãy) |
+| 10–14s | Làm mờ tuyến, vệt trắng chạy trên các đoạn "chạy trong cùng dãy": 505 m vs 159 m |
+| 14–21s | Thẻ trắng "Where do the metres go?": hai thanh cột chồng 3 màu mọc lên, rồi 3 ô chênh lệch +149 / −346 / −233 |
+| 21–24s | Tab 03 SOLVED – "Vào dãy vừa đủ tới điểm cần lấy" |
 
 ## Vấn đề 04 – Morning congestion / Ùn tắc đầu buổi sáng (~25s)
 
