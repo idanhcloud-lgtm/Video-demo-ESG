@@ -1,171 +1,262 @@
-import {interpolate} from 'remotion';
 import {Stop, routeLength, routePolyline, stopPoint} from '../map/route';
+import {LAYOUT, MAP, project} from '../layout';
 import {colors} from '../theme';
-import {Viewport, WarehouseMap, fy} from './WarehouseMap';
+import {MapBase} from './MapBase';
 
 type Pt = [number, number];
 
-function pointAt(pts: Pt[], d: number): Pt {
-  let left = d;
+const segLen = (a: Pt, b: Pt) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+const toPath = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(' ');
+
+function pointAtFraction(pts: Pt[], f: number): Pt {
+  const total = pts.slice(1).reduce((s, p, i) => s + segLen(pts[i], p), 0);
+  let left = Math.max(0, Math.min(1, f)) * total;
   for (let i = 1; i < pts.length; i++) {
-    const seg = Math.abs(pts[i][0] - pts[i - 1][0]) + Math.abs(pts[i][1] - pts[i - 1][1]);
-    if (left <= seg) {
-      const t = seg === 0 ? 0 : left / seg;
+    const l = segLen(pts[i - 1], pts[i]);
+    if (left <= l) {
+      const t = l === 0 ? 0 : left / l;
       return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t];
     }
-    left -= seg;
+    left -= l;
   }
   return pts[pts.length - 1];
 }
 
-const cumulative = (pts: Pt[]) => {
-  const out = [0];
-  for (let i = 1; i < pts.length; i++) {
-    out.push(out[i - 1] + Math.abs(pts[i][0] - pts[i - 1][0]) + Math.abs(pts[i][1] - pts[i - 1][1]));
-  }
-  return out;
+const RouteIcon: React.FC<{kind: 'algo' | 'current'}> = ({kind}) => {
+  const c = kind === 'algo' ? colors.green : colors.red;
+  return (
+    <div
+      style={{
+        width: 54,
+        height: 54,
+        borderRadius: 13,
+        border: `2px solid ${c}66`,
+        background: kind === 'algo' ? '#123a30' : '#3a1820',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {kind === 'algo' ? (
+        <svg width={32} height={32} viewBox="0 0 32 32" fill="none" stroke={c} strokeWidth={2.6} strokeLinecap="round">
+          <path d="M5 6 L9 10 M9 6 L5 10" />
+          <circle cx={11} cy={22} r={3} />
+          <circle cx={20} cy={15} r={3} />
+          <circle cx={27} cy={7} r={3} />
+          <path d="M13 20 L18 17 M22 13 L25 9" />
+        </svg>
+      ) : (
+        <svg width={32} height={32} viewBox="0 0 32 32" fill="none" stroke={c} strokeWidth={2.6} strokeLinecap="round">
+          <path d="M12 8 H27 M12 16 H27 M12 24 H27" />
+          <path d="M5 6 V12 M5 20 V26" />
+        </svg>
+      )}
+    </div>
+  );
 };
 
-const toPath = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${fy(y)}`).join(' ');
-
-export interface PanelProps {
+export interface RoutePanelProps {
   kind: 'algo' | 'current';
   stops: Stop[];
   doorId: string;
+  /** Metres driven so far (Infinity = route complete). */
   traveled: number;
-  view: Viewport;
-  width: number;
-  mapHeight: number;
-  highlightCross?: number;
-  /** Legs (1-based index into the visit order: leg i goes stop i → stop i+1) to emphasise. */
-  highlightLegs?: number[];
-  highlight?: number;
-  /** 0–1: fade the route and stops outside `highlightLegs`. */
-  dim?: number;
-  showFinished?: boolean;
+  /** Map camera: scale and translation in map pixels. */
+  camera?: {k: number; tx: number; ty: number};
+  /** Legs to trace in white (1-based: leg i goes stop i → stop i+1), drawn in order. */
+  focusLegs?: number[];
+  /** 0…focusLegs.length: how far the white trace has progressed. */
+  focusProgress?: number;
+  /** 0–1: hide stop markers outside the focus legs. */
+  hideOthers?: number;
+  children?: React.ReactNode;
 }
 
-export const RoutePanel: React.FC<PanelProps> = ({
+export const RoutePanel: React.FC<RoutePanelProps> = ({
   kind,
   stops,
   doorId,
   traveled,
-  view,
-  width,
-  mapHeight,
-  highlightCross = 0,
-  highlightLegs = [],
-  highlight = 0,
-  dim = 0,
-  showFinished = true,
+  camera = {k: 1, tx: 0, ty: 0},
+  focusLegs = [],
+  focusProgress = 0,
+  hideOthers = 0,
+  children,
 }) => {
-  const focusStops = new Set(highlightLegs.flatMap((leg) => [leg - 1, leg]));
   const accent = kind === 'algo' ? colors.green : colors.red;
-  const {pts, stopIdx} = routePolyline(stops, doorId);
-  const cum = cumulative(pts);
+  const {pts: ptsM, stopIdx} = routePolyline(stops, doorId);
+  const pts = ptsM.map(([x, y]) => project(x, y));
   const total = routeLength(stops, doorId);
+  // Metre distance along the route at each polyline vertex (route legs are axis-aligned in metres).
+  const cumM = [0];
+  for (let i = 1; i < ptsM.length; i++) {
+    cumM.push(cumM[i - 1] + Math.abs(ptsM[i][0] - ptsM[i - 1][0]) + Math.abs(ptsM[i][1] - ptsM[i - 1][1]));
+  }
   const d = Math.min(traveled, total);
-  const visited = stopIdx.filter((i) => cum[i] <= d + 1e-6).length;
-  const truck = pointAt(pts, d);
-  const finished = traveled >= total;
+  const visited = stopIdx.filter((i) => cumM[i] <= d + 1e-6).length;
+  // Driven part of the polyline in pixels.
+  const driven: Pt[] = [pts[0]];
+  for (let i = 1; i < pts.length; i++) {
+    if (cumM[i] <= d) {
+      driven.push(pts[i]);
+    } else {
+      const t = (d - cumM[i - 1]) / (cumM[i] - cumM[i - 1]);
+      driven.push([pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t]);
+      break;
+    }
+  }
+  const focusStops = new Set(focusLegs.flatMap((leg) => [leg - 1, leg]));
+  const legPts = (leg: number) => pts.slice(stopIdx[leg - 1], stopIdx[leg] + 1);
+  const textOnFill = kind === 'algo' ? '#062016' : '#ffffff';
 
   return (
     <div
       style={{
-        width,
-        background: colors.panel,
+        position: 'absolute',
+        left: LAYOUT.panelLeft[kind],
+        top: LAYOUT.panelTop,
+        width: LAYOUT.panelW,
+        height: LAYOUT.panelH,
+        boxSizing: 'border-box',
         borderRadius: 16,
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 30px ${accent}33`,
+        background: colors.panel,
+        border: `1px solid ${colors.line}`,
+        borderTop: `3px solid ${accent}`,
+        boxShadow: `0 -6px 26px ${accent}40`,
         overflow: 'hidden',
       }}
     >
-      <div style={{display: 'flex', alignItems: 'center', padding: '14px 22px', gap: 16}}>
+      <div
+        style={{
+          height: LAYOUT.headerH - 3,
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 18,
+          padding: '0 24px 0 28px',
+          background: colors.panelHeader,
+          borderBottom: `1px solid ${colors.line}`,
+        }}
+      >
+        <RouteIcon kind={kind} />
         <div style={{flex: 1}}>
-          <div style={{fontSize: 16, fontWeight: 700, letterSpacing: 2, color: accent}}>
-            ● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}
-          </div>
-          <div style={{fontSize: 30, fontWeight: 800}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 17, color: colors.muted}}>
-            {kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Lấy theo dãy A → T'}
-          </div>
+          <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
+          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
+          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Lấy theo dãy A → T'}</div>
         </div>
-        <div style={{textAlign: 'right'}}>
-          <div style={{fontSize: 56, fontWeight: 800, color: accent, lineHeight: 1}}>
+        <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0}}>
+          <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
             {Math.round(d).toLocaleString('en-US')}
-            <span style={{fontSize: 24, marginLeft: 6}}>m</span>
+            <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>m</span>
           </div>
-          <div style={{fontSize: 17, color: colors.muted}}>
+          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>
             {visited} / {stops.length} stops · điểm
           </div>
         </div>
       </div>
-      <div style={{position: 'relative'}}>
-        <WarehouseMap view={view} width={width} height={mapHeight} accent={accent} highlightCross={highlightCross} doorId={doorId}
-          labelRacks={[...new Set(stops.map((s) => s.rack))]}>
-          <path d={toPath(pts)} fill="none" stroke={accent} strokeOpacity={0.12} strokeWidth={0.7} />
+      <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
+        <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
+          <MapBase startDoor={doorId} />
+          <path d={toPath(pts)} fill="none" stroke={accent} strokeOpacity={0.3} strokeWidth={1.5} strokeDasharray="4 6" />
           <path
-            d={toPath(pts)}
+            d={toPath(driven)}
             fill="none"
             stroke={accent}
-            opacity={1 - 0.7 * dim}
-            strokeWidth={0.9}
+            strokeWidth={5.5}
             strokeLinejoin="round"
-            strokeDasharray={`${d} ${total + 10}`}
-            style={{filter: `drop-shadow(0 0 0.6px ${accent})`}}
+            strokeLinecap="round"
+            style={{filter: `drop-shadow(0 0 5px ${accent})`}}
           />
-          {highlightLegs.map((leg) => {
-            const seg = pts.slice(stopIdx[leg - 1], stopIdx[leg] + 1);
+          {focusLegs.map((leg, i) => {
+            const p = Math.max(0, Math.min(1, focusProgress - i));
+            if (p <= 0) return null;
+            const lp = legPts(leg);
+            const head = pointAtFraction(lp, p);
             return (
-              <path
-                key={leg}
-                d={toPath(seg)}
-                fill="none"
-                stroke={accent}
-                strokeWidth={1.6}
-                style={{filter: `drop-shadow(0 0 1.2px ${accent})`}}
-                strokeLinejoin="round"
-                opacity={highlight}
-              />
+              <g key={leg}>
+                <path
+                  d={toPath(lp)}
+                  pathLength={1}
+                  strokeDasharray="1 1"
+                  strokeDashoffset={1 - p}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth={6}
+                  strokeLinejoin="round"
+                  style={{filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))'}}
+                />
+                {p < 1 ? <circle cx={head[0]} cy={head[1]} r={9} fill="#ffffff" stroke={accent} strokeWidth={3} /> : null}
+              </g>
             );
           })}
           {stops.map((s, i) => {
-            const [x, y] = stopPoint(s);
+            const [x, y] = project(...stopPoint(s));
             const done = i < visited;
+            const op = focusStops.has(i) ? 1 : 1 - hideOthers;
+            if (op <= 0.01) return null;
             return (
-              <g key={i} opacity={focusStops.has(i) ? 1 : 1 - 0.7 * dim}>
-                <circle cx={x} cy={fy(y)} r={2.1} fill={done ? accent : '#0d1626'} stroke={accent} strokeWidth={0.45} />
-                <text x={x} y={fy(y) + 0.8} fontSize={2.2} fontWeight={800} textAnchor="middle" fill={done ? '#0b1220' : accent}>
+              <g key={i} opacity={op}>
+                <circle cx={x} cy={y} r={15.5} fill={done ? accent : colors.panel} stroke={accent} strokeWidth={2.5} />
+                <text x={x} y={y + 5} textAnchor="middle" fontSize={14.5} fontWeight={700} fill={done ? textOnFill : '#ffffff'}>
                   {i + 1}
                 </text>
               </g>
             );
           })}
-          <g transform={`translate(${truck[0]} ${fy(truck[1])})`} opacity={finished ? 0 : 1}>
-            <rect x={-2} y={-1.3} width={4} height={2.6} rx={0.6} fill={colors.yellow} stroke="#0b1220" strokeWidth={0.3} />
-          </g>
-        </WarehouseMap>
-        {finished && showFinished ? (
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 24,
-              transform: `translateX(-50%) scale(${interpolate(traveled - total, [0, 12], [0.6, 1], {extrapolateRight: 'clamp'})})`,
-              background: '#ffffff',
-              color: '#0b1220',
-              borderRadius: 12,
-              padding: '10px 22px',
-              textAlign: 'center',
-              boxShadow: `0 0 0 3px ${accent}`,
-            }}
-          >
-            <div style={{fontSize: 26, fontWeight: 800}}>✓ FINISHED · Về đích</div>
-            <div style={{fontSize: 18, fontWeight: 700, color: kind === 'algo' ? '#0a8f5a' : '#c4363b'}}>
-              {Math.round(total)} m · {stops.length} / {stops.length} stops
-            </div>
-          </div>
-        ) : null}
+        </g>
+      </svg>
+      {children}
+    </div>
+  );
+};
+
+export const VsBadge: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      left: 960 - 40,
+      top: LAYOUT.panelTop + 8,
+      width: 80,
+      height: 80,
+      boxSizing: 'border-box',
+      borderRadius: 40,
+      background: colors.bg,
+      border: '3px solid #ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 28,
+      fontWeight: 800,
+      zIndex: 3,
+    }}
+  >
+    VS
+  </div>
+);
+
+export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; vi: string; p: number}> = ({kind, en, vi, p}) => {
+  const accent = kind === 'algo' ? colors.green : colors.red;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 30,
+        right: 30,
+        top: 513,
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: `2px solid ${accent}`,
+        boxShadow: `0 10px 34px #000a, 0 0 22px ${accent}55`,
+        opacity: p,
+        transform: `translateY(${(1 - p) * 30}px)`,
+      }}
+    >
+      <div style={{background: accent, color: '#0b1222', fontWeight: 700, fontSize: 19, letterSpacing: 2.5, padding: '10px 24px'}}>
+        {kind === 'algo' ? 'ALGORITHM · THUẬT TOÁN' : 'CURRENT · HIỆN TẠI'}
+      </div>
+      <div style={{background: '#f3f5f9', padding: '16px 24px 18px'}}>
+        <div style={{fontSize: 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{en}</div>
+        <div style={{fontSize: 20, color: '#5b6478', marginTop: 6}}>{vi}</div>
       </div>
     </div>
   );

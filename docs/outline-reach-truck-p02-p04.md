@@ -11,7 +11,7 @@ Nguồn: video phần 1 (vấn đề 01) và `Slide_ESG_Project_V3.pptx` (slide 
 | c. Minh họa | 12s | Callout "CURRENT · HIỆN TẠI" (đỏ) và "ALGORITHM · THUẬT TOÁN" (xanh), có số liệu |
 | d. Kết luận | 4s | Tick vào thanh tiêu đề, dòng chú thích "→ problem 0x solved" |
 
-## Vấn đề 02 – Cross aisles not optimally utilized / Lối đi ngang chưa được sử dụng tối ưu (~21,7s) – ĐÃ DỰNG
+## Vấn đề 02 – Cross aisles not optimally used / Lối đi ngang chưa được sử dụng tối ưu (~21s) – ĐÃ DỰNG
 
 Composition `Problem02` (`src/scenes/Problem02.tsx`).
 
@@ -21,7 +21,8 @@ Composition `Problem02` (`src/scenes/Problem02.tsx`).
 - Phóng to lối 1–12, tô sáng lối 3–5:
   - Hiện tại: dãy 3 VT 70 → VT 20 → ra đầu dãy → dãy 4 VT 12 → VT 62 → hầm 1 → dãy 5 VT 38 → VT 98 (vào sâu, ra đầu, lại vào sâu).
   - Thuật toán: dãy 3 VT 70 → hầm 2 → dãy 5 VT 98; các điểm gần cửa (VT 62, 38, 20, 12) lấy trên đường về.
-- Nhịp: thẻ vấn đề (0–4,5s) → hai tuyến đầy đủ (4,5–6,3s) → nháy 4 chỗ sang lối (6,3–9,3s) → zoom (9,3–11s) → tô sáng + callout (11–18,7s) → tick "solved" (18,7–21,7s).
+- Đồ họa giữ đúng video phần 1 (`src/layout.ts`, `src/components/`): bố cục panel, thanh vấn đề SOLVING/SOLVED, ô kệ màu, cột cửa D1–D25, nhãn CROSS AISLE, callout, thanh chú thích, font Lexend.
+- Nhịp: tab 02 sáng (0,7s) → thẻ vấn đề (1,5–5s) → thẻ thu vào tab → hai tuyến đầy đủ (5,8s) → zoom lối 2–6 (7,2s) → vệt trắng chạy trên đoạn so sánh (8,5–11s) → callout (11–16,7s) → thu zoom, ẩn điểm khác (16,7s) → SOLVED (18s) → hết (21s).
 
 ## Vấn đề 03 – Scattered items / Hàng rải rác nhiều dãy (~25s)
 

@@ -2,7 +2,7 @@ import {loadFont} from '@remotion/fonts';
 import {staticFile} from 'remotion';
 
 // Fonts are bundled in public/fonts so renders work offline and look identical everywhere.
-export const fontFamily = 'Be Vietnam Pro';
+export const fontFamily = 'Lexend';
 
 const subsets = {
   latin:
@@ -13,10 +13,10 @@ const subsets = {
 
 export const fontsLoaded = Promise.all(
   Object.entries(subsets).flatMap(([subset, unicodeRange]) =>
-    ['400', '600', '700', '800'].map((weight) =>
+    ['400', '500', '600', '700', '800'].map((weight) =>
       loadFont({
         family: fontFamily,
-        url: staticFile(`fonts/be-vietnam-pro-${subset}-${weight}-normal.woff2`),
+        url: staticFile(`fonts/lexend-${subset}-${weight}-normal.woff2`),
         weight,
         unicodeRange,
       }),
@@ -25,13 +25,16 @@ export const fontsLoaded = Promise.all(
 );
 
 export const colors = {
-  bg: '#0b1220',
-  panel: '#111a2b',
+  bg: '#060a16',
+  panel: '#0b1222',
+  panelHeader: '#0e1628',
+  line: '#1b2540',
   text: '#ffffff',
-  muted: '#9aa4b8',
-  green: '#2ee59d',
-  red: '#ff5a5f',
-  yellow: '#f5c518',
+  muted: '#8f9bb5',
+  green: '#34e39e',
+  red: '#f25f5c',
+  yellow: '#f5c542',
+  amber: '#d9a93f',
 };
 
 export const VIDEO = {width: 1920, height: 1080, fps: 30};

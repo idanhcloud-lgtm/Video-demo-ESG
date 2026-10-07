@@ -1,5 +1,5 @@
 import {Composition} from 'remotion';
-import {Problem02, PROBLEM02_DURATION} from './scenes/Problem02';
+import {PROBLEM02_DURATION, Problem02} from './scenes/Problem02';
 import {TitleScene} from './scenes/TitleScene';
 import {VIDEO} from './theme';
 
