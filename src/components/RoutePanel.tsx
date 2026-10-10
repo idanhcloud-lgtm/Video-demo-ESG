@@ -139,6 +139,8 @@ export interface RoutePanelProps {
   dim?: number;
   /** false: header shows the stop count instead of metres (keeps totals consistent with video part 1). */
   showDistance?: boolean;
+  /** Overrides the header number (e.g. a live counter). */
+  header?: {value: string; unit: string; sub: string};
   /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
   underlay?: React.ReactNode;
   overlay?: React.ReactNode;
@@ -158,6 +160,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   splitMix = 0,
   dim = 0,
   showDistance = true,
+  header,
   underlay,
   overlay,
   children,
@@ -193,9 +196,9 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   return (
     <PanelShell
       kind={kind}
-      value={showDistance ? Math.round(d).toLocaleString('en-US') : String(visited)}
-      unit={showDistance ? 'm' : `/ ${stops.length}`}
-      sub={showDistance ? `${visited} / ${stops.length} stops · điểm` : 'stops visited · điểm đã ghé'}
+      value={header ? header.value : showDistance ? Math.round(d).toLocaleString('en-US') : String(visited)}
+      unit={header ? header.unit : showDistance ? 'm' : `/ ${stops.length}`}
+      sub={header ? header.sub : showDistance ? `${visited} / ${stops.length} stops · điểm` : 'stops visited · điểm đã ghé'}
     >
       <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
