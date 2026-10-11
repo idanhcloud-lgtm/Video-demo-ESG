@@ -4,6 +4,7 @@ import {PROBLEM03_DURATION, Problem03} from './scenes/Problem03';
 import {PROBLEM04_DURATION, Problem04} from './scenes/Problem04';
 import {SUMMARY_DURATION, Summary} from './scenes/Summary';
 import {TitleScene} from './scenes/TitleScene';
+import {WithVoice, voDuration} from './scenes/WithVoice';
 import {VIDEO} from './theme';
 
 export const RemotionRoot: React.FC = () => {
@@ -49,6 +50,28 @@ export const RemotionRoot: React.FC = () => {
         width={VIDEO.width}
         height={VIDEO.height}
       />
+      {(
+        [
+          ['Problem02VO', '02', Problem02],
+          ['Problem03VO', '03', Problem03],
+          ['Problem04VO', '04', Problem04],
+          ['SummaryVO', 'KET', Summary],
+        ] as const
+      ).map(([id, part, Scene]) => (
+        <Composition
+          key={id}
+          id={id}
+          component={() => (
+            <WithVoice part={part}>
+              <Scene />
+            </WithVoice>
+          )}
+          durationInFrames={voDuration(part, VIDEO.fps)}
+          fps={VIDEO.fps}
+          width={VIDEO.width}
+          height={VIDEO.height}
+        />
+      ))}
     </>
   );
 };
