@@ -1,0 +1,40 @@
+# Lời đọc cho ElevenLabs v3 – có thẻ cảm xúc trong ngoặc vuông
+# Mỗi dòng xuất 1 file, đặt tên đúng mã ở đầu dòng (ví dụ 02-3.mp3). Chỉ dán phần sau dấu hai chấm.
+# Thẻ [ ] viết bằng tiếng Anh, v3 hiểu và không đọc ra thành tiếng. "..." = ngập ngừng/ngắt nhịp ngắn.
+
+## Phần 01
+01-1: [warmly] Tối ưu lộ trình xe reach truck... bằng thuật toán. [confident] Kho B2C rộng ba mươi nghìn chín trăm mét vuông, có ba mươi lăm dãy kệ, gần ba mươi bảy nghìn vị trí lưu kho... và hai mươi sáu xe nâng.
+01-2: [curious] Cùng một phiếu tê-ô... nhưng đi theo hai cách khác nhau. Bên trái, lộ trình tối ưu bằng thuật toán. Bên phải, cách chúng ta vẫn làm hằng ngày: lấy hàng theo thứ tự dãy A đến T.
+01-3: [excited] Hai xe cùng xuất phát, cùng tốc độ, cùng hai mươi tám điểm hạ hàng. [pause] Xe theo lộ trình tối ưu về đích sau một nghìn không trăm lẻ tám mét. [surprised] Còn xe đi theo dãy... phải chạy tới một nghìn bốn trăm bốn mươi mét! [emphasizes] Nhiều hơn bốn trăm ba mươi hai mét, tức là khoảng ba mươi phần trăm.
+01-4: [thoughtful] Vậy... vì sao lại chênh lệch nhiều như vậy? [curious] Quy trình hiện tại có bốn hạn chế. Chúng ta cùng xem thuật toán giải quyết từng hạn chế một nhé.
+01-5: [serious] Hạn chế thứ nhất: không gom các vị trí gần nhau. [thoughtful] Các điểm nằm sát nhau... nhưng vì thuộc các dãy khác nhau, nên trên phiếu in chúng lại bị tách xa.
+01-6: [surprised] Cùng một khu vực, mà xe hiện tại phải vào tới hai lần! [relieved] Thuật toán gom các điểm gần nhau vào cùng một lượt, xe chỉ cần đi qua một lần. [satisfied] Hạn chế thứ nhất... đã được giải quyết.
+
+## Phần 02
+02-1: [serious] Hạn chế thứ hai: lối đi ngang chưa được sử dụng tối ưu. [thoughtful] Chỗ xe đổi lối là do thứ tự in trên phiếu quyết định... chứ không phải lối ngang gần nhất.
+02-2: [curious] Hãy nhìn kỹ khu vực dãy ba đến dãy năm.
+02-3: [frustrated] Xe hiện tại lấy xong điểm số năm ở sâu trong dãy... rồi phải chạy ngược về tận đầu dãy để đổi lối, sau đó lại vào sâu tới điểm số tám. [pause] [confident] Còn thuật toán? Đổi lối ngay tại hầm hai trên đường đi, và các điểm gần đầu dãy được lấy luôn trên đường về.
+02-4: [satisfied] Đổi lối ngay tại lối ngang trên đường đi. Hạn chế thứ hai... đã được giải quyết.
+
+## Phần 03
+03-1: [serious] Hạn chế thứ ba: hàng nằm rải rác nhiều dãy. [emphasizes] Nếu không có lộ trình tối ưu... xe sẽ phải chạy thừa rất nhiều.
+03-2: [thoughtful] Một phiếu tê-ô có hai mươi tám điểm, nằm rải rác trên mười lăm trong mười tám dãy... từ đầu kho cho tới tận cuối kho.
+03-3: [curious] Cùng các điểm, cùng tốc độ. [pause] [surprised] Xe đi theo lộ trình tối ưu đã về đích rồi... trong khi xe đi theo dãy vẫn còn đang chạy!
+03-4: [curious] Thử duỗi thẳng hai lộ trình ra... để so độ dài xem sao.
+03-5: [emphasizes] Phần dây đỏ dài hơn... chính là quãng đường lãng phí. [serious] Hàng càng rải rác, đi theo thứ tự dãy càng lãng phí.
+03-6: [confident] Lộ trình tối ưu cắt bỏ phần lãng phí này. [satisfied] Hạn chế thứ ba... đã được giải quyết.
+
+## Phần 04
+04-1: [serious] Hạn chế thứ tư: ùn tắc đầu buổi sáng. [thoughtful] Lý do là... các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
+04-2: [dramatic] Chín giờ sáng... giờ cao điểm. Các xe cùng rời cửa.
+04-3: [concerned] Với cách hiện tại, xe nào cũng chạy vào dãy A và Bê trước. Chỉ ba xe kịp rẽ sang lối ngang... [sighs] sáu xe còn lại kẹt cứng ở giữa dãy.
+04-4: [serious] Ùn tắc xảy ra vì các phiếu đều bắt đầu từ dãy A, Bê. [pause] [confident] Với lộ trình tối ưu, xe vẫn đi vào từ dãy A, Bê... nhưng tới lối ngang là rẽ ra khắp kho, nên không còn xe nào đứng kẹt.
+04-5: [relieved] Giảm ùn tắc ở dãy A, Bê. [satisfied] Hạn chế thứ tư... đã được giải quyết.
+
+## Phần kết
+KET-1: [warmly] Cùng nhìn lại bốn hạn chế của quy trình hiện tại.
+KET-2: [thoughtful] Một: các điểm gần nhau nhưng khác dãy bị tách xa trên phiếu. [confident] Thuật toán gom chúng vào cùng một lượt.
+KET-3: [thoughtful] Hai: xe phải chạy về đầu dãy để đổi lối. [confident] Thuật toán đổi lối ngay ở lối ngang trên đường đi.
+KET-4: [thoughtful] Ba: hàng rải nhiều dãy khiến xe chạy thừa. [confident] Lộ trình tối ưu cắt bỏ quãng đường lãng phí.
+KET-5: [thoughtful] Bốn: các phiếu đều bắt đầu từ dãy A, Bê gây ùn tắc. [confident] Xe được rẽ qua lối ngang, giảm ùn tắc.
+KET-6: [serious] Bốn hạn chế... nhưng chung một nguyên nhân: phiếu in theo thứ tự A đến T cố định. [pause] [inspired] Và giải pháp của chúng tôi... là sắp xếp lại lộ trình theo đúng vị trí hàng.
