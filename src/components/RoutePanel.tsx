@@ -62,11 +62,12 @@ const RouteIcon: React.FC<{kind: 'algo' | 'current'}> = ({kind}) => {
 };
 
 /** Panel frame and header shared by all comparison panels (layout of video part 1). */
-export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit: string; sub: string; children: React.ReactNode}> = ({
+export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit: string; sub: string; statsOpacity?: number; children: React.ReactNode}> = ({
   kind,
   value,
   unit,
   sub,
+  statsOpacity = 1,
   children,
 }) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
@@ -105,7 +106,7 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
           <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
           <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Hạ hàng theo dãy A → T'}</div>
         </div>
-        <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0}}>
+        <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0, opacity: statsOpacity}}>
           <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
             {value}
             <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>{unit}</span>
@@ -141,6 +142,8 @@ export interface RoutePanelProps {
   showDistance?: boolean;
   /** false: hide the faint planned route (only the driven part is drawn). */
   showPlanned?: boolean;
+  /** 0–1: opacity of the header numbers (fade them once they are no longer the point). */
+  statsOpacity?: number;
   /** Overrides the header number (e.g. a live counter). */
   header?: {value: string; unit: string; sub: string};
   /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
@@ -163,6 +166,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   dim = 0,
   showDistance = true,
   header,
+  statsOpacity = 1,
   showPlanned = true,
   underlay,
   overlay,
@@ -202,6 +206,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
       value={header ? header.value : showDistance ? Math.round(d).toLocaleString('en-US') : String(visited)}
       unit={header ? header.unit : showDistance ? 'm' : `/ ${stops.length}`}
       sub={header ? header.sub : showDistance ? `${visited} / ${stops.length} stops · điểm` : 'stops visited · điểm đã ghé'}
+      statsOpacity={statsOpacity}
     >
       <svg width={MAP.w} height={MAP.h} style={{display: 'block'}}>
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>

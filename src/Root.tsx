@@ -52,6 +52,7 @@ export const RemotionRoot: React.FC = () => {
         width={VIDEO.width}
         height={VIDEO.height}
       />
+      <Composition id="MainRaceClean" component={() => <MainRace clean demoSubtitle />} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="MainRace" component={MainRace} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="Condensed" component={Condensed} durationInFrames={CONDENSED_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(

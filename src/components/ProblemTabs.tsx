@@ -30,11 +30,12 @@ const Chip: React.FC<{text: string; dark: boolean}> = ({text, dark}) => (
 );
 
 /** Problem tab bar. `glow` (0–1) lights the solving tab; `hidden` hides a tab (while its card is shown). */
-export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: number; checkScale?: number}> = ({
+export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: number; checkScale?: number; flash?: {index: number; p: number}}> = ({
   states,
   glow = 0,
   hidden,
   checkScale = 1,
+  flash,
 }) => (
   <>
     {PROBLEMS.map((p, i) => {
@@ -58,7 +59,15 @@ export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: 
             padding: '0 24px',
             background: solved ? '#eef1f7' : solving ? '#0a1020' : '#0a101e',
             border: `2px solid ${solved || solving ? '#ffffff' : '#141c2e'}`,
-            boxShadow: solving ? `0 0 ${40 * glow}px rgba(255,255,255,${0.45 * glow})` : solved ? '0 0 24px rgba(255,255,255,0.15)' : 'none',
+            boxShadow:
+              flash && flash.index === i && solved
+                ? `0 0 ${20 + 60 * flash.p}px rgba(52,227,158,${0.25 + 0.6 * flash.p}), 0 0 0 ${4 * flash.p}px ${colors.green}`
+                : solving
+                  ? `0 0 ${40 * glow}px rgba(255,255,255,${0.45 * glow})`
+                  : solved
+                    ? '0 0 24px rgba(255,255,255,0.15)'
+                    : 'none',
+            transform: flash && flash.index === i && solved ? `scale(${1 + 0.05 * flash.p})` : undefined,
             opacity: hidden === i ? 0 : 1,
           }}
         >

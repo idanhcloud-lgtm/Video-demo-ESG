@@ -1,6 +1,7 @@
 import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
 import {Background} from '../components/Background';
 import {CaptionBar} from '../components/CaptionBar';
+import {Subtitle} from '../components/Subtitle';
 import {TabState, ProblemTabs} from '../components/ProblemTabs';
 import {Ropes, Truck} from '../components/Ropes';
 import {Callout, RoutePanel, VsBadge} from '../components/RoutePanel';
@@ -54,7 +55,8 @@ const mix = (a: Cam, b: Cam, t: number): Cam => ({k: a.k + (b.k - a.k) * t, tx: 
 
 const Hl: React.FC<{c: string; children: React.ReactNode}> = ({c, children}) => <span style={{color: c}}>{children}</span>;
 
-export const MainRace: React.FC = () => {
+/** clean: no caption bar (bottom strip kept for subtitles); demoSubtitle shows how a subtitle sits there. */
+export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean}> = ({clean = false, demoSubtitle = false}) => {
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -89,6 +91,9 @@ export const MainRace: React.FC = () => {
   const glow = solvingIdx >= 0 ? interpolate(frame, [startAt[solvingIdx], startAt[solvingIdx] + 15], [0, 1], clamp) : 0;
   const lastSolved = Math.max(...solvedAt.filter((s) => frame >= s), -Infinity);
   const check = Number.isFinite(lastSolved) ? spring({frame: frame - lastSolved, fps, config: {damping: 12}}) : 1;
+  const flashIdx = solvedAt.findIndex((s) => s === lastSolved);
+  const flashP = Number.isFinite(lastSolved) ? interpolate(frame - lastSolved, [0, 8, 40, 70], [0, 1, 1, 0], clamp) : 0;
+  const statsOpacity = interpolate(frame, [T.tabs, T.tabs + 20], [1, clean ? 0 : 1], clamp);
 
   const callP1 = spring({frame: frame - T.p1Callout, fps, config: {damping: 200}}) * interpolate(frame, [T.p2 - 10, T.p2], [1, 0], clamp);
   const callP2 = spring({frame: frame - T.p2Callout, fps, config: {damping: 200}}) * interpolate(frame, [T.p3 - 10, T.p3], [1, 0], clamp);
@@ -127,6 +132,7 @@ export const MainRace: React.FC = () => {
     showDistance: false,
     showPlanned: false,
     camera: cam,
+    statsOpacity,
     focusLegs: active ? active[kind] : [],
     focusProgress: active ? trace(active[kind].length) : 0,
     hideOthers: 0.75 * focusOn,
@@ -176,7 +182,7 @@ export const MainRace: React.FC = () => {
         <div style={{fontSize: 26, color: colors.muted}}>Cùng 1 phiếu TO · 28 điểm · Xe nào chạy ít hơn?</div>
       </div>
       <div style={{opacity: tabsIn, transform: `translateY(${(1 - tabsIn) * -20}px)`}}>
-        <ProblemTabs states={states} glow={glow} checkScale={check} />
+        <ProblemTabs states={states} glow={glow} checkScale={check} flash={clean ? {index: flashIdx, p: flashP} : undefined} />
       </div>
 
       <RoutePanel {...panel('algo')}>
@@ -222,7 +228,14 @@ export const MainRace: React.FC = () => {
       <FinishChip kind="current" />
 
       {ropesOn ? <Ropes frame={frame} start={T.p3Ropes} waste={T.p3Waste} tracks={TRACK} /> : null}
-      <CaptionBar icon={cap.icon} en={cap.en} vi={cap.vi} opacity={capOpacity} />
+      {clean ? null : <CaptionBar icon={cap.icon} en={cap.en} vi={cap.vi} opacity={capOpacity} />}
+      {demoSubtitle && frame >= T.p1 && frame < T.p2 ? (
+        <Subtitle
+          vi="Một: các điểm gần nhau không được hạ hàng liên tiếp..."
+          en="One: nearby stops are not handled in sequence..."
+          opacity={interpolate(frame, [T.p1 + 10, T.p1 + 20], [0, 1], clamp)}
+        />
+      ) : null}
     </AbsoluteFill>
   );
 };
