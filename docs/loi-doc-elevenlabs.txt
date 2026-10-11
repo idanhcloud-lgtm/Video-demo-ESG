@@ -37,9 +37,3 @@ KET-3: Hai: xe phải chạy về đầu dãy để đổi lối. Thuật toán 
 KET-4: Ba: hàng rải nhiều dãy khiến xe chạy thừa. Lộ trình tối ưu cắt bỏ quãng đường lãng phí.
 KET-5: Bốn: các phiếu đều bắt đầu từ dãy A, Bê gây ùn tắc. Xe được rẽ qua lối ngang, giảm ùn tắc.
 KET-6: Bốn hạn chế, chung một nguyên nhân: phiếu in theo thứ tự A đến T cố định. Giải pháp của chúng tôi là sắp xếp lại lộ trình theo vị trí hàng.
-KET-8: +7s
-KET-9: +12s
-KET-10: +6,5s
-KET-11: +6,5s
-KET-12: +1,5s
-KET-13: **+33,5s**
