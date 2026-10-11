@@ -39,9 +39,9 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 ```
 [matter-of-fact] Bốn: ùn tắc dãy A, Bê buổi sáng. Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu tê-ô, ai cũng bắt đầu hạ hàng từ dãy A và Bê... vì phiếu nào cũng in hai dãy này đầu tiên.
 [long pause]
-[calm] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe kịp rẽ ra lối ngang... sáu xe kẹt ở giữa dãy.
+[calm] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe rẽ ra lối ngang, vì đã hạ xong các điểm trong hai dãy này. Sáu xe còn điểm ở cuối dãy, phải đi tiếp... nên kẹt ở giữa dãy.
 [long pause]
-[calm] Với lộ trình tối ưu, xe vẫn vào từ dãy A, Bê, nhưng tới lối ngang là rẽ ra khắp kho. Không còn xe đứng kẹt.
+[calm] Với lộ trình tối ưu, xe không phải đi hết từng dãy. Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình... hạn chế việc dồn vào cùng một chỗ lúc đầu ca.
 ```
 
 ## V4 – Kết (tổng kết 4 hạn chế, nhịp chậm)
