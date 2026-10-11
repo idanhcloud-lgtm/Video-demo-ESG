@@ -13,7 +13,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 ```
 [calm, professional] Tối ưu lộ trình xe reach truck bằng thuật toán. Kho B2C rộng ba mươi nghìn chín trăm mét vuông, có ba mươi lăm dãy kệ và hai mươi sáu xe nâng.
 [long pause]
-[calm] Cùng một phiếu tê-ô, hai mươi tám điểm hạ hàng, nhưng đi theo hai cách. Bên trái là lộ trình tối ưu. Bên phải là cách hiện tại, theo thứ tự dãy A đến T.
+[calm] Để so sánh, chúng tôi mô phỏng cùng một phiếu tê-ô có hai mươi tám điểm hạ hàng. Bên trái, xe đi theo lộ trình do thuật toán sắp xếp. Bên phải, xe đi theo cách đang làm tại kho: lần lượt từ dãy A đến T.
 [long pause]
 [calm] Hai xe cùng xuất phát, cùng tốc độ. Xe theo lộ trình tối ưu đã về đích... trong khi xe đi theo dãy vẫn còn đang chạy.
 [long pause]
