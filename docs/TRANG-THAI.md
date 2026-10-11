@@ -1,7 +1,7 @@
 # Trạng thái dự án video (tạm dừng chờ giọng đọc)
 
 ## Đang chờ
-- Người dùng tạo giọng đọc ElevenLabs v3 theo `docs/kich-ban-giong-doc-v2.md` → 4 file `V1.mp3`–`V4.mp3`.
+- Người dùng tạo giọng đọc ElevenLabs v3 theo `docs/kich-ban-giong-doc-v4.md` (viết cho ElevenLabs v4, thẻ cảm xúc nhẹ; V4 là đoạn kết mới tổng kết 4 hạn chế) → 4 file `V1.mp3`–`V4.mp3`.
 - Khi nhận file: cắt câu theo khoảng lặng (như `tools/voiceover_plan.py`), giữ hình cho khớp, dựng phụ đề song ngữ ở dải dưới.
 
 ## Bản rút gọn (đang làm)
