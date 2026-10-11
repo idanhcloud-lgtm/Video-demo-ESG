@@ -26,7 +26,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 [long pause]
 [calm] Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực một lần là hạ hàng xong.
 [long pause]
-[matter-of-fact] Hai: lối đi ngang chưa được sử dụng tối ưu. Xe hiện tại chạy ngược về đầu dãy để đổi lối, rồi lại vào sâu.
+[matter-of-fact] Hai: lối đi ngang chưa được sử dụng tối ưu. Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối, rồi lại vào sâu.
 [long pause]
 [calm] Thuật toán đổi lối ngay tại lối ngang gần nhất, trên đường đang đi. Các điểm gần cửa được hạ hàng trên đường quay về.
 [long pause]
@@ -50,7 +50,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 [long pause]
 [calm, slow] Một: các điểm gần nhau không được hạ hàng liên tiếp.
 [long pause]
-[calm, slow] Hai: lối ngang chưa được sử dụng tối ưu, xe quay ngược về đầu dãy để đổi lối, dù có lối ngang gần hơn.
+[calm, slow] Hai: hạ xong điểm ở sâu trong dãy, xe quay ra đầu dãy rồi lại vào sâu dãy bên cạnh... thay vì đổi lối ngay tại lối ngang gần đó.
 [long pause]
 [calm, slow] Ba: hàng rải rác, xe chạy thừa nhiều.
 [long pause]
