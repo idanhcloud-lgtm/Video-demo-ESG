@@ -1,0 +1,17 @@
+# Trạng thái dự án video (tạm dừng chờ giọng đọc)
+
+## Đang chờ
+- Người dùng tạo giọng đọc ElevenLabs v3 theo `docs/kich-ban-giong-doc-v2.md` → 4 file `V1.mp3`–`V4.mp3`.
+- Khi nhận file: cắt câu theo khoảng lặng (như `tools/voiceover_plan.py`), giữ hình cho khớp, dựng phụ đề song ngữ ở dải dưới.
+
+## Bản rút gọn (đang làm)
+- Composition `Condensed` = Title → `MainRace` (cuộc đua + 01–03 trên cùng bản đồ) → `Problem04` → `ClosingShort`.
+- Bố cục đã duyệt thử: `MainRace` với `clean` (bỏ thanh chữ dưới, dải dưới để phụ đề, thẻ hạn chế chớp xanh khi giải quyết). Bản thử: composition `MainRaceClean`.
+- Chưa chốt: callout chỉ tiếng Việt (A) hay song ngữ (B). Chưa áp `clean` cho `Problem04` và `ClosingShort`.
+
+## Thuật ngữ đã chốt
+- "hạ hàng" (không dùng "lấy", "gom"), "liên tiếp", "lối ngang" (không dùng "hầm").
+- Không hiện số mét ở bản rút gọn. Video 1080p 60fps.
+
+## Bản đầy đủ có giọng (đã xong)
+- `tools/build_full.sh`, file giọng gốc `audio/raw/`, kế hoạch giữ hình `src/data/voiceover.json`.
