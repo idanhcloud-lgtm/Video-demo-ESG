@@ -59,6 +59,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="SlideFigure" component={SlideFigure} defaultProps={{variant: 'overview' as const}} durationInFrames={1} fps={VIDEO.fps} width={FIGURE.width} height={FIGURE.height} />
       <Composition id="Condensed" component={Condensed} durationInFrames={CONDENSED_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="CondensedVoice" component={CondensedVoice} durationInFrames={CONDENSED_VOICE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="CondensedVoiceEN" component={CondensedVoice} defaultProps={{enFirst: true}} durationInFrames={CONDENSED_VOICE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],

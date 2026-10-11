@@ -1,7 +1,8 @@
 import {colors, fontFamily} from '../theme';
 
 /** Bilingual subtitle in the strip reserved at the bottom of the frame (below the map panels). */
-export const Subtitle: React.FC<{vi: string; en: string; opacity?: number}> = ({vi, en, opacity = 1}) => (
+/** enFirst: English is the main (large) line, Vietnamese the small one. */
+export const Subtitle: React.FC<{vi: string; en: string; opacity?: number; enFirst?: boolean}> = ({vi, en, opacity = 1, enFirst = false}) => (
   <div style={{position: 'absolute', left: 120, right: 120, top: 922, textAlign: 'center', opacity, fontFamily}}>
     <div
       style={{
@@ -11,8 +12,8 @@ export const Subtitle: React.FC<{vi: string; en: string; opacity?: number}> = ({
         padding: '8px 22px 10px',
       }}
     >
-      <div style={{fontSize: 34, fontWeight: 600, lineHeight: 1.25, color: '#ffffff'}}>{vi}</div>
-      <div style={{fontSize: 24, lineHeight: 1.25, color: colors.muted}}>{en}</div>
+      <div style={{fontSize: 34, fontWeight: 600, lineHeight: 1.25, color: '#ffffff'}}>{enFirst ? en : vi}</div>
+      <div style={{fontSize: 24, lineHeight: 1.25, color: colors.muted}}>{enFirst ? vi : en}</div>
     </div>
   </div>
 );

@@ -12,18 +12,19 @@ const S = vo.scenes;
 export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds);
 
 /** Bilingual subtitle for the sentence being spoken. */
-const Subtitles: React.FC = () => {
+const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const t = frame / fps;
   const s = [...vo.subs].reverse().find((x) => t >= x.at && t < x.end);
   if (!s) return null;
   const o = interpolate(t, [s.at, s.at + 0.15, s.end - 0.15, s.end], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  return <Subtitle vi={s.vi} en={s.en} opacity={o} />;
+  return <Subtitle vi={s.vi} en={s.en} opacity={o} enFirst={enFirst} />;
 };
 
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
-export const CondensedVoice: React.FC = () => (
+/** enFirst: subtitles with English as the main line. */
+export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false}) => (
   <AbsoluteFill>
     <Series>
       <Series.Sequence durationInFrames={f(S.title.seconds)}>
@@ -44,6 +45,6 @@ export const CondensedVoice: React.FC = () => (
         <Audio src={staticFile(a.file)} />
       </Sequence>
     ))}
-    <Subtitles />
+    <Subtitles enFirst={enFirst} />
   </AbsoluteFill>
 );
