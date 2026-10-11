@@ -6,24 +6,25 @@ import {ProblemCard} from '../components/ProblemCard';
 import {ProblemTabs} from '../components/ProblemTabs';
 import {RoutePanel, VsBadge} from '../components/RoutePanel';
 import {TO28, TO28_DOOR, TO28_OPTIMIZED} from '../data/to28';
-import {MAP, project, vtX} from '../layout';
-import {RACKS, VT_WIDTH_M} from '../map/khoC';
-import {Stop, aisleOrder, routeLength, routePolyline} from '../map/route';
+import {project} from '../layout';
+import {RACKS} from '../map/khoC';
+import {Stop, aisleOrder, routePolyline, stopPoint} from '../map/route';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
 import {useTimelineFrame} from '../timeline';
 
-// Timeline (30 units per second), same beats as the other problems.
+// Timeline (30 units per second).
 const T = {
   glow: 20,
   cardIn: 45,
   cardOut: 150,
   panelsIn: 175,
-  zones: 190,
-  race: 245,
-  raceEnd: 605,
-  callout: 615,
-  solved: 775,
-  end: 865,
+  dots: 190,
+  race: 320,
+  raceEnd: 680,
+  ropes: 700,
+  waste: 790,
+  solved: 900,
+  end: 990,
 };
 export const PROBLEM03_DURATION = toFrames(T.end);
 
@@ -32,110 +33,113 @@ const algo = TO28_OPTIMIZED;
 const laneOf = (s: Stop) => RACKS.find((r) => r.code === s.rack)!.lane;
 const LANES = new Set(TO28.map(laneOf)).size;
 
-// The warehouse is split at VT 52 into the half near the doors and the deep half.
-const MID_VT = 52;
-const MID_X_M = MID_VT * VT_WIDTH_M;
-
 type Pt = [number, number];
 interface Track {
   pts: Pt[];
   cum: number[];
   total: number;
-  /** Route distance (m) and position (m) of every crossing into the deep half. */
-  entries: {at: number; p: Pt}[];
+  /** Route distance at which each stop is reached. */
+  stopAt: number[];
 }
 const track = (stops: Stop[]): Track => {
-  const {pts} = routePolyline(stops, TO28_DOOR);
+  const {pts, stopIdx} = routePolyline(stops, TO28_DOOR);
   const cum = [0];
-  const entries: {at: number; p: Pt}[] = [];
-  for (let i = 1; i < pts.length; i++) {
-    const [a, b] = [pts[i - 1], pts[i]];
-    cum.push(cum[i - 1] + Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]));
-    if (a[0] < MID_X_M && b[0] >= MID_X_M) entries.push({at: cum[i - 1] + (MID_X_M - a[0]), p: [MID_X_M, a[1]]});
-  }
-  return {pts, cum, total: cum[cum.length - 1], entries};
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.abs(pts[i][0] - pts[i - 1][0]) + Math.abs(pts[i][1] - pts[i - 1][1]));
+  return {pts, cum, total: cum[cum.length - 1], stopAt: stopIdx.map((k) => cum[k])};
 };
 const TRACK = {current: track(current), algo: track(algo)};
-const ENTRIES = {current: TRACK.current.entries.length, algo: TRACK.algo.entries.length};
-// Both trucks drive at the same speed; the current route uses the whole race window.
-const SPEED = routeLength(current, TO28_DOOR) / (T.raceEnd - T.race);
+// Same speed for both trucks; the current route takes the whole race window.
+const SPEED = TRACK.current.total / (T.raceEnd - T.race);
 
 function pose(t: Track, d: number): {p: Pt; angle: number} {
   for (let i = 1; i < t.pts.length; i++) {
     if (d <= t.cum[i] || i === t.pts.length - 1) {
-      const [a, b] = [t.pts[i - 1], t.pts[i]];
+      const pa = project(...t.pts[i - 1]);
+      const pb = project(...t.pts[i]);
       const seg = t.cum[i] - t.cum[i - 1];
       const k = seg === 0 ? 1 : Math.min(1, Math.max(0, (d - t.cum[i - 1]) / seg));
-      const pa = project(...a);
-      const pb = project(...b);
-      return {
-        p: [pa[0] + (pb[0] - pa[0]) * k, pa[1] + (pb[1] - pa[1]) * k],
-        angle: (Math.atan2(pb[1] - pa[1], pb[0] - pa[0]) * 180) / Math.PI,
-      };
+      return {p: [pa[0] + (pb[0] - pa[0]) * k, pa[1] + (pb[1] - pa[1]) * k], angle: (Math.atan2(pb[1] - pa[1], pb[0] - pa[0]) * 180) / Math.PI};
     }
   }
   return {p: project(...t.pts[0]), angle: 0};
 }
 
-/** Near / deep halves and the middle line, drawn under the route. */
-const Zones: React.FC<{p: number; flash: number; accent: string}> = ({p, flash, accent}) => {
-  const x = vtX(MID_VT);
-  const top = MAP.topLineY + 4;
-  return (
-    <g opacity={p}>
-      <rect x={vtX(0) - 6} y={top} width={x - vtX(0) + 6} height={MAP.h - top} fill="#3b82f6" opacity={0.07} />
-      <rect x={x} y={top} width={vtX(105) - x} height={MAP.h - top} fill="#f59e0b" opacity={0.08} />
-      <line x1={x} y1={top} x2={x} y2={MAP.h} stroke="#ffffff" strokeWidth={3 + 5 * flash} strokeDasharray="10 8" opacity={0.55 + 0.45 * flash} />
-      <rect x={x - 70} y={MAP.h - 34} width={140} height={26} rx={7} fill="#0b1222" stroke={flash > 0.05 ? accent : '#ffffff55'} />
-      <text x={x} y={MAP.h - 16} textAnchor="middle" fontSize={14} fontWeight={800} letterSpacing={1.5} fill="#ffffff">
-        GIỮA KHO · VT {MID_VT}
-      </text>
-    </g>
-  );
-};
-
-const ZoneLabels: React.FC<{p: number}> = ({p}) => (
+/** Plain dots that pop up one by one all over the warehouse (before any route is shown). */
+const ScatterDots: React.FC<{frame: number; p: number}> = ({frame, p}) => (
   <g opacity={p}>
-    {[
-      {x: (vtX(0) + vtX(MID_VT)) / 2, t: 'NỬA GẦN CỬA', s: 'near half', c: '#7cb7ff'},
-      {x: (vtX(MID_VT) + vtX(104)) / 2, t: 'NỬA SÂU', s: 'deep half', c: '#fbbf5a'},
-    ].map((z) => (
-      <g key={z.t}>
-        <rect x={z.x - 100} y={MAP.topLineY + 10} width={200} height={46} rx={10} fill="#0b1222" opacity={0.9} stroke={z.c} strokeWidth={2} />
-        <text x={z.x} y={MAP.topLineY + 33} textAnchor="middle" fontSize={19} fontWeight={800} fill={z.c}>
-          {z.t}
-        </text>
-        <text x={z.x} y={MAP.topLineY + 50} textAnchor="middle" fontSize={13} fill={colors.muted}>
-          {z.s}
-        </text>
-      </g>
-    ))}
+    {TO28.map((s, i) => {
+      const [x, y] = project(...stopPoint(s));
+      const k = Math.max(0, Math.min(1, (frame - T.dots - i * 3.5) / 8));
+      return <circle key={i} cx={x} cy={y} r={11 * k + 4 * k * (1 - k)} fill={colors.yellow} stroke="#0b1222" strokeWidth={2} opacity={k} />;
+    })}
   </g>
 );
 
-/** Truck, and a numbered marker at each entry into the deep half. */
-const RaceOverlay: React.FC<{t: Track; d: number; accent: string; show: number}> = ({t, d, accent, show}) => {
+const Truck: React.FC<{t: Track; d: number; show: boolean}> = ({t, d, show}) => {
+  if (!show || d <= 0 || d >= t.total) return null;
   const {p, angle} = pose(t, d);
-  const done = d >= t.total;
+  return <Forklift x={p[0]} y={p[1]} angle={angle} />;
+};
+
+/** Both routes straightened into two ropes at true scale; the extra length of the current one is the waste. */
+const Ropes: React.FC<{frame: number}> = ({frame}) => {
+  const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+  const card = spring({frame: frame - T.ropes, fps: TIMELINE_FPS, config: {damping: 200}});
+  const grow = interpolate(frame, [T.ropes + 15, T.ropes + 75], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
+  const waste = interpolate(frame, [T.waste, T.waste + 15], [0, 1], clamp);
+  const pulse = 0.6 + 0.4 * Math.sin(frame / 4);
+  const W = 1500;
+  const scale = W / TRACK.current.total;
+  const x0 = 200;
+  const lenG = TRACK.algo.total * scale;
+  const lenR = TRACK.current.total * scale;
+  const rope = (kind: 'algo' | 'current', y: number) => {
+    const t = TRACK[kind];
+    const len = t.total * scale * grow;
+    const accent = kind === 'algo' ? colors.green : colors.red;
+    return (
+      <g>
+        <text x={x0 - 8} y={y - 30} fontSize={30} fontWeight={800} fill={accent}>
+          {kind === 'algo' ? 'ALGORITHM · Lộ trình tối ưu' : 'CURRENT · Theo dãy A → T'}
+        </text>
+        <line x1={x0} y1={y} x2={x0 + len} y2={y} stroke={accent} strokeWidth={16} strokeLinecap="round" style={{filter: `drop-shadow(0 0 8px ${accent})`}} />
+        {t.stopAt
+          .filter((a) => a * scale <= len)
+          .map((a, i) => (
+            <circle key={i} cx={x0 + a * scale} cy={y} r={6} fill="#ffffff" stroke="#0b1222" strokeWidth={2} />
+          ))}
+        <g transform={`translate(${x0 + len} ${y})`}>
+          <Forklift x={0} y={0} angle={0} />
+        </g>
+      </g>
+    );
+  };
   return (
-    <g opacity={show}>
-      {t.entries
-        .filter((e) => e.at <= d)
-        .map((e, i) => {
-          const [x, y] = project(...e.p);
-          const age = Math.min(1, (d - e.at) / 25);
-          return (
-            <g key={i} transform={`translate(${x} ${y - 24}) scale(${1.5 - 0.5 * age})`}>
-              <path d="M0 14 L-6 6 L6 6 Z" fill={colors.yellow} />
-              <rect x={-22} y={-14} width={44} height={22} rx={6} fill={colors.yellow} stroke="#0b1222" strokeWidth={2} />
-              <text y={3} textAnchor="middle" fontSize={14} fontWeight={800} fill="#0b1222">
-                #{i + 1}
-              </text>
-            </g>
-          );
-        })}
-      {!done && d > 0 ? <Forklift x={p[0]} y={p[1]} angle={angle} /> : null}
-    </g>
+    <AbsoluteFill style={{opacity: card}}>
+      <div style={{position: 'absolute', left: 40, top: 176, width: 1840, height: 727, background: 'rgba(6, 10, 22, 0.86)', borderRadius: 16}} />
+      <svg width={1920} height={1080} style={{position: 'absolute', left: 0, top: 0}}>
+        <text x={960} y={300} textAnchor="middle" fontSize={40} fontWeight={800} fill="#ffffff">
+          Same 28 stops – routes straightened out
+        </text>
+        <text x={960} y={340} textAnchor="middle" fontSize={26} fill={colors.muted}>
+          Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài
+        </text>
+        {rope('algo', 470)}
+        {rope('current', 640)}
+        {/* end of the optimized rope, projected onto the current rope */}
+        <line x1={x0 + lenG} y1={430} x2={x0 + lenG} y2={680} stroke="#ffffff" strokeWidth={2.5} strokeDasharray="8 7" opacity={waste} />
+        <g opacity={waste}>
+          <rect x={x0 + lenG} y={624} width={lenR - lenG} height={32} rx={6} fill={colors.red} opacity={0.35 + 0.45 * pulse} />
+          <rect x={x0 + (lenG + lenR) / 2 - 275} y={690} width={550} height={92} rx={14} fill="#ffffff" stroke={colors.red} strokeWidth={4} />
+          <text x={x0 + (lenG + lenR) / 2} y={735} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
+            QUÃNG ĐƯỜNG LÃNG PHÍ
+          </text>
+          <text x={x0 + (lenG + lenR) / 2} y={766} textAnchor="middle" fontSize={22} fontWeight={600} fill="#5b6478">
+            Wasted travel
+          </text>
+        </g>
+      </svg>
+    </AbsoluteFill>
   );
 };
 
@@ -149,48 +153,35 @@ export const Problem03: React.FC = () => {
   const cardIn = spring({frame: frame - T.cardIn, fps, config: {damping: 200}});
   const cardOut = interpolate(frame, [T.cardOut, T.cardOut + 20], [0, 1], ease);
   const panels = spring({frame: frame - T.panelsIn, fps, config: {damping: 200}});
-  const zones = interpolate(frame, [T.zones, T.zones + 20], [0, 1], clamp);
-  const labels = interpolate(frame, [T.zones, T.zones + 20, T.race - 5, T.race + 15], [0, 1, 1, 0], clamp);
+  const dots = interpolate(frame, [T.race, T.race + 20], [1, 0], clamp);
+  const racing = frame >= T.race;
   const traveled = Math.max(0, frame - T.race) * SPEED;
+  const ropesOn = frame >= T.ropes;
   const solved = frame >= T.solved;
   const check = spring({frame: frame - T.solved, fps, config: {damping: 12}});
 
-  const count = (t: Track) => t.entries.filter((e) => e.at <= traveled).length;
-  const flash = (t: Track) => {
-    const last = t.entries.filter((e) => e.at <= traveled).pop();
-    return last ? Math.max(0, 1 - (traveled - last.at) / 40) : 0;
-  };
-
-  const phase = frame < T.race ? 0 : frame < T.callout ? 1 : frame < T.solved ? 2 : 3;
+  const phase = frame < T.race ? 0 : frame < T.ropes ? 1 : frame < T.waste ? 2 : frame < T.solved ? 3 : 4;
   const captions = [
-    {icon: '03', en: `28 stops on ${LANES} of 18 aisles – near the doors and deep inside`, vi: `28 điểm rải trên ${LANES}/18 lối – có điểm gần cửa, có điểm tận cuối kho`},
-    {icon: '03', en: 'Yellow tag = one more trip into the deep half', vi: 'Mỗi thẻ vàng = thêm 1 lượt xe chạy vào nửa sâu của kho'},
-    {icon: '03', en: `A → T goes back and forth: ${ENTRIES.current} trips · Deep zone first: ${ENTRIES.algo} trips`, vi: `Theo tên dãy A → T chạy tới lui đầu – cuối kho ${ENTRIES.current} lượt · Thuật toán lấy vùng sâu trước: ${ENTRIES.algo} lượt`},
-    {icon: 'check', en: 'Route by zone, not by aisle name → problem 03 solved', vi: 'Đi theo vùng, không theo tên dãy → vấn đề 03 đã giải quyết'},
+    {icon: '03', en: `One TO: 28 stops scattered over ${LANES} of 18 aisles`, vi: `Một phiếu TO: 28 điểm nằm rải rác trên ${LANES}/18 dãy`},
+    {icon: '03', en: 'Same stops, same speed – which truck drives further?', vi: 'Cùng các điểm, cùng tốc độ – xe nào chạy xa hơn?'},
+    {icon: '03', en: 'Straighten both routes and compare', vi: 'Duỗi thẳng hai lộ trình để so sánh'},
+    {icon: '03', en: 'Scattered items without an optimized route = a lot of wasted travel', vi: 'Hàng rải rác mà không có lộ trình tối ưu = lãng phí rất nhiều quãng đường'},
+    {icon: 'check', en: 'Optimized route cuts the wasted travel → problem 03 solved', vi: 'Lộ trình tối ưu cắt bỏ quãng đường lãng phí → vấn đề 03 đã giải quyết'},
   ];
-  const capStart = [T.panelsIn, T.race, T.callout, T.solved][phase];
+  const capStart = [T.panelsIn, T.race, T.ropes, T.waste, T.solved][phase];
   const capOpacity = interpolate(frame, [capStart, capStart + 12], [0, 1], clamp);
 
-  const panel = (kind: 'algo' | 'current') => {
-    const t = TRACK[kind];
-    const accent = kind === 'algo' ? colors.green : colors.red;
-    const n = count(t);
-    return {
-      kind,
-      stops: kind === 'algo' ? algo : current,
-      doorId: TO28_DOOR,
-      traveled: frame < T.race ? Infinity : traveled,
-      dim: frame < T.race ? 0.6 * zones : 0,
-      header: {value: String(frame < T.race ? 0 : n), unit: n === 1 ? 'trip' : 'trips', sub: 'into the deep half · lượt vào nửa sâu'},
-      underlay: <Zones p={zones} flash={flash(t)} accent={accent} />,
-      overlay: (
-        <>
-          <ZoneLabels p={labels} />
-          <RaceOverlay t={t} d={traveled} accent={accent} show={frame >= T.race ? 1 : 0} />
-        </>
-      ),
-    };
-  };
+  const panel = (kind: 'algo' | 'current') => ({
+    kind,
+    stops: kind === 'algo' ? algo : current,
+    doorId: TO28_DOOR,
+    traveled: racing ? traveled : 0,
+    showDistance: false,
+    showPlanned: false,
+    hideOthers: racing ? 0 : 1,
+    underlay: <ScatterDots frame={frame} p={dots} />,
+    overlay: <Truck t={TRACK[kind]} d={traveled} show={racing && !ropesOn} />,
+  });
 
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
@@ -205,8 +196,8 @@ export const Problem03: React.FC = () => {
         n={3}
         en="Scattered items"
         vi="Hàng rải rác nhiều dãy"
-        descEn="Items are spread over the whole warehouse – the A → T order follows aisle names, not zones"
-        descVi="Hàng rải khắp kho – phiếu A → T đi theo tên dãy, không theo vùng"
+        descEn="Items spread over many aisles – without an optimized route, the truck drives much further"
+        descVi="Hàng nằm rải rác nhiều dãy – không có lộ trình tối ưu, xe chạy thừa rất nhiều"
         enter={cardIn}
         out={cardOut}
       />
@@ -215,6 +206,7 @@ export const Problem03: React.FC = () => {
         <RoutePanel {...panel('algo')} />
         <RoutePanel {...panel('current')} />
         <VsBadge />
+        {ropesOn ? <Ropes frame={frame} /> : null}
         <CaptionBar icon={captions[phase].icon} en={captions[phase].en} vi={captions[phase].vi} opacity={capOpacity} />
       </div>
     </AbsoluteFill>

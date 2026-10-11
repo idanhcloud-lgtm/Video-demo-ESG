@@ -139,6 +139,8 @@ export interface RoutePanelProps {
   dim?: number;
   /** false: header shows the stop count instead of metres (keeps totals consistent with video part 1). */
   showDistance?: boolean;
+  /** false: hide the faint planned route (only the driven part is drawn). */
+  showPlanned?: boolean;
   /** Overrides the header number (e.g. a live counter). */
   header?: {value: string; unit: string; sub: string};
   /** Extra SVG drawn in map coordinates: under the route / on top of everything. */
@@ -161,6 +163,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   dim = 0,
   showDistance = true,
   header,
+  showPlanned = true,
   underlay,
   overlay,
   children,
@@ -204,7 +207,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
         <g transform={`translate(${camera.tx} ${camera.ty}) scale(${camera.k})`}>
           <MapBase startDoor={doorId} />
           {underlay}
-          <path d={toPath(pts)} fill="none" stroke={accent} strokeOpacity={0.3} strokeWidth={1.5} strokeDasharray="4 6" />
+          {showPlanned ? <path d={toPath(pts)} fill="none" stroke={accent} strokeOpacity={0.3} strokeWidth={1.5} strokeDasharray="4 6" /> : null}
           <path
             d={toPath(driven)}
             fill="none"
