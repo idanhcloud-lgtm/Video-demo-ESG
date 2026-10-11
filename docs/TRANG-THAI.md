@@ -9,6 +9,7 @@
 - Bố cục đã duyệt thử: `MainRace` với `clean` (bỏ thanh chữ dưới, dải dưới để phụ đề, thẻ hạn chế chớp xanh khi giải quyết). Bản thử: composition `MainRaceClean`.
 - Chưa chốt: callout chỉ tiếng Việt (A) hay song ngữ (B). Chưa áp `clean` cho `Problem04` và `ClosingShort`.
 
+- Hạn chế 04: đổi banner "9:00 AM" thành "Đầu ca sáng" cho khớp giọng đọc mới.
 - Bỏ 4 ô thông số kho ở cảnh tiêu đề (giọng đọc V1 không còn câu thông số).
 
 ## Thuật ngữ đã chốt

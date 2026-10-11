@@ -37,9 +37,9 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 
 ## V3 – Hạn chế 04
 ```
-[matter-of-fact] Bốn: ùn tắc dãy A, Bê buổi sáng. Chín giờ sáng, giờ cao điểm, các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
+[matter-of-fact] Bốn: ùn tắc dãy A, Bê buổi sáng. Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu tê-ô, ai cũng bắt đầu hạ hàng từ dãy A và Bê... vì phiếu nào cũng in hai dãy này đầu tiên.
 [long pause]
-[calm] Xe nào cũng chạy vào dãy A, Bê trước. Chỉ ba xe kịp rẽ ra lối ngang... sáu xe kẹt ở giữa dãy.
+[calm] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe kịp rẽ ra lối ngang... sáu xe kẹt ở giữa dãy.
 [long pause]
 [calm] Với lộ trình tối ưu, xe vẫn vào từ dãy A, Bê, nhưng tới lối ngang là rẽ ra khắp kho. Không còn xe đứng kẹt.
 ```
@@ -73,7 +73,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 | V2 | 1–2 | Tab 01: vệt đỏ vào khu vực 2 lần → callout xanh |
 | V2 | 3–4 | Tab 02: chạy về đầu dãy → callout xanh |
 | V2 | 5–6 | Tab 03: duỗi thẳng 2 lộ trình → "quãng đường chạy thừa" |
-| V3 | 1–3 | Tab 04: 9:00 AM → 6 xe kẹt → callout xanh |
+| V3 | 1–3 | Tab 04: banner "Đầu ca sáng" → 6 xe kẹt → callout xanh |
 | V4 | 1 | Camera thu về toàn kho |
 | V4 | 2–5 | 4 vị trí hạn chế lần lượt chuyển đỏ → xanh |
 | V4 | 6–7 | Dòng chốt: không đổi kho, không thêm xe; lợi ích |
