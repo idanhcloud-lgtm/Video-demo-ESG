@@ -35,7 +35,7 @@ Mỗi câu đi với một sự kiện trên màn hình (ghi trong bảng cuối
 
 ## V3 – Hạn chế 04
 ```
-[serious] Bốn: ùn tắc đầu buổi sáng. [dramatic] Chín giờ sáng... các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
+[serious] Bốn: ùn tắc dãy A, Bê buổi sáng. [dramatic] Chín giờ sáng, giờ cao điểm... các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
 [long pause]
 [concerned] Xe nào cũng chạy vào dãy A, Bê trước. Chỉ ba xe kịp rẽ ra lối ngang... [sighs] sáu xe kẹt ở giữa dãy.
 [long pause]
