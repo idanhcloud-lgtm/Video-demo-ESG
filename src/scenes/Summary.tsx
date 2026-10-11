@@ -19,7 +19,7 @@ const ROWS = [
     curEn: 'Nearby bins in different aisles are picked far apart',
     curVi: 'Điểm gần nhau nhưng khác dãy bị tách xa trên phiếu',
     algoEn: 'Nearby bins picked in the same pass',
-    algoVi: 'Gom các điểm gần nhau vào cùng một lượt',
+    algoVi: 'Hạ hàng các điểm gần nhau liên tiếp',
   },
   {
     curEn: 'Drives back to the front to change aisle',
@@ -31,7 +31,7 @@ const ROWS = [
     curEn: 'Items spread over many aisles – a lot of wasted travel',
     curVi: 'Hàng rải nhiều dãy – xe chạy thừa rất nhiều',
     algoEn: 'Optimized route cuts the wasted travel',
-    algoVi: 'Lộ trình tối ưu cắt bỏ quãng đường lãng phí',
+    algoVi: 'Lộ trình tối ưu giảm phần chạy thừa',
   },
   {
     curEn: 'Every TO starts in aisles A, B – trucks get stuck',

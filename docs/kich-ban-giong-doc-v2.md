@@ -13,31 +13,31 @@ Mỗi câu đi với một sự kiện trên màn hình (ghi trong bảng cuối
 [long pause]
 [curious] Cùng một phiếu tê-ô, hai mươi tám điểm hạ hàng... nhưng đi theo hai cách. Bên trái là lộ trình tối ưu. Bên phải là cách hiện tại, theo thứ tự dãy A đến T.
 [long pause]
-[excited] Hai xe cùng xuất phát, cùng tốc độ... [surprised] Xe theo lộ trình tối ưu về đích trước, quãng đường ngắn hơn khoảng ba mươi phần trăm!
+[excited] Hai xe cùng xuất phát, cùng tốc độ... [surprised] Xe theo lộ trình tối ưu đã về đích, trong khi xe đi theo dãy vẫn còn đang chạy!
 [long pause]
 [thoughtful] Vậy... vì sao lại chênh lệch như vậy? [curious] Quy trình hiện tại có bốn hạn chế. Ngay trên bản đồ này, chúng ta cùng xem từng hạn chế một.
 ```
 
 ## V2 – Hạn chế 01, 02, 03 (cùng một bản đồ)
 ```
-[serious] Một: không gom các vị trí gần nhau. [frustrated] Các điểm nằm sát nhau nhưng khác dãy... nên xe hiện tại phải vào khu vực này tới hai lần.
+[serious] Một: các điểm gần nhau không được hạ hàng liên tiếp. [frustrated] Các điểm nằm sát nhau nhưng khác dãy... nên xe hiện tại phải vào khu vực này tới hai lần.
 [long pause]
-[confident] Thuật toán gom chúng vào cùng một lượt, xe chỉ cần đi qua một lần.
+[confident] Thuật toán sắp các điểm này liên tiếp, xe chỉ vào khu vực một lần là hạ hàng xong.
 [long pause]
 [serious] Hai: lối đi ngang chưa được sử dụng tối ưu. [frustrated] Xe hiện tại phải chạy ngược về đầu dãy để đổi lối... rồi lại vào sâu.
 [long pause]
-[confident] Thuật toán đổi lối ngay tại hầm, trên đường đang đi.
+[confident] Thuật toán đổi lối ngay tại lối ngang gần nhất, trên đường đang đi. Các điểm gần cửa được hạ hàng trên đường quay về.
 [long pause]
 [serious] Ba: hàng nằm rải rác nhiều dãy. [curious] Thử duỗi thẳng hai lộ trình ra để so độ dài...
 [long pause]
-[emphasizes] Phần dây đỏ dài hơn... chính là quãng đường lãng phí. [confident] Lộ trình tối ưu cắt bỏ phần lãng phí này.
+[emphasizes] Phần dây đỏ dài hơn... chính là quãng đường chạy thừa. [confident] Lộ trình tối ưu giảm phần chạy thừa này.
 ```
 
 ## V3 – Hạn chế 04
 ```
 [serious] Bốn: ùn tắc đầu buổi sáng. [dramatic] Chín giờ sáng... các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
 [long pause]
-[concerned] Xe nào cũng chạy vào dãy A, Bê trước. Chỉ ba xe kịp rẽ ra... [sighs] sáu xe kẹt ở giữa dãy.
+[concerned] Xe nào cũng chạy vào dãy A, Bê trước. Chỉ ba xe kịp rẽ ra lối ngang... [sighs] sáu xe kẹt ở giữa dãy.
 [long pause]
 [confident] Với lộ trình tối ưu, xe vẫn vào từ dãy A, Bê... nhưng tới lối ngang là rẽ ra khắp kho. [relieved] Không còn xe đứng kẹt.
 ```
@@ -71,5 +71,6 @@ Mỗi câu đi với một sự kiện trên màn hình (ghi trong bảng cuối
 | V4 | 2 | Dòng giải pháp màu xanh |
 
 ## Lưu ý
-- Câu V1-3 nói **"khoảng ba mươi phần trăm"**, tức là giữ số của video cũ (1.440 m và 1.008 m). Nếu bạn chọn dùng số theo app mới (1.596 m và 1.166 m), sửa thành **"khoảng hai mươi bảy phần trăm"** trước khi tạo giọng.
+- Thuật ngữ thống nhất: **hạ hàng** (không dùng "lấy", "gom"), **liên tiếp**, **lối ngang** (không dùng "hầm").
+- Video bản rút gọn không hiện số mét, nên giọng đọc cũng không nói số mét hay phần trăm.
 - Ước tính có giọng: V1 ~30s, V2 ~40s, V3 ~25s, V4 ~12s, cộng phần hình chờ, **tổng khoảng 2 phút**.

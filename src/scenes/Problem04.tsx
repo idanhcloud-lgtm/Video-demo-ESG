@@ -242,7 +242,7 @@ export const Problem04: React.FC = () => {
 
   const phase = frame < T.jam ? 0 : frame < T.solved ? 1 : 2;
   const captions = [
-    {icon: '04', en: '9:00 AM – shift start, every truck heads for aisles A, B', vi: '9:00 sáng – đầu ca, các xe cùng chạy vào dãy A, B'},
+    {icon: '04', en: '9:00 AM – morning peak, every truck heads for aisles A, B', vi: '9:00 sáng – giờ cao điểm, các xe cùng chạy vào dãy A, B'},
     {icon: '04', en: 'Congestion: every TO starts in aisles A, B', vi: 'Ùn tắc do các TO đều bắt đầu từ dãy A, B'},
     {icon: 'check', en: 'Less congestion in aisles A, B as trucks turn at the cross aisles → problem 04 solved', vi: 'Giảm ùn tắc dãy A, B khi xe rẽ qua các lối ngang → vấn đề 04 đã giải quyết'},
   ];
@@ -262,7 +262,7 @@ export const Problem04: React.FC = () => {
       <ProblemCard
         n={4}
         en="Morning congestion"
-        vi="Ùn tắc dãy đầu buổi sáng"
+        vi="Ùn tắc dãy A, B buổi sáng"
         descEn="Every TO starts in aisles A, B – at 9:00 the trucks get stuck there"
         descVi="Các TO đều bắt đầu từ dãy A, B – 9:00 sáng xe kẹt ở hai dãy này"
         enter={cardIn}
@@ -280,7 +280,7 @@ export const Problem04: React.FC = () => {
             large
             p={callout}
             en="Less congestion in aisles A, B as trucks turn off at the cross aisles"
-            vi="Giảm ùn tắc dãy A, B khi các xe bắt đầu rẽ qua các lối ngang"
+            vi="Giảm ùn tắc dãy A, B: xe rẽ ra lối ngang, không đứng chờ"
           />
         </PanelShell>
         <PanelShell kind="current" value={String(stuckCur)} unit={stuckCur === 1 ? 'truck' : 'trucks'} sub="stuck in aisles A, B · xe kẹt ở dãy A, B">

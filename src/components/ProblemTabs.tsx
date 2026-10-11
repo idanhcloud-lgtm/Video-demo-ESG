@@ -2,10 +2,10 @@ import {LAYOUT} from '../layout';
 import {colors} from '../theme';
 
 export const PROBLEMS = [
-  {en: 'Nearby bins not grouped', vi: 'Không gom vị trí gần nhau'},
+  {en: 'Nearby bins not in sequence', vi: 'Điểm gần nhau không hạ liên tiếp'},
   {en: 'Cross aisles not optimally used', vi: 'Lối ngang chưa được sử dụng tối ưu'},
   {en: 'Scattered items', vi: 'Hàng rải rác nhiều dãy'},
-  {en: 'Morning congestion', vi: 'Ùn tắc dãy đầu buổi sáng'},
+  {en: 'Morning congestion', vi: 'Ùn tắc dãy A, B buổi sáng'},
 ];
 
 export type TabState = 'idle' | 'solving' | 'solved';

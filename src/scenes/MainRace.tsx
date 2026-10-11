@@ -45,7 +45,7 @@ const SPEED = TRACK.current.total / (T.raceEnd - T.race);
 // Problem 01 (same example as video part 1): current visits #19 #20, drives far left for #21 #22,
 // then comes back for #23 #24; the algorithm takes the same four stops in one pass (#8–#11).
 const P1 = {current: [19, 20, 21, 22, 23], algo: [8, 9, 10], cam: {k: 1.4, tx: -1.4 * 200, ty: 250 - 1.4 * 146.5}};
-// Problem 02 (lanes 3–5): current goes back to the front to change aisle; algorithm turns at tunnel 2.
+// Problem 02 (lanes 3–5): current goes back to the front to change aisle; algorithm turns at the cross aisle at VT 75.
 const P2 = {current: [5, 6, 7], algo: [5, 25, 26, 27], cam: {k: 1.45, tx: -1.45 * 60, ty: 240 - 1.45 * 500}};
 const NO_CAM = {k: 1, tx: 0, ty: 0};
 
@@ -98,12 +98,12 @@ export const MainRace: React.FC = () => {
     {at: T.race + 270, icon: 'target', en: 'The optimized truck finishes first', vi: 'Xe theo lộ trình tối ưu về đích trước'},
     {at: T.tabs, icon: 'target', en: 'Why the difference? 4 limitations of the current process', vi: 'Vì sao chênh lệch? 4 hạn chế của quy trình hiện tại'},
     {at: T.p1, icon: '01', en: 'Same area – but the current truck comes in twice', vi: 'Cùng một khu vực, nhưng xe hiện tại phải vào tới 2 lần'},
-    {at: T.p1Solved, icon: 'check', en: 'Nearby stops grouped into one pass → 01 solved', vi: 'Gom các điểm gần nhau vào cùng một lượt → 01 đã giải quyết'},
+    {at: T.p1Solved, icon: 'check', en: 'Nearby stops handled back to back → 01 solved', vi: 'Các điểm gần nhau được hạ hàng liên tiếp → 01 đã giải quyết'},
     {at: T.p2, icon: '02', en: 'Back to the front to change aisle – then deep again', vi: 'Chạy về đầu dãy để đổi lối, rồi lại vào sâu'},
-    {at: T.p2Solved, icon: 'check', en: 'Aisle changed at the cross aisle on the way → 02 solved', vi: 'Đổi lối ngay tại lối ngang trên đường đi → 02 đã giải quyết'},
+    {at: T.p2Solved, icon: 'check', en: 'Aisle changed at the cross aisle on the way → 02 solved', vi: 'Đổi lối ngay tại lối ngang gần nhất trên đường đi → 02 đã giải quyết'},
     {at: T.p3, icon: '03', en: '28 stops scattered over 15 of 18 aisles', vi: '28 điểm nằm rải rác trên 15/18 dãy'},
-    {at: T.p3Waste, icon: '03', en: 'Without an optimized route = a lot of wasted travel', vi: 'Không có lộ trình tối ưu = lãng phí rất nhiều quãng đường'},
-    {at: T.p3Solved, icon: 'check', en: 'Optimized route cuts the wasted travel → 03 solved', vi: 'Lộ trình tối ưu cắt bỏ quãng đường lãng phí → 03 đã giải quyết'},
+    {at: T.p3Waste, icon: '03', en: 'Without an optimized route, the truck drives a lot further', vi: 'Không có lộ trình tối ưu, xe chạy thừa rất nhiều quãng đường'},
+    {at: T.p3Solved, icon: 'check', en: 'Optimized route reduces the extra travel → 03 solved', vi: 'Lộ trình tối ưu giảm phần quãng đường chạy thừa → 03 đã giải quyết'},
   ];
   const cap = [...phases].reverse().find((p) => frame >= p.at)!;
   const capOpacity = interpolate(frame, [cap.at, cap.at + 12], [0, 1], clamp);
@@ -186,15 +186,15 @@ export const MainRace: React.FC = () => {
             placement="top"
             large
             p={callP1}
-            en={<>Groups the <Hl c="#0a8f5a">4 nearby stops</Hl> into one pass</>}
-            vi="Gom 4 điểm gần nhau, ghé liền một lượt"
+            en={<>Handles the <Hl c="#0a8f5a">4 nearby stops</Hl> back to back – one visit to this area</>}
+            vi="Hạ hàng 4 điểm gần nhau liên tiếp, chỉ vào khu vực này một lần"
           />
         ) : (
           <Callout
             kind="algo"
             p={callP2}
-            en={<>Changes aisle at <Hl c="#0a8f5a">tunnel 2</Hl> right where it is</>}
-            vi="Đổi lối ngay ở hầm 2; điểm đầu dãy lấy trên đường về"
+            en={<>Changes aisle at the <Hl c="#0a8f5a">nearest cross aisle</Hl> on the way</>}
+            vi="Đổi lối ngay ở lối ngang gần nhất; các điểm gần cửa được hạ hàng trên đường quay về"
           />
         )}
       </RoutePanel>
@@ -205,8 +205,8 @@ export const MainRace: React.FC = () => {
             placement="top"
             large
             p={callP1}
-            en={<>#19 #20 → drives <Hl c="#d23c3a">far left</Hl> → comes back for #23 #24</>}
-            vi="Ghé #19 #20, chạy xa sang trái rồi quay lại #23 #24"
+            en={<>#19 #20 → drives <Hl c="#d23c3a">far away</Hl> → comes back for #23 #24</>}
+            vi="Hạ #19 #20, rời đi xa rồi quay lại hạ #23 #24"
           />
         ) : (
           <Callout

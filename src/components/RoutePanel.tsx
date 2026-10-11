@@ -103,7 +103,7 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
         <div style={{flex: 1}}>
           <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
           <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Lấy theo dãy A → T'}</div>
+          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'Lộ trình tối ưu · S-shape + 2-opt' : 'Hiện tại · Hạ hàng theo dãy A → T'}</div>
         </div>
         <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0}}>
           <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>

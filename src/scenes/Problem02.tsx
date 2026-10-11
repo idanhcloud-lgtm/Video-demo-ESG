@@ -90,8 +90,8 @@ export const Problem02: React.FC = () => {
           <Callout
             kind="algo"
             p={callout}
-            en={<>Changes aisle at <Hl c="#0a8f5a">tunnel 2</Hl> right where it is; front stops on the way back</>}
-            vi="Đổi lối ngay ở hầm 2; các điểm đầu dãy lấy trên đường về"
+            en={<>Changes aisle at the <Hl c="#0a8f5a">nearest cross aisle</Hl>; front stops on the way back</>}
+            vi="Đổi lối ngay ở lối ngang gần nhất; các điểm gần cửa được hạ hàng trên đường quay về"
           />
         </RoutePanel>
         <RoutePanel kind="current" stops={current} showDistance={false} doorId={TO28_DOOR} traveled={Infinity} camera={camera} focusLegs={CURRENT_LEGS} focusProgress={traceCur} hideOthers={hideOthers}>

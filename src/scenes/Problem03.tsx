@@ -72,7 +72,7 @@ export const Problem03: React.FC = () => {
     {icon: '03', en: 'Same stops, same speed – which truck drives further?', vi: 'Cùng các điểm, cùng tốc độ – xe nào chạy xa hơn?'},
     {icon: '03', en: 'Straighten both routes and compare', vi: 'Duỗi thẳng hai lộ trình để so sánh'},
     {icon: '03', en: 'Scattered items without an optimized route = a lot of wasted travel', vi: 'Hàng rải rác mà không có lộ trình tối ưu = lãng phí rất nhiều quãng đường'},
-    {icon: 'check', en: 'Optimized route cuts the wasted travel → problem 03 solved', vi: 'Lộ trình tối ưu cắt bỏ quãng đường lãng phí → vấn đề 03 đã giải quyết'},
+    {icon: 'check', en: 'Optimized route reduces the extra travel → problem 03 solved', vi: 'Lộ trình tối ưu giảm phần quãng đường chạy thừa → vấn đề 03 đã giải quyết'},
   ];
   const capStart = [T.panelsIn, T.race, T.ropes, T.waste, T.solved][phase];
   const capOpacity = interpolate(frame, [capStart, capStart + 12], [0, 1], clamp);
