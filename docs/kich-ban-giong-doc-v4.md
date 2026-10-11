@@ -1,7 +1,7 @@
 # Kịch bản giọng đọc – Bản rút gọn, viết cho ElevenLabs v4
 
 v4 bám thẻ cảm xúc mạnh hơn v3, nên dùng thẻ như v3 sẽ bị diễn quá tay. Bản này:
-- Mỗi đoạn chỉ một thẻ giọng nhẹ ở đầu (`[calm]`, `[matter-of-fact]`, `[warm]`...), không dùng thẻ mạnh như `[excited]`, `[surprised]`, `[frustrated]`, `[sighs]`, `[dramatic]`.
+- Mỗi đoạn chỉ một thẻ giọng ở đầu (`[confident]`, `[engaging]`, `[clear]`...), tránh `[calm]`, `[slow]` vì làm giọng đọc lờ đờ, không dùng thẻ mạnh như `[excited]`, `[surprised]`, `[frustrated]`, `[sighs]`, `[dramatic]`.
 - Nhấn nhịp bằng dấu câu: dấu phẩy, dấu chấm, "..." cho chỗ ngừng ngắn.
 - Giữ `[long pause]` giữa các câu để tách file theo khoảng lặng.
 
@@ -11,54 +11,54 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 
 ## V1 – Mở đầu và cuộc đua
 ```
-[calm, professional] Tối ưu lộ trình xe reach truck bằng thuật toán.
+[confident, upbeat] Tối ưu lộ trình xe reach truck bằng thuật toán.
 [long pause]
-[calm] Để so sánh, chúng tôi mô phỏng cùng một phiếu tê-ô có hai mươi tám điểm hạ hàng. Bên trái, xe đi theo lộ trình do thuật toán sắp xếp. Bên phải, xe đi theo cách đang làm tại kho: lần lượt từ dãy A đến T.
+[engaging] Để so sánh, chúng tôi mô phỏng cùng một phiếu tê-ô có hai mươi tám điểm hạ hàng. Bên trái, xe đi theo lộ trình do thuật toán sắp xếp. Bên phải, xe đi theo cách đang làm tại kho: lần lượt từ dãy A đến T.
 [long pause]
-[calm] Hai xe cùng xuất phát, cùng tốc độ. Xe theo lộ trình tối ưu đã về đích... trong khi xe đi theo dãy vẫn còn đang chạy.
+[lively] Hai xe cùng xuất phát, cùng tốc độ. Xe theo lộ trình tối ưu đã về đích... trong khi xe đi theo dãy vẫn còn đang chạy.
 [long pause]
-[matter-of-fact] Vì sao có chênh lệch này? Quy trình hiện tại có bốn hạn chế. Chúng ta xem lần lượt từng hạn chế trên bản đồ.
+[curious] Vì sao có chênh lệch này? Quy trình hiện tại có bốn hạn chế. Chúng ta xem lần lượt từng hạn chế trên bản đồ.
 ```
 
 ## V2 – Hạn chế 01, 02, 03
 ```
-[matter-of-fact] Một: các điểm gần nhau không được hạ hàng liên tiếp. Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này hai lần.
+[clear, confident] Một: các điểm gần nhau không được hạ hàng liên tiếp. Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này hai lần.
 [long pause]
-[calm] Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực một lần là hạ hàng xong.
+[confident] Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực một lần là hạ hàng xong.
 [long pause]
-[matter-of-fact] Hai: lối đi ngang chưa được sử dụng tối ưu. Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối... rồi lại vào sâu dãy bên cạnh.
+[clear, confident] Hai: lối đi ngang chưa được sử dụng tối ưu. Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối... rồi lại vào sâu dãy bên cạnh.
 [long pause]
-[calm] Thuật toán cho xe đổi lối ngay tại lối ngang gần đó, không phải quay ra đầu dãy. Các điểm gần cửa được hạ hàng trên đường quay về.
+[confident] Thuật toán cho xe đổi lối ngay tại lối ngang gần đó, không phải quay ra đầu dãy. Các điểm gần cửa được hạ hàng trên đường quay về.
 [long pause]
-[matter-of-fact] Ba: hàng nằm rải rác nhiều dãy. Thử duỗi thẳng hai lộ trình ra để so độ dài.
+[clear, confident] Ba: hàng nằm rải rác nhiều dãy. Thử duỗi thẳng hai lộ trình ra để so độ dài.
 [long pause]
-[calm] Phần dây đỏ dài hơn chính là quãng đường chạy thừa. Lộ trình tối ưu giảm phần chạy thừa này.
+[confident] Phần dây đỏ dài hơn chính là quãng đường chạy thừa. Lộ trình tối ưu giảm phần chạy thừa này.
 ```
 
 ## V3 – Hạn chế 04
 ```
-[matter-of-fact] Bốn: ùn tắc dãy A, Bê buổi sáng. Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu tê-ô, ai cũng bắt đầu hạ hàng từ dãy A và Bê... vì phiếu đã in sẵn theo thứ tự dãy.
+[clear, confident] Bốn: ùn tắc dãy A, Bê buổi sáng. Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu tê-ô, ai cũng bắt đầu hạ hàng từ dãy A và Bê... vì phiếu đã in sẵn theo thứ tự dãy.
 [long pause]
-[calm] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe rẽ ra lối ngang, vì đã hạ xong các điểm trong hai dãy này. Sáu xe còn điểm ở cuối dãy, phải đi tiếp... nên kẹt ở giữa dãy.
+[clear] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe rẽ ra lối ngang, vì đã hạ xong các điểm trong hai dãy này. Sáu xe còn điểm ở cuối dãy, phải đi tiếp... nên kẹt ở giữa dãy.
 [long pause]
-[calm] Với lộ trình tối ưu, xe không phải đi hết từng dãy. Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình... hạn chế việc dồn vào cùng một chỗ lúc đầu ca.
+[confident] Với lộ trình tối ưu, xe không phải đi hết từng dãy. Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình... hạn chế việc dồn vào cùng một chỗ lúc đầu ca.
 ```
 
 ## V4 – Kết (tổng kết 4 hạn chế, nhịp chậm)
 ```
-[calm, slow] Nhìn lại bốn hạn chế của cách đi hiện tại.
+[clear, steady] Nhìn lại bốn hạn chế của cách đi hiện tại.
 [long pause]
-[calm, slow] Một: các điểm gần nhau không được hạ hàng liên tiếp.
+[clear, steady] Một: các điểm gần nhau không được hạ hàng liên tiếp.
 [long pause]
-[calm, slow] Hai: hạ xong điểm ở sâu trong dãy, xe quay ra đầu dãy rồi lại vào sâu dãy bên cạnh... thay vì đổi lối ngay tại lối ngang gần đó.
+[clear, steady] Hai: hạ xong điểm ở sâu trong dãy, xe quay ra đầu dãy rồi lại vào sâu dãy bên cạnh... thay vì đổi lối ngay tại lối ngang gần đó.
 [long pause]
-[calm, slow] Ba: hàng rải rác, xe chạy thừa nhiều.
+[clear, steady] Ba: hàng rải rác, xe chạy thừa nhiều.
 [long pause]
-[calm, slow] Bốn: ùn tắc dãy A, Bê buổi sáng.
+[clear, steady] Bốn: ùn tắc dãy A, Bê buổi sáng.
 [long pause]
-[warm] Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.
+[confident] Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.
 [long pause]
-[warm] Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.
+[warm, upbeat] Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.
 ```
 
 ---
