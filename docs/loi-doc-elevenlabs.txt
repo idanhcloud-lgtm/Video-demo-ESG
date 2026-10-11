@@ -1,0 +1,46 @@
+# Lời đọc cho ElevenLabs – mỗi dòng xuất 1 file, đặt tên đúng mã ở đầu dòng
+
+
+## Phần 01
+01-1: Tối ưu lộ trình xe reach truck bằng thuật toán. Kho B2C rộng ba mươi nghìn chín trăm mét vuông, có ba mươi lăm dãy kệ, gần ba mươi bảy nghìn vị trí lưu kho và hai mươi sáu xe nâng.
+01-2: Cùng một phiếu tê-ô, chúng tôi so sánh hai cách đi. Bên trái là lộ trình tối ưu bằng thuật toán. Bên phải là cách hiện tại, lấy hàng theo thứ tự dãy A đến T.
+01-3: Hai xe cùng xuất phát, cùng tốc độ, cùng hai mươi tám điểm hạ hàng. Xe theo lộ trình tối ưu về đích sau một nghìn không trăm lẻ tám mét. Xe đi theo dãy phải chạy tới một nghìn bốn trăm bốn mươi mét, nhiều hơn bốn trăm ba mươi hai mét, tương đương ba mươi phần trăm.
+01-4: Vì sao có chênh lệch này? Quy trình hiện tại có bốn hạn chế. Chúng ta lần lượt xem thuật toán giải quyết từng hạn chế.
+01-5: Hạn chế thứ nhất: không gom các vị trí gần nhau. Các điểm nằm sát nhau nhưng thuộc các dãy khác nhau, nên trên phiếu in chúng bị tách xa.
+01-6: Cùng một khu vực, nhưng xe hiện tại phải vào tới hai lần. Thuật toán gom các điểm gần nhau vào cùng một lượt, xe chỉ cần đi qua một lần. Hạn chế thứ nhất đã được giải quyết.
+
+## Phần 02
+02-1: Hạn chế thứ hai: lối đi ngang chưa được sử dụng tối ưu. Thứ tự in trên phiếu quyết định chỗ đổi lối, chứ không phải lối ngang gần nhất.
+02-2: Hãy nhìn vào khu vực dãy ba đến dãy năm.
+02-3: Xe hiện tại lấy xong điểm số năm ở sâu trong dãy, phải chạy ngược về đầu dãy để đổi lối, rồi lại vào sâu tới điểm số tám. Thuật toán đổi lối ngay tại hầm hai trên đường đi, các điểm gần đầu dãy được lấy trên đường về.
+02-4: Đổi lối ngay tại lối ngang trên đường đi. Hạn chế thứ hai đã được giải quyết.
+
+## Phần 03
+03-1: Hạn chế thứ ba: hàng nằm rải rác nhiều dãy. Nếu không có lộ trình tối ưu, xe phải chạy thừa rất nhiều.
+03-2: Một phiếu tê-ô có hai mươi tám điểm, nằm rải rác trên mười lăm trong mười tám dãy, từ đầu kho tới cuối kho.
+03-3: Cùng các điểm, cùng tốc độ. Xe đi theo lộ trình tối ưu đã về đích, trong khi xe đi theo dãy vẫn còn đang chạy.
+03-4: Duỗi thẳng hai lộ trình ra để so sánh độ dài.
+03-5: Phần dây đỏ dài hơn chính là quãng đường lãng phí. Hàng càng rải rác, đi theo thứ tự dãy càng lãng phí.
+03-6: Lộ trình tối ưu cắt bỏ phần lãng phí này. Hạn chế thứ ba đã được giải quyết.
+
+## Phần 04
+04-1: Hạn chế thứ tư: ùn tắc đầu buổi sáng. Các phiếu tê-ô đều bắt đầu từ dãy A và Bê.
+04-2: Chín giờ sáng, giờ cao điểm. Các xe cùng rời cửa.
+04-3: Với cách hiện tại, xe nào cũng chạy vào dãy A và Bê trước. Chỉ ba xe kịp rẽ sang lối ngang, sáu xe còn lại kẹt ở giữa dãy.
+04-4: Ùn tắc xảy ra vì các phiếu đều bắt đầu từ dãy A, Bê. Với lộ trình tối ưu, xe vẫn đi vào từ dãy A, Bê nhưng tới lối ngang thì rẽ ra khắp kho, nên không còn xe đứng kẹt.
+04-5: Giảm ùn tắc ở dãy A, Bê. Hạn chế thứ tư đã được giải quyết.
+
+## Phần kết
+KET-1: Tổng kết lại bốn hạn chế của quy trình hiện tại.
+KET-2: Một: các điểm gần nhau nhưng khác dãy bị tách xa trên phiếu. Thuật toán gom chúng vào cùng một lượt.
+KET-3: Hai: xe phải chạy về đầu dãy để đổi lối. Thuật toán đổi lối ngay ở lối ngang trên đường đi.
+KET-4: Ba: hàng rải nhiều dãy khiến xe chạy thừa. Lộ trình tối ưu cắt bỏ quãng đường lãng phí.
+KET-5: Bốn: các phiếu đều bắt đầu từ dãy A, Bê gây ùn tắc. Xe được rẽ qua lối ngang, giảm ùn tắc.
+KET-6: Bốn hạn chế, chung một nguyên nhân: phiếu in theo thứ tự A đến T cố định. Giải pháp của chúng tôi là sắp xếp lại lộ trình theo vị trí hàng.
+KET-7: Giữ thêm
+KET-8: +7s
+KET-9: +12s
+KET-10: +6,5s
+KET-11: +6,5s
+KET-12: +1,5s
+KET-13: **+33,5s**
