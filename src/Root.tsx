@@ -4,6 +4,7 @@ import {PROBLEM03_DURATION, Problem03} from './scenes/Problem03';
 import {PROBLEM04_DURATION, Problem04} from './scenes/Problem04';
 import {SUMMARY_DURATION, Summary} from './scenes/Summary';
 import {TitleScene} from './scenes/TitleScene';
+import {FIGURE, SlideFigure} from './scenes/SlideFigure';
 import {CONDENSED_DURATION, Condensed} from './scenes/Condensed';
 import {MAIN_RACE_DURATION, MainRace} from './scenes/MainRace';
 import {WithVoice, voDuration} from './scenes/WithVoice';
@@ -54,6 +55,7 @@ export const RemotionRoot: React.FC = () => {
       />
       <Composition id="MainRaceClean" component={() => <MainRace clean demoSubtitle />} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="MainRace" component={MainRace} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="SlideFigure" component={SlideFigure} defaultProps={{variant: 'overview' as const}} durationInFrames={1} fps={VIDEO.fps} width={FIGURE.width} height={FIGURE.height} />
       <Composition id="Condensed" component={Condensed} durationInFrames={CONDENSED_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
