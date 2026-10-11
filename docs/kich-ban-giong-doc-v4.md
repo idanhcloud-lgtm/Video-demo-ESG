@@ -56,7 +56,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 [long pause]
 [calm, slow] Bốn: ùn tắc dãy A, Bê buổi sáng.
 [long pause]
-[warm] Thuật toán xử lý cả bốn hạn chế, chỉ bằng cách sắp lại thứ tự hạ hàng. Không cần thay đổi kho, không cần thêm xe.
+[warm] Thuật toán khắc phục các hạn chế này bằng cách sắp xếp lại thứ tự hạ hàng, theo đúng vị trí của hàng trong kho.
 [long pause]
 [warm] Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.
 ```
@@ -76,7 +76,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 | V3 | 1–3 | Tab 04: banner "Đầu ca sáng" → 6 xe kẹt → callout xanh |
 | V4 | 1 | Camera thu về toàn kho |
 | V4 | 2–5 | 4 vị trí hạn chế lần lượt chuyển đỏ → xanh |
-| V4 | 6–7 | Dòng chốt: không đổi kho, không thêm xe; lợi ích |
+| V4 | 6–7 | Dòng chốt: sắp lại thứ tự hạ hàng theo vị trí; lợi ích |
 
 ## Lưu ý
 - Thuật ngữ: **hạ hàng**, **liên tiếp**, **lối ngang**. Không nói số mét, phần trăm.
