@@ -9,6 +9,8 @@
 - Bố cục đã duyệt thử: `MainRace` với `clean` (bỏ thanh chữ dưới, dải dưới để phụ đề, thẻ hạn chế chớp xanh khi giải quyết). Bản thử: composition `MainRaceClean`.
 - Chưa chốt: callout chỉ tiếng Việt (A) hay song ngữ (B). Chưa áp `clean` cho `Problem04` và `ClosingShort`.
 
+- Bỏ 4 ô thông số kho ở cảnh tiêu đề (giọng đọc V1 không còn câu thông số).
+
 ## Thuật ngữ đã chốt
 - "hạ hàng" (không dùng "lấy", "gom"), "liên tiếp", "lối ngang" (không dùng "hầm").
 - Không hiện số mét ở bản rút gọn. Video 1080p 60fps.

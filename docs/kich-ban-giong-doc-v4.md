@@ -11,7 +11,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 
 ## V1 – Mở đầu và cuộc đua
 ```
-[calm, professional] Tối ưu lộ trình xe reach truck bằng thuật toán. Kho B2C rộng ba mươi nghìn chín trăm mét vuông, có ba mươi lăm dãy kệ và hai mươi sáu xe nâng.
+[calm, professional] Tối ưu lộ trình xe reach truck bằng thuật toán.
 [long pause]
 [calm] Để so sánh, chúng tôi mô phỏng cùng một phiếu tê-ô có hai mươi tám điểm hạ hàng. Bên trái, xe đi theo lộ trình do thuật toán sắp xếp. Bên phải, xe đi theo cách đang làm tại kho: lần lượt từ dãy A đến T.
 [long pause]
@@ -66,7 +66,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 ## Câu nào đi với hình nào
 | File | Câu | Sự kiện trên màn hình |
 |---|---|---|
-| V1 | 1 | Tiêu đề + 4 ô số liệu kho |
+| V1 | 1 | Tiêu đề (bỏ 4 ô số liệu kho) |
 | V1 | 2 | Hai bản đồ xanh / đỏ hiện lên, 28 điểm |
 | V1 | 3 | Hai xe chạy, xe xanh về đích trước |
 | V1 | 4 | Thanh 4 tab hạn chế hiện lên |
