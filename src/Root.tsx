@@ -4,6 +4,8 @@ import {PROBLEM03_DURATION, Problem03} from './scenes/Problem03';
 import {PROBLEM04_DURATION, Problem04} from './scenes/Problem04';
 import {SUMMARY_DURATION, Summary} from './scenes/Summary';
 import {TitleScene} from './scenes/TitleScene';
+import {CONDENSED_DURATION, Condensed} from './scenes/Condensed';
+import {MAIN_RACE_DURATION, MainRace} from './scenes/MainRace';
 import {WithVoice, voDuration} from './scenes/WithVoice';
 import {VIDEO} from './theme';
 
@@ -50,6 +52,8 @@ export const RemotionRoot: React.FC = () => {
         width={VIDEO.width}
         height={VIDEO.height}
       />
+      <Composition id="MainRace" component={MainRace} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="Condensed" component={Condensed} durationInFrames={CONDENSED_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],
