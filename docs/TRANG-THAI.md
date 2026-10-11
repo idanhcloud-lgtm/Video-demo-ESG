@@ -1,4 +1,11 @@
-# Trạng thái dự án video (tạm dừng chờ giọng đọc)
+# Trạng thái dự án video
+
+## Bản rút gọn có giọng v4 (đã dựng)
+- Giọng chốt: `audio/v4/V1..V4.mp3`. Lập lịch: `python3 tools/voice_v4_plan.py` → `public/audio/v4/*.wav` + `src/data/voiceV4.json`.
+- Composition `CondensedVoice`: Title (không ô thông số) → `MainRace clean` → `Problem04 clean shiftStart` → `ClosingRecap`, phụ đề song ngữ ở dải dưới.
+- Render: `npx remotion render CondensedVoice out/ToiUuLoTrinh_BanRutGon_GiongDoc_1080p60.mp4 --crf=18`.
+
+## Ghi chú cũ (trước khi có giọng v4)
 
 ## Đang chờ
 - Người dùng tạo giọng đọc ElevenLabs v3 theo `docs/kich-ban-giong-doc-v4.md` (viết cho ElevenLabs v4, thẻ cảm xúc nhẹ; V4 là đoạn kết mới tổng kết 4 hạn chế) → 4 file `V1.mp3`–`V4.mp3`.

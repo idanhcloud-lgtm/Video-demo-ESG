@@ -9,7 +9,7 @@ const stats = [
   {value: '26', en: 'Forklifts', vi: 'Xe nâng'},
 ];
 
-export const TitleScene: React.FC = () => {
+export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => {
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
   const intro = spring({frame, fps, config: {damping: 200}});
@@ -55,7 +55,7 @@ export const TitleScene: React.FC = () => {
       <div style={{fontSize: 30, color: colors.muted, opacity: intro}}>
         Tối ưu lộ trình xe Reach Truck bằng thuật toán
       </div>
-      <div style={{display: 'flex', gap: 20, marginTop: 40}}>
+      <div style={{display: noStats ? 'none' : 'flex', gap: 20, marginTop: 40}}>
         {stats.map((s, i) => {
           const p = spring({frame: frame - 20 - i * 6, fps, config: {damping: 200}});
           return (

@@ -6,6 +6,7 @@ import {SUMMARY_DURATION, Summary} from './scenes/Summary';
 import {TitleScene} from './scenes/TitleScene';
 import {FIGURE, SlideFigure} from './scenes/SlideFigure';
 import {CONDENSED_DURATION, Condensed} from './scenes/Condensed';
+import {CONDENSED_VOICE_DURATION, CondensedVoice} from './scenes/CondensedVoice';
 import {MAIN_RACE_DURATION, MainRace} from './scenes/MainRace';
 import {WithVoice, voDuration} from './scenes/WithVoice';
 import {VIDEO} from './theme';
@@ -57,6 +58,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="MainRace" component={MainRace} durationInFrames={MAIN_RACE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="SlideFigure" component={SlideFigure} defaultProps={{variant: 'overview' as const}} durationInFrames={1} fps={VIDEO.fps} width={FIGURE.width} height={FIGURE.height} />
       <Composition id="Condensed" component={Condensed} durationInFrames={CONDENSED_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="CondensedVoice" component={CondensedVoice} durationInFrames={CONDENSED_VOICE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],

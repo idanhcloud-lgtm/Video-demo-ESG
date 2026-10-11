@@ -16,7 +16,7 @@ import {useTimelineFrame} from '../timeline';
  * Condensed version: the opening race, then problems 01–03 explained on the same map by moving the camera.
  * Timeline in 30-per-second units.
  */
-const T = {
+const T0 = {
   dots: 0,
   race: 60,
   raceEnd: 420,
@@ -35,13 +35,19 @@ const T = {
   p3Waste: 1275,
   p3Solved: 1375,
   end: 1460,
+  // optional: highlight the left / right panel while the voice introduces it
+  spotL: -1,
+  spotR: -1,
+  spotEnd: -1,
 };
-export const MAIN_RACE_DURATION = toFrames(T.end);
+export type MainRaceBeats = Partial<typeof T0>;
+export const MAIN_RACE_DURATION = toFrames(T0.end);
 
 const current = aisleOrder(TO28);
 const algo = TO28_OPTIMIZED;
 const TRACK = {current: track(current, TO28_DOOR), algo: track(algo, TO28_DOOR)};
-const SPEED = TRACK.current.total / (T.raceEnd - T.race);
+// The race always lasts raceEnd - race of T0, so beat overrides keep the same truck speed.
+const SPEED = TRACK.current.total / (T0.raceEnd - T0.race);
 
 // Problem 01 (same example as video part 1): current visits #19 #20, drives far left for #21 #22,
 // then comes back for #23 #24; the algorithm takes the same four stops in one pass (#8–#11).
@@ -56,7 +62,8 @@ const mix = (a: Cam, b: Cam, t: number): Cam => ({k: a.k + (b.k - a.k) * t, tx: 
 const Hl: React.FC<{c: string; children: React.ReactNode}> = ({c, children}) => <span style={{color: c}}>{children}</span>;
 
 /** clean: no caption bar (bottom strip kept for subtitles); demoSubtitle shows how a subtitle sits there. */
-export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean}> = ({clean = false, demoSubtitle = false}) => {
+export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?: MainRaceBeats}> = ({clean = false, demoSubtitle = false, beats}) => {
+  const T = {...T0, ...beats};
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -223,6 +230,30 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean}> = ({c
           />
         )}
       </RoutePanel>
+      {(['algo', 'current'] as const).map((kind) => {
+        const s0 = kind === 'algo' ? T.spotL : T.spotR;
+        const s1 = kind === 'algo' ? T.spotR : T.spotEnd;
+        if (s0 < 0) return null;
+        const o = interpolate(frame, [s0, s0 + 8, s1 - 6, s1], [0, 1, 1, 0], clamp);
+        return (
+          <div
+            key={kind}
+            style={{
+              position: 'absolute',
+              left: LAYOUT.panelLeft[kind] - 8,
+              top: LAYOUT.panelTop - 8,
+              width: LAYOUT.panelW + 16,
+              height: LAYOUT.panelH + 16,
+              borderRadius: 22,
+              border: `5px solid ${kind === 'algo' ? colors.green : colors.red}`,
+              boxShadow: `0 0 40px ${kind === 'algo' ? colors.green : colors.red}`,
+              opacity: o,
+              pointerEvents: 'none',
+              zIndex: 3,
+            }}
+          />
+        );
+      })}
       <VsBadge />
       <FinishChip kind="algo" />
       <FinishChip kind="current" />

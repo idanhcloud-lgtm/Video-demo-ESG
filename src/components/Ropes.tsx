@@ -62,7 +62,7 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
           <rect x={x0 + lenG} y={624} width={lenR - lenG} height={32} rx={6} fill={colors.red} opacity={0.35 + 0.45 * pulse} />
           <rect x={x0 + (lenG + lenR) / 2 - 275} y={690} width={550} height={92} rx={14} fill="#ffffff" stroke={colors.red} strokeWidth={4} />
           <text x={x0 + (lenG + lenR) / 2} y={735} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
-            QUÃNG ĐƯỜNG LÃNG PHÍ
+            QUÃNG ĐƯỜNG CHẠY THỪA
           </text>
           <text x={x0 + (lenG + lenR) / 2} y={766} textAnchor="middle" fontSize={22} fontWeight={600} fill="#5b6478">
             Wasted travel

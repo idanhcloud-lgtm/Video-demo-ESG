@@ -12,7 +12,7 @@ import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
 import {useTimelineFrame} from '../timeline';
 
 // Timeline (30 units per second), same beats as the other problems.
-const T = {
+const T0 = {
   glow: 20,
   cardIn: 45,
   cardOut: 150,
@@ -26,7 +26,8 @@ const T = {
   solved: 730,
   end: 820,
 };
-export const PROBLEM04_DURATION = toFrames(T.end);
+export type Problem04Beats = Partial<typeof T0>;
+export const PROBLEM04_DURATION = toFrames(T0.end);
 
 type Pt = [number, number];
 /**
@@ -105,11 +106,11 @@ const tripPath = (t: Trip): Pt[] => {
 
 const SPEED = 5.5; // px per timeline unit
 const STAGGER = 10;
-const tripDistance = (frame: number, i: number, L: number) => Math.max(0, Math.min(L, (frame - T.drive - i * STAGGER) * SPEED));
+const tripDistance = (frame: number, i: number, L: number, drive: number) => Math.max(0, Math.min(L, (frame - drive - i * STAGGER) * SPEED));
 
 /** Trucks standing stuck in aisles A, B at this frame. */
-const trucksStuck = (trips: Trip[], frame: number) =>
-  trips.filter((t, i) => t.stuckAt !== undefined && tripDistance(frame, i, pathLen(tripPath(t))) >= pathLen(tripPath(t)) - 0.5).length;
+const trucksStuck = (trips: Trip[], frame: number, drive: number) =>
+  trips.filter((t, i) => t.stuckAt !== undefined && tripDistance(frame, i, pathLen(tripPath(t)), drive) >= pathLen(tripPath(t)) - 0.5).length;
 
 // Camera on the jam (current route only): lanes 1–4, middle of aisles A, B, below the top callouts.
 const ZOOM = {k: 1.9, tx: -1.9 * 200, ty: 580 - 1.9 * 596};
@@ -138,7 +139,7 @@ const MapChip: React.FC<{x: number; y: number; title: string; sub: string; accen
   </div>
 );
 
-const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number; zoom: number}> = ({kind, frame, jam, zoom}) => {
+const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number; zoom: number; drive: number}> = ({kind, frame, jam, zoom, drive}) => {
   const trips = kind === 'algo' ? ALGO : CURRENT;
   const accent = kind === 'algo' ? colors.green : colors.red;
   const cam = {k: 1 + (ZOOM.k - 1) * zoom, tx: ZOOM.tx * zoom, ty: ZOOM.ty * zoom};
@@ -167,7 +168,7 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
         {trips.map((t, i) => {
           const pts = tripPath(t);
           const L = pathLen(pts);
-          const d = tripDistance(frame, i, L);
+          const d = tripDistance(frame, i, L, drive);
           const {p, angle} = along(pts, d);
           const stuck = t.stuckAt !== undefined && d >= L - 0.5;
           return (
@@ -180,7 +181,7 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
                 strokeOpacity={0.5}
                 strokeDasharray={`${d} ${L + 10}`}
               />
-              {frame >= T.drive + i * STAGGER ? <Forklift x={p[0]} y={p[1]} angle={angle} light={stuck ? 0.3 : 1} alert={stuck ? jam * pulse : 0} /> : null}
+              {frame >= drive + i * STAGGER ? <Forklift x={p[0]} y={p[1]} angle={angle} light={stuck ? 0.3 : 1} alert={stuck ? jam * pulse : 0} /> : null}
             </g>
           );
         })}
@@ -195,7 +196,7 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
   );
 };
 
-const ClockBanner: React.FC<{p: number; mini: number}> = ({p, mini}) => {
+const ClockBanner: React.FC<{p: number; mini: number; shiftStart?: boolean}> = ({p, mini, shiftStart}) => {
   const y = interpolate(mini, [0, 1], [540, 330]);
   const scale = interpolate(mini, [0, 1], [1, 0.55]);
   return (
@@ -214,13 +215,15 @@ const ClockBanner: React.FC<{p: number; mini: number}> = ({p, mini}) => {
         zIndex: 6,
       }}
     >
-      <div style={{fontSize: 88, fontWeight: 800, lineHeight: 1}}>9:00 AM</div>
-      <div style={{fontSize: 26, marginTop: 8}}>Giờ cao điểm sáng · Morning peak</div>
+      <div style={{fontSize: shiftStart ? 76 : 88, fontWeight: 800, lineHeight: 1}}>{shiftStart ? 'ĐẦU CA SÁNG' : '9:00 AM'}</div>
+      <div style={{fontSize: 26, marginTop: 8}}>{shiftStart ? 'Start of the morning shift' : 'Giờ cao điểm sáng · Morning peak'}</div>
     </div>
   );
 };
 
-export const Problem04: React.FC = () => {
+/** clean: no caption bar (subtitles go there); shiftStart: "start of the morning shift" instead of 9:00 AM. */
+export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shiftStart?: boolean}> = ({beats, clean = false, shiftStart = false}) => {
+  const T = {...T0, ...beats};
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -248,7 +251,7 @@ export const Problem04: React.FC = () => {
   ];
   const capStart = [T.panelsIn, T.jam, T.solved][phase];
   const capOpacity = interpolate(frame, [capStart, capStart + 12], [0, 1], clamp);
-  const stuckCur = trucksStuck(CURRENT, frame);
+  const stuckCur = trucksStuck(CURRENT, frame, T.drive);
 
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
@@ -258,20 +261,21 @@ export const Problem04: React.FC = () => {
         glow={glow}
         hidden={frame >= T.cardIn && frame < T.cardOut + 15 ? 3 : undefined}
         checkScale={solved ? check : 1}
+        flash={clean && solved ? {index: 3, p: interpolate(frame - T.solved, [0, 8, 40, 70], [0, 1, 1, 0], clamp)} : undefined}
       />
       <ProblemCard
         n={4}
         en="Morning congestion"
         vi="Ùn tắc dãy A, B buổi sáng"
-        descEn="Every TO starts in aisles A, B – at 9:00 the trucks get stuck there"
-        descVi="Các TO đều bắt đầu từ dãy A, B – 9:00 sáng xe kẹt ở hai dãy này"
+        descEn={shiftStart ? 'Every TO starts in aisles A, B – at shift start the trucks get stuck there' : 'Every TO starts in aisles A, B – at 9:00 the trucks get stuck there'}
+        descVi={shiftStart ? 'Các TO đều bắt đầu từ dãy A, B – đầu ca sáng xe kẹt ở hai dãy này' : 'Các TO đều bắt đầu từ dãy A, B – 9:00 sáng xe kẹt ở hai dãy này'}
         enter={cardIn}
         out={cardOut}
       />
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
-        <PanelShell kind="algo" value={String(trucksStuck(ALGO, frame))} unit="trucks" sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
-          <TrafficMap kind="algo" frame={frame} jam={jam} zoom={0} />
+        <PanelShell kind="algo" value={String(trucksStuck(ALGO, frame, T.drive))} unit="trucks" sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
+          <TrafficMap kind="algo" frame={frame} jam={jam} zoom={0} drive={T.drive} />
           {/* empty corner right of the short aisles 1–3 */}
           <MapChip x={606} y={99 + 545} title="GIẢM ÙN TẮC" sub="dãy A, B · less congestion" accent={colors.green} p={badge} />
           <Callout
@@ -284,7 +288,7 @@ export const Problem04: React.FC = () => {
           />
         </PanelShell>
         <PanelShell kind="current" value={String(stuckCur)} unit={stuckCur === 1 ? 'truck' : 'trucks'} sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
-          <TrafficMap kind="current" frame={frame} jam={jam} zoom={zoom} />
+          <TrafficMap kind="current" frame={frame} jam={jam} zoom={zoom} drive={T.drive} />
           {/* just behind the queue, only while zoomed in */}
           <MapChip x={640} y={99 + 550} title={`${STUCK} XE KẸT`} sub="ở dãy A, B · trucks stuck" accent={colors.red} p={badge * zoom} />
           <Callout
@@ -297,9 +301,9 @@ export const Problem04: React.FC = () => {
           />
         </PanelShell>
         <VsBadge />
-        <CaptionBar icon={captions[phase].icon} en={captions[phase].en} vi={captions[phase].vi} opacity={capOpacity} />
+        {clean ? null : <CaptionBar icon={captions[phase].icon} en={captions[phase].en} vi={captions[phase].vi} opacity={capOpacity} />}
       </div>
-      <ClockBanner p={clockIn * clockOut} mini={clockMini} />
+      <ClockBanner p={clockIn * clockOut} mini={clockMini} shiftStart={shiftStart} />
     </AbsoluteFill>
   );
 };
