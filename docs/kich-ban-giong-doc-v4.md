@@ -50,7 +50,7 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 [long pause]
 [calm, slow] Một: các điểm gần nhau không được hạ hàng liên tiếp.
 [long pause]
-[calm, slow] Hai: xe phải chạy về đầu dãy để đổi lối.
+[calm, slow] Hai: lối ngang chưa được sử dụng tối ưu, xe quay ngược về đầu dãy để đổi lối, dù có lối ngang gần hơn.
 [long pause]
 [calm, slow] Ba: hàng rải rác, xe chạy thừa nhiều.
 [long pause]
