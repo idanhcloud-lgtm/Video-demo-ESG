@@ -40,7 +40,7 @@ const T0 = {
   spotR: -1,
   spotEnd: -1,
   // optional: distance comparison after the race. With dist set, both panel headers count metres during the race;
-  // at dist the final metres are highlighted, at distDiff the difference badge pops between the panels.
+  // at dist the two header counters turn into white cards and fly to the centre, at distDiff the difference pops.
   dist: -1,
   distDiff: -1,
 };
@@ -106,7 +106,9 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
   const check = Number.isFinite(lastSolved) ? spring({frame: frame - lastSolved, fps, config: {damping: 12}}) : 1;
   const flashIdx = solvedAt.findIndex((s) => s === lastSolved);
   const flashP = Number.isFinite(lastSolved) ? interpolate(frame - lastSolved, [0, 8, 40, 70], [0, 1, 1, 0], clamp) : 0;
-  const statsOpacity = interpolate(frame, [T.tabs, T.tabs + 20], [1, clean ? 0 : 1], clamp);
+  // header numbers lift off as the comparison cards (DistanceCompare) while those are on screen
+  const lifted = T.dist >= 0 && frame >= T.dist + 2 ? 0 : 1;
+  const statsOpacity = interpolate(frame, [T.tabs, T.tabs + 20], [1, clean ? 0 : 1], clamp) * lifted;
 
   const callP1 = spring({frame: frame - T.p1Callout, fps, config: {damping: 200}}) * interpolate(frame, [T.p2 - 10, T.p2], [1, 0], clamp);
   const callP2 = spring({frame: frame - T.p2Callout, fps, config: {damping: 200}}) * interpolate(frame, [T.p3 - 10, T.p3], [1, 0], clamp);
@@ -280,62 +282,83 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
 };
 
 
-/** After the race: highlight both final distances in the panel headers, then show the difference between them. */
+
+/** The two header counters turn white, lift off their maps and meet in the centre; then the difference appears. */
 const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out: number}> = ({frame, at, diffAt, out}) => {
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
   const fps = TIMELINE_FPS;
   if (frame < at || frame > out) return null;
-  const hl = interpolate(frame, [at, at + 10, out - 12, out], [0, 1, 1, 0], clamp);
-  const pulse = 0.75 + 0.25 * Math.sin((frame - at) / 5);
+  const white = interpolate(frame, [at, at + 10], [0, 1], clamp);
+  const fly = interpolate(frame, [at + 12, at + 45], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
+  const fade = interpolate(frame, [out - 14, out], [1, 0], clamp);
   const pop = frame >= diffAt ? spring({frame: frame - diffAt, fps, config: {damping: 12}}) : 0;
-  const popOut = interpolate(frame, [out - 12, out], [1, 0], clamp);
   const diff = LEN.current - LEN.algo;
+  const W = 300;
+  const H = 96;
+  const K = 1.75; // card scale in the centre
+  const cards = [
+    {kind: 'algo' as const, left: LAYOUT.panelLeft.algo + LAYOUT.panelW - 52 - W, cx: 960 - 300, c: colors.green, ink: '#0a8f5a', vi: 'Lộ trình tối ưu', en: 'Optimized route'},
+    {kind: 'current' as const, left: LAYOUT.panelLeft.current + LAYOUT.panelW - 24 - W, cx: 960 + 300, c: colors.red, ink: '#d23c3a', vi: 'Theo dãy A → T', en: 'Aisle order A → T'},
+  ];
+  const top = LAYOUT.panelTop + 2;
+  const cy = 450;
+  const mix = (a: number, b: number) => a + (b - a) * fly;
   return (
-    <>
-      {(['algo', 'current'] as const).map((kind) => {
-        const c = kind === 'algo' ? colors.green : colors.red;
+    <div style={{position: 'absolute', inset: 0, opacity: fade, zIndex: 9}}>
+      <div style={{position: 'absolute', inset: 0, background: '#050912', opacity: 0.72 * fly}} />
+      {cards.map((k) => {
+        const x0 = k.left + W / 2;
+        const y0 = top + H / 2;
         return (
           <div
-            key={kind}
+            key={k.kind}
             style={{
               position: 'absolute',
-              left: LAYOUT.panelLeft[kind] + LAYOUT.panelW - (kind === 'algo' ? 330 : 302),
-              top: LAYOUT.panelTop + 4,
-              width: 290,
-              height: 92,
+              left: k.left,
+              top,
+              width: W,
+              height: H,
+              boxSizing: 'border-box',
+              transform: `translate(${mix(x0, k.cx) - x0}px, ${mix(y0, cy) - y0}px) scale(${mix(1, K)})`,
               borderRadius: 14,
-              border: `4px solid ${c}`,
-              boxShadow: `0 0 ${24 * pulse}px ${c}`,
-              opacity: hl,
-              zIndex: 4,
+              background: `rgba(255,255,255,${white})`,
+              boxShadow: `0 0 0 ${3 * white}px ${k.c}, 0 ${18 * fly}px ${40 * fly}px #000a`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-          />
+          >
+            <div style={{position: 'absolute', top: -30, fontSize: 18, fontWeight: 800, color: k.c, opacity: fly, whiteSpace: 'nowrap'}}>
+              {k.vi} <span style={{fontWeight: 500, color: colors.muted}}>· {k.en}</span>
+            </div>
+            <div style={{fontSize: 58, fontWeight: 800, lineHeight: 1, color: white > 0.5 ? k.ink : k.c}}>
+              {Math.round(LEN[k.kind]).toLocaleString('en-US')}
+              <span style={{fontSize: 24, fontWeight: 600, color: white > 0.5 ? '#5b6478' : colors.muted, marginLeft: 6}}>m</span>
+            </div>
+            <div style={{fontSize: 16, color: white > 0.5 ? '#5b6478' : colors.muted, marginTop: 4}}>28 / 28 điểm hạ hàng</div>
+          </div>
         );
       })}
       <div
         style={{
           position: 'absolute',
           left: 960,
-          top: LAYOUT.panelTop + 175,
+          top: cy + (H * K) / 2 + 40,
           transform: `translateX(-50%) scale(${0.6 + 0.4 * pop})`,
-          opacity: Math.min(1, pop) * popOut,
-          background: '#ffffff',
-          color: '#0b1222',
-          borderRadius: 22,
-          padding: '16px 40px 18px',
-          textAlign: 'center',
-          boxShadow: `0 0 0 5px ${colors.green}, 0 20px 50px #000c`,
+          opacity: Math.min(1, pop),
+          background: colors.green,
+          color: '#062016',
+          borderRadius: 50,
+          padding: '14px 44px',
           whiteSpace: 'nowrap',
-          zIndex: 9,
+          boxShadow: '0 16px 40px #000a',
         }}
       >
-        <div style={{fontSize: 22, fontWeight: 700, color: '#5b6478', letterSpacing: 1}}>LỘ TRÌNH TỐI ƯU NGẮN HƠN · SHORTER</div>
-        <div style={{fontSize: 78, fontWeight: 800, lineHeight: 1.05, color: '#0a8f5a'}}>
-          −{Math.round(diff).toLocaleString('en-US')} m
-          <span style={{fontSize: 44, marginLeft: 18}}>−{Math.round((100 * diff) / LEN.current)}%</span>
-        </div>
-        <div style={{fontSize: 20, color: '#5b6478'}}>cùng 1 phiếu TO · 28 điểm hạ hàng</div>
+        <span style={{fontSize: 56, fontWeight: 800}}>−{Math.round(diff).toLocaleString('en-US')} m</span>
+        <span style={{fontSize: 40, fontWeight: 800, marginLeft: 20}}>−{Math.round((100 * diff) / LEN.current)}%</span>
+        <span style={{fontSize: 24, fontWeight: 600, marginLeft: 20}}>ngắn hơn · shorter</span>
       </div>
-    </>
+    </div>
   );
 };

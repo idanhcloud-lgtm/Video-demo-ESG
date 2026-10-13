@@ -3,7 +3,7 @@ import {colors, fontFamily} from '../theme';
 /** Bilingual subtitle in the strip reserved at the bottom of the frame (below the map panels). */
 /** enFirst: English is the main (large) line, Vietnamese the small one. */
 export const Subtitle: React.FC<{vi: string; en: string; opacity?: number; enFirst?: boolean}> = ({vi, en, opacity = 1, enFirst = false}) => (
-  <div style={{position: 'absolute', left: 120, right: 120, top: 922, textAlign: 'center', opacity, fontFamily}}>
+  <div style={{position: 'absolute', left: 120, right: 120, top: 922, textAlign: 'center', opacity, fontFamily, zIndex: 20}}>
     <div
       style={{
         display: 'inline-block',
