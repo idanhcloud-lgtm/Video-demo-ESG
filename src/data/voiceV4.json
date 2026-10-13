@@ -1,5 +1,5 @@
 {
- "total": 167.296,
+ "total": 178.546,
  "scenes": {
   "title": {
    "seconds": 3.84
@@ -50,7 +50,7 @@
    }
   },
   "ket": {
-   "seconds": 31.56,
+   "seconds": 30.56,
    "beats": {
     "intro": 0,
     "i1": 134,
@@ -61,7 +61,14 @@
     "b1": 739,
     "b2": 775,
     "b3": 809,
-    "end": 947
+    "end": 917
+   }
+  },
+  "end": {
+   "seconds": 12.25,
+   "beats": {
+    "next": 158,
+    "end": 368
    }
   }
  },
@@ -129,6 +136,10 @@
   {
    "file": "audio/v4/ket.wav",
    "at": 136.536
+  },
+  {
+   "file": "audio/v4/v5.wav",
+   "at": 167.096
   }
  ],
  "subs": [
@@ -341,6 +352,18 @@
    "end": 164.746,
    "vi": "Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.",
    "en": "Shorter travel, less congestion, energy saved on every forklift trip."
+  },
+  {
+   "at": 167.096,
+   "end": 171.516,
+   "vi": "Trên đây là phần mô phỏng giải pháp tối ưu lộ trình xe reach truck bằng thuật toán.",
+   "en": "That was the simulation of our algorithm-based reach truck route optimization."
+  },
+  {
+   "at": 171.576,
+   "end": 176.596,
+   "vi": "Tiếp theo, chúng tôi xin trình bày kết quả chạy mô phỏng trên các phiếu TO trong một tháng.",
+   "en": "Next, we present the results of simulating one month of TOs."
   }
  ]
 }

@@ -3,13 +3,14 @@ import {Subtitle} from '../components/Subtitle';
 import vo from '../data/voiceV4.json';
 import {VIDEO} from '../theme';
 import {ClosingRecap} from './ClosingRecap';
+import {EndCard} from './EndCard';
 import {MainRace} from './MainRace';
 import {Problem04} from './Problem04';
 import {TitleScene} from './TitleScene';
 
 const f = (s: number) => Math.round(s * VIDEO.fps);
 const S = vo.scenes;
-export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds);
+export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds) + f(S.end.seconds);
 
 /** Bilingual subtitle for the sentence being spoken. */
 const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
@@ -38,6 +39,9 @@ export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false})
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.ket.seconds)}>
         <ClosingRecap beats={S.ket.beats} />
+      </Series.Sequence>
+      <Series.Sequence durationInFrames={f(S.end.seconds)}>
+        <EndCard beats={S.end.beats} />
       </Series.Sequence>
     </Series>
     {vo.audio.map((a) => (

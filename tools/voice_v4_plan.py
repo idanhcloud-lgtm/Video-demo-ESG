@@ -44,6 +44,8 @@ SEG = {
     'k3': ('V4', 11.64, 14.41, 'Ba: hàng rải rác, xe chạy thừa nhiều.', 'Three: scattered stops, a lot of extra travel.'),
     'k4': ('V4', 15.20, 18.01, 'Bốn: ùn tắc dãy A, B buổi sáng.', 'Four: morning congestion in aisles A, B.'),
     'k5': ('V4', 18.77, 23.31, 'Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.', 'The algorithm addresses them by re-sequencing the put-away stops more efficiently.'),
+    'v5a': ('V5', 0.00, 4.17, 'Trên đây là phần mô phỏng giải pháp tối ưu lộ trình xe reach truck bằng thuật toán.', 'That was the simulation of our algorithm-based reach truck route optimization.'),
+    'v5b': ('V5', 4.48, 9.25, 'Tiếp theo, chúng tôi xin trình bày kết quả chạy mô phỏng trên các phiếu TO trong một tháng.', 'Next, we present the results of simulating one month of TOs.'),
     'k6': ('V4', 24.06, 28.20, 'Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.', 'Shorter travel, less congestion, energy saved on every forklift trip.'),
 }
 # Inside k6: when each benefit is spoken (file time).
@@ -171,10 +173,17 @@ x = place('ket', c0 + 0.8, 'k0', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6')
 off = c0 + 0.8 - SEG['k0'][1]
 C = {'intro': c0, 'i1': x['k1'][0], 'i2': x['k2'][0], 'i3': x['k3'][0], 'i4': x['k4'][0], 'fix': x['k5'][0],
      'b1': K6_WORDS[0] + off, 'b2': K6_WORDS[1] + off, 'b3': K6_WORDS[2] + off}
-C['end'] = x['k6'][1] + 2.8
+C['end'] = x['k6'][1] + 1.8
 ket_beats = {k: round((v - c0) * U) for k, v in C.items()}
 ket_dur = C['end'] - c0
-total = C['end']
+
+# ---- End card (V5) ----
+e0 = C['end']
+x = place('v5', e0 + 0.8, 'v5a', 'v5b')
+E = {'next': x['v5b'][0], 'end': x['v5b'][1] + 2.2}
+end_beats = {k: round((v - e0) * U) for k, v in E.items()}
+end_dur = E['end'] - e0
+total = E['end']
 
 # ---- cut audio blocks ----
 audio = []
@@ -191,12 +200,13 @@ data = {
         'race': {'seconds': round(race_dur, 3), 'beats': race_beats},
         'p04': {'seconds': round(p4_dur, 3), 'beats': p4_beats},
         'ket': {'seconds': round(ket_dur, 3), 'beats': ket_beats},
+        'end': {'seconds': round(end_dur, 3), 'beats': end_beats},
     },
     'audio': audio,
     'subs': [{'at': round(a, 3), 'end': round(e + 0.25, 3), 'vi': vi, 'en': en} for a, e, vi, en in subs],
 }
 json.dump(data, open('src/data/voiceV4.json', 'w'), ensure_ascii=False, indent=1)
-print(f'total {total:.1f}s  title {title_dur:.1f}  race {race_dur:.1f}  p04 {p4_dur:.1f}  ket {ket_dur:.1f}')
+print(f'total {total:.1f}s  title {title_dur:.1f}  race {race_dur:.1f}  p04 {p4_dur:.1f}  ket {ket_dur:.1f}  end {end_dur:.1f}')
 print('race', race_beats)
 print('p04', p4_beats)
 print('ket', ket_beats)
