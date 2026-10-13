@@ -5,6 +5,14 @@
 - Composition `CondensedVoice`: Title (không ô thông số) → `MainRace clean` → `Problem04 clean shiftStart` → `ClosingRecap`, phụ đề song ngữ ở dải dưới.
 - Render: `npx remotion render CondensedVoice out/ToiUuLoTrinh_BanRutGon_GiongDoc_1080p60.mp4 --crf=18`.
 
+## Đang chờ (cập nhật)
+- `audio/v4/V1b.mp3`: giọng đoạn so sánh quãng đường (kịch bản V1b trong `docs/kich-ban-giong-doc-v4.md`). Hình đã duyệt: 2 ô số mét chuyển nền trắng, bay ra giữa, rồi hiện −430 m · −27%. Có file thì chạy lại `tools/voice_v4_plan.py` (tự nhận V1b).
+- `V5`: câu kết video (3 phương án đã gửi, chờ chọn) + màn hình cảm ơn ~5–6 s (chưa dựng).
+- Xuất lại 2 bản: `CondensedVoice` (phụ đề Việt chính) và `CondensedVoiceEN` (Anh chính), nén < 30 MB để gửi chat.
+
+## Slide "Hạn chế"
+- Mục 1 xong: `tools/build_hanche_muc1.py` (slide 3, 4) + `tools/build_hanche_so_sanh.py` (slide 5 so sánh). Mục 2–5 chưa làm; mục 04 còn ghi "dãy A" cần sửa "dãy A, B".
+
 ## Ghi chú cũ (trước khi có giọng v4)
 
 ## Đang chờ
