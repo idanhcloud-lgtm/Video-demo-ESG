@@ -22,9 +22,9 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 
 ## V1b – So sánh quãng đường (chèn sau cuộc đua, trước "Vì sao có chênh lệch này?")
 ```
-[confident] Cùng hai mươi tám điểm hạ hàng, lộ trình tối ưu chạy một nghìn một trăm sáu mươi sáu mét. Cách hiện tại chạy một nghìn năm trăm chín mươi sáu mét.
+[calm, matter-of-fact] Cùng hai mươi tám điểm hạ hàng, lộ trình tối ưu chạy một nghìn một trăm sáu mươi sáu mét. Cách hiện tại chạy một nghìn năm trăm chín mươi sáu mét.
 [long pause]
-[confident] Ngắn hơn khoảng bốn trăm ba mươi mét, tức khoảng hai mươi bảy phần trăm... chỉ trong một phiếu tê-ô.
+[calm] Ngắn hơn khoảng bốn trăm ba mươi mét, tức khoảng hai mươi bảy phần trăm, chỉ trong một phiếu tê-ô.
 ```
 Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 m): 1.166 m và 1.596 m, chênh 430 m (26,9%).
 
