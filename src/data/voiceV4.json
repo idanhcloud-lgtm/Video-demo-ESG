@@ -1,11 +1,11 @@
 {
- "total": 164.007,
+ "total": 167.296,
  "scenes": {
   "title": {
    "seconds": 3.84
   },
   "race": {
-   "seconds": 91.337,
+   "seconds": 94.626,
    "beats": {
     "spotL": 158,
     "spotR": 258,
@@ -13,22 +13,22 @@
     "race": 409,
     "raceEnd": 769,
     "dist": 778,
-    "distDiff": 1003,
-    "tabs": 1194,
-    "p1": 1331,
-    "p1Trace": 1440,
-    "p1Callout": 1590,
-    "p1Solved": 1735,
-    "p2": 1774,
-    "p2Trace": 1876,
-    "p2Callout": 2061,
-    "p2Solved": 2305,
-    "p3": 2344,
-    "p3Flash": 2371,
-    "p3Ropes": 2433,
-    "p3Waste": 2528,
-    "p3Solved": 2625,
-    "end": 2740,
+    "distDiff": 1066,
+    "tabs": 1292,
+    "p1": 1430,
+    "p1Trace": 1539,
+    "p1Callout": 1688,
+    "p1Solved": 1834,
+    "p2": 1873,
+    "p2Trace": 1975,
+    "p2Callout": 2160,
+    "p2Solved": 2404,
+    "p3": 2443,
+    "p3Flash": 2470,
+    "p3Ropes": 2532,
+    "p3Waste": 2627,
+    "p3Solved": 2724,
+    "end": 2839,
     "dots": 0
    }
   },
@@ -83,48 +83,52 @@
    "at": 24.659
   },
   {
+   "file": "audio/v4/dist.wav",
+   "at": 30.28
+  },
+  {
    "file": "audio/v4/why.wav",
-   "at": 42.08
+   "at": 45.369
   },
   {
    "file": "audio/v4/p1.wav",
-   "at": 48.51
+   "at": 51.799
   },
   {
    "file": "audio/v4/p1c.wav",
-   "at": 57.13
+   "at": 60.419
   },
   {
    "file": "audio/v4/p2.wav",
-   "at": 63.27
+   "at": 66.559
   },
   {
    "file": "audio/v4/p2c.wav",
-   "at": 72.85
+   "at": 76.139
   },
   {
    "file": "audio/v4/p3.wav",
-   "at": 82.28
+   "at": 85.569
   },
   {
    "file": "audio/v4/p3c.wav",
-   "at": 88.117
+   "at": 91.406
   },
   {
    "file": "audio/v4/p4a.wav",
-   "at": 96.877
+   "at": 100.166
   },
   {
    "file": "audio/v4/p4c.wav",
-   "at": 108.027
+   "at": 111.316
   },
   {
    "file": "audio/v4/p4f.wav",
-   "at": 119.097
+   "at": 122.386
   },
   {
    "file": "audio/v4/ket.wav",
-   "at": 133.247
+   "at": 136.536
   }
  ],
  "subs": [
@@ -166,175 +170,175 @@
   },
   {
    "at": 30.28,
-   "end": 36.73,
+   "end": 37.932,
    "vi": "Cùng 28 điểm hạ hàng, lộ trình tối ưu chạy 1.166 m. Cách hiện tại chạy 1.596 m.",
    "en": "Same 28 stops: the optimized route drives 1,166 m, today's order 1,596 m."
   },
   {
-   "at": 37.28,
-   "end": 41.53,
+   "at": 39.382,
+   "end": 44.819,
    "vi": "Ngắn hơn khoảng 430 m, tức khoảng 27%, chỉ trong một phiếu TO.",
    "en": "About 430 m shorter – roughly 27% – on a single TO."
   },
   {
-   "at": 42.08,
-   "end": 45.5,
+   "at": 45.369,
+   "end": 48.789,
    "vi": "Vì sao có chênh lệch này? Quy trình hiện tại có 4 hạn chế.",
    "en": "Why the difference? The current process has 4 limitations."
   },
   {
-   "at": 45.68,
-   "end": 47.96,
+   "at": 48.969,
+   "end": 51.249,
    "vi": "Chúng ta xem lần lượt từng hạn chế trên bản đồ.",
    "en": "Let's look at each one on the map."
   },
   {
-   "at": 48.51,
-   "end": 51.51,
+   "at": 51.799,
+   "end": 54.799,
    "vi": "Một: các điểm gần nhau không được hạ hàng liên tiếp.",
    "en": "One: nearby stops are not handled in sequence."
   },
   {
-   "at": 51.85,
-   "end": 56.58,
+   "at": 55.139,
+   "end": 59.869,
    "vi": "Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này 2 lần.",
    "en": "They sit close together but in different aisles, so today the truck enters this area twice."
   },
   {
-   "at": 57.13,
-   "end": 61.72,
+   "at": 60.419,
+   "end": 65.009,
    "vi": "Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực 1 lần là hạ hàng xong.",
    "en": "The algorithm puts them in sequence – one visit to the area is enough."
   },
   {
-   "at": 63.27,
-   "end": 66.17,
+   "at": 66.559,
+   "end": 69.459,
    "vi": "Hai: lối đi ngang chưa được sử dụng tối ưu.",
    "en": "Two: cross aisles are not used optimally."
   },
   {
-   "at": 66.38,
-   "end": 72.3,
+   "at": 69.669,
+   "end": 75.589,
    "vi": "Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối, rồi lại vào sâu dãy bên cạnh.",
    "en": "After a stop deep in the aisle, the truck goes back to the front to change aisle, then deep again."
   },
   {
-   "at": 72.85,
-   "end": 77.08,
+   "at": 76.139,
+   "end": 80.369,
    "vi": "Thuật toán cho xe đổi lối ngay tại lối ngang gần đó, không phải quay ra đầu dãy.",
    "en": "The algorithm changes aisle at the nearby cross aisle – no trip back to the front."
   },
   {
-   "at": 77.34,
-   "end": 80.73,
+   "at": 80.629,
+   "end": 84.019,
    "vi": "Các điểm gần đầu dãy được hạ hàng trên đường quay về.",
    "en": "Stops near the front are handled on the way back."
   },
   {
-   "at": 82.28,
-   "end": 84.78,
+   "at": 85.569,
+   "end": 88.069,
    "vi": "Ba: hàng nằm rải rác nhiều dãy.",
    "en": "Three: stops are scattered over many aisles."
   },
   {
-   "at": 84.95,
-   "end": 87.45,
+   "at": 88.239,
+   "end": 90.739,
    "vi": "Thử duỗi thẳng 2 lộ trình ra để so độ dài.",
    "en": "Let's straighten both routes and compare their length."
   },
   {
-   "at": 88.117,
-   "end": 90.847,
+   "at": 91.406,
+   "end": 94.136,
    "vi": "Phần dây đỏ dài hơn chính là quãng đường chạy thừa.",
    "en": "The extra red length is the wasted travel."
   },
   {
-   "at": 91.047,
-   "end": 93.227,
+   "at": 94.336,
+   "end": 96.516,
    "vi": "Lộ trình tối ưu giảm phần chạy thừa này.",
    "en": "The optimized route cuts this waste."
   },
   {
-   "at": 96.877,
-   "end": 99.897,
+   "at": 100.166,
+   "end": 103.186,
    "vi": "Bốn: ùn tắc dãy A, B buổi sáng.",
    "en": "Four: morning congestion in aisles A, B."
   },
   {
-   "at": 100.067,
-   "end": 107.777,
+   "at": 103.356,
+   "end": 111.066,
    "vi": "Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu TO, ai cũng bắt đầu hạ hàng từ dãy A và B, vì phiếu đã in sẵn theo thứ tự dãy.",
    "en": "At the start of the morning shift, every driver begins in aisles A and B – the TOs are printed in aisle order."
   },
   {
-   "at": 108.027,
-   "end": 110.337,
+   "at": 111.316,
+   "end": 113.626,
    "vi": "Các xe cùng dồn vào dãy A, B.",
    "en": "All trucks crowd into aisles A, B."
   },
   {
-   "at": 110.637,
-   "end": 114.497,
+   "at": 113.926,
+   "end": 117.786,
    "vi": "Chỉ 3 xe rẽ ra lối ngang, vì đã hạ xong các điểm trong 2 dãy này.",
    "en": "Only 3 turn off at the cross aisle – they are done with these two aisles."
   },
   {
-   "at": 114.647,
-   "end": 118.747,
+   "at": 117.936,
+   "end": 122.036,
    "vi": "6 xe còn điểm ở cuối dãy, phải đi tiếp, nên kẹt ở giữa dãy.",
    "en": "The other 6 still have stops further down, so they get stuck mid-aisle."
   },
   {
-   "at": 119.097,
-   "end": 122.087,
+   "at": 122.386,
+   "end": 125.376,
    "vi": "Với lộ trình tối ưu, xe không phải đi hết từng dãy.",
    "en": "With the optimized route, trucks don't run each aisle to the end."
   },
   {
-   "at": 122.327,
-   "end": 128.997,
+   "at": 125.616,
+   "end": 132.286,
    "vi": "Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình, hạn chế việc dồn vào cùng một chỗ lúc đầu ca.",
    "en": "Stops are grouped by zone; at the cross aisle each truck turns to its own zone – less crowding at shift start."
   },
   {
-   "at": 133.247,
-   "end": 135.657,
+   "at": 136.536,
+   "end": 138.946,
    "vi": "Nhìn lại 4 hạn chế của cách đi hiện tại.",
    "en": "Looking back at the 4 limitations of today's routing."
   },
   {
-   "at": 136.907,
-   "end": 140.167,
+   "at": 140.196,
+   "end": 143.456,
    "vi": "Một: các điểm gần nhau không được hạ hàng liên tiếp.",
    "en": "One: nearby stops are not handled in sequence."
   },
   {
-   "at": 140.977,
-   "end": 144.087,
+   "at": 144.266,
+   "end": 147.376,
    "vi": "Hai: lối đi ngang chưa được sử dụng tối ưu.",
    "en": "Two: cross aisles are not used optimally."
   },
   {
-   "at": 144.647,
-   "end": 147.667,
+   "at": 147.936,
+   "end": 150.956,
    "vi": "Ba: hàng rải rác, xe chạy thừa nhiều.",
    "en": "Three: scattered stops, a lot of extra travel."
   },
   {
-   "at": 148.207,
-   "end": 151.267,
+   "at": 151.496,
+   "end": 154.556,
    "vi": "Bốn: ùn tắc dãy A, B buổi sáng.",
    "en": "Four: morning congestion in aisles A, B."
   },
   {
-   "at": 151.777,
-   "end": 156.567,
+   "at": 155.066,
+   "end": 159.856,
    "vi": "Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.",
    "en": "The algorithm addresses them by re-sequencing the put-away stops more efficiently."
   },
   {
-   "at": 157.067,
-   "end": 161.457,
+   "at": 160.356,
+   "end": 164.746,
    "vi": "Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.",
    "en": "Shorter travel, less congestion, energy saved on every forklift trip."
   }
