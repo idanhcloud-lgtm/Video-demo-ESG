@@ -7,7 +7,7 @@ import {Ropes, Truck} from '../components/Ropes';
 import {Callout, RoutePanel, VsBadge} from '../components/RoutePanel';
 import {TO28, TO28_DOOR, TO28_OPTIMIZED} from '../data/to28';
 import {LAYOUT, project} from '../layout';
-import {aisleOrder, stopPoint} from '../map/route';
+import {aisleOrder, routeLength, stopPoint} from '../map/route';
 import {track} from '../map/track';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
 import {useTimelineFrame} from '../timeline';
@@ -39,6 +39,9 @@ const T0 = {
   spotL: -1,
   spotR: -1,
   spotEnd: -1,
+  // optional: distance comparison card after the race (dist = card in, distDiff = difference badge)
+  dist: -1,
+  distDiff: -1,
 };
 export type MainRaceBeats = Partial<typeof T0>;
 export const MAIN_RACE_DURATION = toFrames(T0.end);
@@ -48,6 +51,8 @@ const algo = TO28_OPTIMIZED;
 const TRACK = {current: track(current, TO28_DOOR), algo: track(algo, TO28_DOOR)};
 // The race always lasts raceEnd - race of T0, so beat overrides keep the same truck speed.
 const SPEED = TRACK.current.total / (T0.raceEnd - T0.race);
+// Route lengths in metres (same formula as the routing app).
+const LEN = {algo: routeLength(algo, TO28_DOOR), current: routeLength(current, TO28_DOOR)};
 
 // Problem 01 (same example as video part 1): current visits #19 #20, drives far left for #21 #22,
 // then comes back for #23 #24; the algorithm takes the same four stops in one pass (#8–#11).
@@ -154,7 +159,8 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
 
   const FinishChip: React.FC<{kind: 'algo' | 'current'}> = ({kind}) => {
     const t0 = T.race + TRACK[kind].total / SPEED;
-    const p = spring({frame: frame - t0, fps, config: {damping: 14}}) * interpolate(frame, [T.tabs - 10, T.tabs + 5], [1, 0], clamp);
+    const out = T.dist >= 0 ? T.dist : T.tabs;
+    const p = spring({frame: frame - t0, fps, config: {damping: 14}}) * interpolate(frame, [out - 10, out + 5], [1, 0], clamp);
     if (!finished(kind)) return null;
     return (
       <div
@@ -258,6 +264,7 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
       <FinishChip kind="algo" />
       <FinishChip kind="current" />
 
+      {T.dist >= 0 ? <DistanceCard frame={frame} at={T.dist} diffAt={T.distDiff} out={T.tabs} /> : null}
       {ropesOn ? <Ropes frame={frame} start={T.p3Ropes} waste={T.p3Waste} tracks={TRACK} /> : null}
       {clean ? null : <CaptionBar icon={cap.icon} en={cap.en} vi={cap.vi} opacity={capOpacity} />}
       {demoSubtitle && frame >= T.p1 && frame < T.p2 ? (
@@ -268,5 +275,76 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
         />
       ) : null}
     </AbsoluteFill>
+  );
+};
+
+/** Travel distance of both routes for the same TO, shown once both trucks are back. */
+const DistanceCard: React.FC<{frame: number; at: number; diffAt: number; out: number}> = ({frame, at, diffAt, out}) => {
+  const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+  const fps = TIMELINE_FPS;
+  const inP = spring({frame: frame - at, fps, config: {damping: 200}});
+  const outP = interpolate(frame, [out - 12, out], [1, 0], clamp);
+  if (frame < at || frame > out) return null;
+  const grow = interpolate(frame, [at + 10, at + 55], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+  const diffP = spring({frame: frame - diffAt, fps, config: {damping: 12}});
+  const W = 860;
+  const diff = LEN.current - LEN.algo;
+  const rows = [
+    {kind: 'algo' as const, vi: 'Lộ trình tối ưu', en: 'Optimized route', c: colors.green},
+    {kind: 'current' as const, vi: 'Theo dãy A → T', en: 'Aisle order A → T', c: colors.red},
+  ];
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 960,
+        top: 540,
+        transform: `translate(-50%, -50%) scale(${0.92 + 0.08 * inP})`,
+        opacity: inP * outP,
+        width: W + 120,
+        padding: '34px 60px 40px',
+        borderRadius: 26,
+        background: '#0b1222f2',
+        border: '2px solid #ffffff33',
+        boxShadow: '0 30px 80px #000c',
+        zIndex: 8,
+      }}
+    >
+      <div style={{fontSize: 40, fontWeight: 800}}>Quãng đường di chuyển</div>
+      <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Travel distance · cùng 1 phiếu TO, 28 điểm hạ hàng</div>
+      {rows.map((r) => {
+        const v = LEN[r.kind] * grow;
+        return (
+          <div key={r.kind} style={{marginBottom: 22}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}>
+              <div>
+                <span style={{fontSize: 30, fontWeight: 700, color: r.c}}>{r.vi}</span>
+                <span style={{fontSize: 22, color: colors.muted, marginLeft: 14}}>{r.en}</span>
+              </div>
+              <div style={{fontSize: 44, fontWeight: 800}}>
+                {Math.round(v).toLocaleString('en-US')} <span style={{fontSize: 26, color: colors.muted}}>m</span>
+              </div>
+            </div>
+            <div style={{height: 26, borderRadius: 13, background: '#1b2540'}}>
+              <div style={{width: (W * v) / LEN.current, height: 26, borderRadius: 13, background: r.c}} />
+            </div>
+          </div>
+        );
+      })}
+      <div
+        style={{
+          marginTop: 18,
+          display: 'flex',
+          justifyContent: 'center',
+          opacity: frame >= diffAt ? Math.min(1, diffP) : 0,
+          transform: `scale(${0.8 + 0.2 * diffP})`,
+        }}
+      >
+        <div style={{background: colors.green, color: '#062016', borderRadius: 40, padding: '10px 36px', fontSize: 36, fontWeight: 800}}>
+          Ngắn hơn {Math.round(diff).toLocaleString('en-US')} m · −{Math.round((100 * diff) / LEN.current)}%
+          <span style={{fontSize: 22, fontWeight: 600, marginLeft: 14}}>{Math.round(diff)} m shorter</span>
+        </div>
+      </div>
+    </div>
   );
 };

@@ -20,6 +20,14 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 [curious] Vì sao có chênh lệch này? Quy trình hiện tại có bốn hạn chế. Chúng ta xem lần lượt từng hạn chế trên bản đồ.
 ```
 
+## V1b – So sánh quãng đường (chèn sau cuộc đua, trước "Vì sao có chênh lệch này?")
+```
+[confident] Cùng hai mươi tám điểm hạ hàng, lộ trình tối ưu chạy một nghìn một trăm sáu mươi sáu mét. Cách hiện tại chạy một nghìn năm trăm chín mươi sáu mét.
+[long pause]
+[confident] Ngắn hơn khoảng bốn trăm ba mươi mét, tức khoảng hai mươi bảy phần trăm... chỉ trong một phiếu tê-ô.
+```
+Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 m): 1.166 m và 1.596 m, chênh 430 m (26,9%).
+
 ## V2 – Hạn chế 01, 02, 03
 ```
 [clear, confident] Một: các điểm gần nhau không được hạ hàng liên tiếp. Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này hai lần.
@@ -79,5 +87,5 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 | V4 | 6–7 | Dòng chốt: sắp xếp lại thứ tự hạ hàng tối ưu hơn; lợi ích |
 
 ## Lưu ý
-- Thuật ngữ: **hạ hàng**, **liên tiếp**, **lối ngang**. Không nói số mét, phần trăm.
+- Thuật ngữ: **hạ hàng**, **liên tiếp**, **lối ngang**. Số mét, phần trăm chỉ nói ở đoạn V1b.
 - V4 thay cho đoạn kết cũ "4 hạn chế – 1 nguyên nhân" (câu này không đúng hoàn toàn với hạn chế 03).
