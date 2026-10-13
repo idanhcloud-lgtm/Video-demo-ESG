@@ -231,6 +231,49 @@ def set_timing(slide, steps):
         slide._element.append(el)
 
 
+WIPE = {'up': (4, 'wipe(up)'), 'down': (1, 'wipe(down)'), 'right': (8, 'wipe(right)'), 'left': (2, 'wipe(left)')}
+
+
+def timing_fx(slide, clicks):
+    """clicks: list of lists of effects. ('fade', shape) | ('wipe', shape, delay, dur, dir) | ('appear', ...) | ('motion', shape, delay, dur, path)."""
+    ids = iter(range(3, 100000))
+    pars = []
+    for click in clicks:
+        inner = []
+        for k, e in enumerate(click):
+            kind, sh = e[0], e[1]
+            delay = e[2] if len(e) > 2 else 0
+            node = 'clickEffect' if k == 0 else 'withEffect'
+            a, b, c = next(ids), next(ids), next(ids)
+            sp = f'<p:tgtEl><p:spTgt spid="{sh.shape_id}"/></p:tgtEl>'
+            vis = (f'<p:set><p:cBhvr><p:cTn id="{b}" dur="1" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>{sp}'
+                   '<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>')
+            if kind == 'fade':
+                body, head = vis + f'<p:animEffect transition="in" filter="fade"><p:cBhvr><p:cTn id="{c}" dur="500"/>{sp}</p:cBhvr></p:animEffect>', 'presetID="10" presetClass="entr" presetSubtype="0"'
+            elif kind == 'wipe':
+                sub, flt = WIPE[e[4]]
+                body, head = vis + f'<p:animEffect transition="in" filter="{flt}"><p:cBhvr><p:cTn id="{c}" dur="{e[3]}"/>{sp}</p:cBhvr></p:animEffect>', f'presetID="22" presetClass="entr" presetSubtype="{sub}"'
+            elif kind == 'appear':
+                body, head = vis, 'presetID="1" presetClass="entr" presetSubtype="0"'
+            else:  # motion
+                body = (f'<p:animMotion origin="layout" path="{e[4]}" pathEditMode="relative" ptsTypes=""><p:cBhvr><p:cTn id="{c}" dur="{e[3]}" fill="hold"/>{sp}'
+                        '<p:attrNameLst><p:attrName>ppt_x</p:attrName><p:attrName>ppt_y</p:attrName></p:attrNameLst></p:cBhvr></p:animMotion>')
+                head = 'presetID="0" presetClass="path" presetSubtype="0" accel="0" decel="0"'
+            inner.append(f'<p:par><p:cTn id="{a}" {head} fill="hold" nodeType="{node}"><p:stCondLst><p:cond delay="{delay}"/></p:stCondLst><p:childTnLst>{body}</p:childTnLst></p:cTn></p:par>')
+        o1, o2 = next(ids), next(ids)
+        pars.append(f'<p:par><p:cTn id="{o1}" fill="hold"><p:stCondLst><p:cond delay="indefinite"/></p:stCondLst><p:childTnLst>'
+                    f'<p:par><p:cTn id="{o2}" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>' + ''.join(inner) +
+                    '</p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par>')
+    xml = (f'<p:timing xmlns:p="{PNS}"><p:tnLst><p:par><p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>'
+           '<p:seq concurrent="1" nextAc="seek"><p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>' + ''.join(pars) +
+           '</p:childTnLst></p:cTn><p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+           '<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst></p:seq>'
+           '</p:childTnLst></p:cTn></p:par></p:tnLst></p:timing>')
+    el = etree.fromstring(xml)
+    ext = slide._element.find(qn('p:extLst'))
+    (ext.addprevious(el) if ext is not None else slide._element.append(el))
+
+
 def group(slide, name):
     g = slide.shapes.add_group_shape(); g.name = name
     return g
