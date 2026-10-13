@@ -39,7 +39,8 @@ const T0 = {
   spotL: -1,
   spotR: -1,
   spotEnd: -1,
-  // optional: distance comparison card after the race (dist = card in, distDiff = difference badge)
+  // optional: distance comparison after the race. With dist set, both panel headers count metres during the race;
+  // at dist the final metres are highlighted, at distDiff the difference badge pops between the panels.
   dist: -1,
   distDiff: -1,
 };
@@ -141,7 +142,7 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
     stops: kind === 'algo' ? algo : current,
     doorId: TO28_DOOR,
     traveled: racing ? traveled : 0,
-    showDistance: false,
+    showDistance: T.dist >= 0,
     showPlanned: false,
     camera: cam,
     statsOpacity,
@@ -264,7 +265,7 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
       <FinishChip kind="algo" />
       <FinishChip kind="current" />
 
-      {T.dist >= 0 ? <DistanceCard frame={frame} at={T.dist} diffAt={T.distDiff} out={T.tabs} /> : null}
+      {T.dist >= 0 ? <DistanceCompare frame={frame} at={T.dist} diffAt={T.distDiff} out={T.tabs} /> : null}
       {ropesOn ? <Ropes frame={frame} start={T.p3Ropes} waste={T.p3Waste} tracks={TRACK} /> : null}
       {clean ? null : <CaptionBar icon={cap.icon} en={cap.en} vi={cap.vi} opacity={capOpacity} />}
       {demoSubtitle && frame >= T.p1 && frame < T.p2 ? (
@@ -278,73 +279,63 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
   );
 };
 
-/** Travel distance of both routes for the same TO, shown once both trucks are back. */
-const DistanceCard: React.FC<{frame: number; at: number; diffAt: number; out: number}> = ({frame, at, diffAt, out}) => {
+
+/** After the race: highlight both final distances in the panel headers, then show the difference between them. */
+const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out: number}> = ({frame, at, diffAt, out}) => {
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
   const fps = TIMELINE_FPS;
-  const inP = spring({frame: frame - at, fps, config: {damping: 200}});
-  const outP = interpolate(frame, [out - 12, out], [1, 0], clamp);
   if (frame < at || frame > out) return null;
-  const grow = interpolate(frame, [at + 10, at + 55], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-  const diffP = spring({frame: frame - diffAt, fps, config: {damping: 12}});
-  const W = 860;
+  const hl = interpolate(frame, [at, at + 10, out - 12, out], [0, 1, 1, 0], clamp);
+  const pulse = 0.75 + 0.25 * Math.sin((frame - at) / 5);
+  const pop = frame >= diffAt ? spring({frame: frame - diffAt, fps, config: {damping: 12}}) : 0;
+  const popOut = interpolate(frame, [out - 12, out], [1, 0], clamp);
   const diff = LEN.current - LEN.algo;
-  const rows = [
-    {kind: 'algo' as const, vi: 'Lộ trình tối ưu', en: 'Optimized route', c: colors.green},
-    {kind: 'current' as const, vi: 'Theo dãy A → T', en: 'Aisle order A → T', c: colors.red},
-  ];
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 960,
-        top: 540,
-        transform: `translate(-50%, -50%) scale(${0.92 + 0.08 * inP})`,
-        opacity: inP * outP,
-        width: W + 120,
-        padding: '34px 60px 40px',
-        borderRadius: 26,
-        background: '#0b1222f2',
-        border: '2px solid #ffffff33',
-        boxShadow: '0 30px 80px #000c',
-        zIndex: 8,
-      }}
-    >
-      <div style={{fontSize: 40, fontWeight: 800}}>Quãng đường di chuyển</div>
-      <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Travel distance · cùng 1 phiếu TO, 28 điểm hạ hàng</div>
-      {rows.map((r) => {
-        const v = LEN[r.kind] * grow;
+    <>
+      {(['algo', 'current'] as const).map((kind) => {
+        const c = kind === 'algo' ? colors.green : colors.red;
         return (
-          <div key={r.kind} style={{marginBottom: 22}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}>
-              <div>
-                <span style={{fontSize: 30, fontWeight: 700, color: r.c}}>{r.vi}</span>
-                <span style={{fontSize: 22, color: colors.muted, marginLeft: 14}}>{r.en}</span>
-              </div>
-              <div style={{fontSize: 44, fontWeight: 800}}>
-                {Math.round(v).toLocaleString('en-US')} <span style={{fontSize: 26, color: colors.muted}}>m</span>
-              </div>
-            </div>
-            <div style={{height: 26, borderRadius: 13, background: '#1b2540'}}>
-              <div style={{width: (W * v) / LEN.current, height: 26, borderRadius: 13, background: r.c}} />
-            </div>
-          </div>
+          <div
+            key={kind}
+            style={{
+              position: 'absolute',
+              left: LAYOUT.panelLeft[kind] + LAYOUT.panelW - (kind === 'algo' ? 330 : 302),
+              top: LAYOUT.panelTop + 4,
+              width: 290,
+              height: 92,
+              borderRadius: 14,
+              border: `4px solid ${c}`,
+              boxShadow: `0 0 ${24 * pulse}px ${c}`,
+              opacity: hl,
+              zIndex: 4,
+            }}
+          />
         );
       })}
       <div
         style={{
-          marginTop: 18,
-          display: 'flex',
-          justifyContent: 'center',
-          opacity: frame >= diffAt ? Math.min(1, diffP) : 0,
-          transform: `scale(${0.8 + 0.2 * diffP})`,
+          position: 'absolute',
+          left: 960,
+          top: LAYOUT.panelTop + 175,
+          transform: `translateX(-50%) scale(${0.6 + 0.4 * pop})`,
+          opacity: Math.min(1, pop) * popOut,
+          background: '#ffffff',
+          color: '#0b1222',
+          borderRadius: 22,
+          padding: '16px 40px 18px',
+          textAlign: 'center',
+          boxShadow: `0 0 0 5px ${colors.green}, 0 20px 50px #000c`,
+          whiteSpace: 'nowrap',
+          zIndex: 9,
         }}
       >
-        <div style={{background: colors.green, color: '#062016', borderRadius: 40, padding: '10px 36px', fontSize: 36, fontWeight: 800}}>
-          Ngắn hơn {Math.round(diff).toLocaleString('en-US')} m · −{Math.round((100 * diff) / LEN.current)}%
-          <span style={{fontSize: 22, fontWeight: 600, marginLeft: 14}}>{Math.round(diff)} m shorter</span>
+        <div style={{fontSize: 22, fontWeight: 700, color: '#5b6478', letterSpacing: 1}}>LỘ TRÌNH TỐI ƯU NGẮN HƠN · SHORTER</div>
+        <div style={{fontSize: 78, fontWeight: 800, lineHeight: 1.05, color: '#0a8f5a'}}>
+          −{Math.round(diff).toLocaleString('en-US')} m
+          <span style={{fontSize: 44, marginLeft: 18}}>−{Math.round((100 * diff) / LEN.current)}%</span>
         </div>
+        <div style={{fontSize: 20, color: '#5b6478'}}>cùng 1 phiếu TO · 28 điểm hạ hàng</div>
       </div>
-    </div>
+    </>
   );
 };
