@@ -6,7 +6,7 @@ the cartons / numbers / routes with one TO of 9 bins whose two orders follow the
   nearer the truck; aisle changes use the nearest crossing (front, cross aisle or far end).
 - optimized: same bins re-sequenced (1-3-4-7-8-9-6-5-2), nearby bins handled back to back.
 Each step is a group that fades in on click.
-Usage: python3 tools/build_hanche_muc1.py <in.pptx> <out.pptx>
+Usage: python3 tools/build_hanche_muc1.py <in.pptx> <out.pptx>  (also imported by build_hanche_so_sanh.py)
 """
 import io
 import sys
@@ -19,8 +19,6 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Pt
 
-SRC, DST = sys.argv[1], sys.argv[2]
-prs = Presentation(SRC)
 
 # ---- map geometry (EMU), read from the deck's own shapes ----
 COL0, PITCH = 6667500, 482600              # rack A centre, rack-to-rack pitch
@@ -165,11 +163,16 @@ def chain(seq, first_from_door=False):
 
 
 CARTON = None
-for sh in prs.slides[2].shapes:
-    if sh.name.startswith('P1 carton'):
-        CARTON = sh.image.blob
-        break
-assert CARTON
+
+
+def load_carton(prs):
+    """Carton picture reused from the deck (slide 3)."""
+    global CARTON
+    for sh in prs.slides[2].shapes:
+        if sh.name.startswith('P1 carton'):
+            CARTON = sh.image.blob
+            return
+    raise SystemExit('carton picture not found')
 
 
 def bins(slide, name, color, numbers):
@@ -237,71 +240,80 @@ def group(slide, name):
 BAND1 = (Y_C1 - 125000, 250000)
 BAND2 = (Y_C2 - 125000, 250000)
 
-# ================= Slide 3: current =================
-s = prs.slides[2]
-clear(s)
-g1 = bins(s, 'Bước 1 – 9 thùng theo phiếu', BLUE, {n: n for n in P})
-note = label(g1.shapes, 6280000, BAND1[0] - 40000, 1530000, BAND1[1] + 80000, [[('Phiếu in theo dãy A → T', 7, INK, True)], [('#1 → #2 → … → #9', 7, BLUE, True)]], BLUE)
-g2 = group(s, 'Bước 2 – Cửa → #1 → #2')
-poly(g2.shapes, route(chain([1, 2], True)), RED)
-g3 = group(s, 'Bước 3 – #2 → #3 → #4 → #5')
-poly(g3.shapes, route(chain([2, 3, 4, 5])), RED)
-ring(g3.shapes, 2, 5, RED)
-label(g3.shapes, 8420000, BAND2[0] - 40000, 1330000, BAND2[1] + 80000, [[('#2 · #5 sát nhau', 7, RED, True)], [('không hạ liên tiếp', 6.5, INK, False)]], RED)
-g4 = group(s, 'Bước 4 – #5 → … → #9')
-poly(g4.shapes, route(chain([5, 6, 7, 8, 9])), RED)
-ring(g4.shapes, 6, 9, RED)
-label(g4.shapes, 10340000, BAND2[0] - 40000, 1110000, BAND2[1] + 80000, [[('#6 · #9 sát nhau', 7, RED, True)], [('không hạ liên tiếp', 6.5, INK, False)]], RED)
-g5 = group(s, 'Bước 5 – Về cửa + kết luận')
-poly(g5.shapes, door_back(P[9], 70000), RED)
-concl = shape(g5.shapes, MSO_SHAPE.ROUNDED_RECTANGLE, 8420000, BAND1[0] - 40000, 1330000, BAND1[1] + 80000, RED, None, adj=0.25)
-text_into(concl, [[('Cùng một khu vực', 7.5, 'FFFFFF', True)], [('xe phải vào 2 lần', 7.5, 'FFFFFF', True)]])
-set_timing(s, [[g1], [g2], [g3], [g4], [g5]])
+def build(prs):
+    """Slides 3 (current) and 4 (optimized) + agreed wording for limitation 01."""
+    # ================= Slide 3: current =================
+    s = prs.slides[2]
+    clear(s)
+    g1 = bins(s, 'Bước 1 – 9 thùng theo phiếu', BLUE, {n: n for n in P})
+    note = label(g1.shapes, 6280000, BAND1[0] - 40000, 1530000, BAND1[1] + 80000, [[('Phiếu in theo dãy A → T', 7, INK, True)], [('#1 → #2 → … → #9', 7, BLUE, True)]], BLUE)
+    g2 = group(s, 'Bước 2 – Cửa → #1 → #2')
+    poly(g2.shapes, route(chain([1, 2], True)), RED)
+    g3 = group(s, 'Bước 3 – #2 → #3 → #4 → #5')
+    poly(g3.shapes, route(chain([2, 3, 4, 5])), RED)
+    ring(g3.shapes, 2, 5, RED)
+    label(g3.shapes, 8420000, BAND2[0] - 40000, 1330000, BAND2[1] + 80000, [[('#2 · #5 sát nhau', 7, RED, True)], [('không hạ liên tiếp', 6.5, INK, False)]], RED)
+    g4 = group(s, 'Bước 4 – #5 → … → #9')
+    poly(g4.shapes, route(chain([5, 6, 7, 8, 9])), RED)
+    ring(g4.shapes, 6, 9, RED)
+    label(g4.shapes, 10340000, BAND2[0] - 40000, 1110000, BAND2[1] + 80000, [[('#6 · #9 sát nhau', 7, RED, True)], [('không hạ liên tiếp', 6.5, INK, False)]], RED)
+    g5 = group(s, 'Bước 5 – Về cửa + kết luận')
+    poly(g5.shapes, door_back(P[9], 70000), RED)
+    concl = shape(g5.shapes, MSO_SHAPE.ROUNDED_RECTANGLE, 8420000, BAND1[0] - 40000, 1330000, BAND1[1] + 80000, RED, None, adj=0.25)
+    text_into(concl, [[('Cùng một khu vực', 7.5, 'FFFFFF', True)], [('xe phải vào 2 lần', 7.5, 'FFFFFF', True)]])
+    set_timing(s, [[g1], [g2], [g3], [g4], [g5]])
 
-# ================= Slide 4: optimized =================
-s = prs.slides[3]
-clear(s)
-pos = {n: OPT.index(n) + 1 for n in P}
-g1 = bins(s, 'Bước 1 – Cùng 9 thùng', '8A94A6', {n: n for n in P})
-label(g1.shapes, 7930000, BAND1[0] - 40000, 1820000, BAND1[1] + 80000, [[('Thứ tự mới', 7, INK, True)], [('1 → 3 → 4 → 7 → 8 → 9 → 6 → 5 → 2', 6.5, GREEN, True)]], GREEN)
-g2 = group(s, 'Bước 2 – Cửa → #1 → #3 → #4 → #7')
-poly(g2.shapes, route(chain([1, 3, 4, 7], True)), GREEN)
-for n in (1, 3, 4, 7):
-    x, y = P[n]
-    b = shape(g2.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
-    text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
-g3 = group(s, 'Bước 3 – #7 → #8 → #9 → #6')
-poly(g3.shapes, route(chain([7, 8, 9, 6])), GREEN)
-for n in (8, 9, 6):
-    x, y = P[n]
-    b = shape(g3.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
-    text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
-ring(g3.shapes, 6, 9, GREEN)
-label(g3.shapes, 8750000, BAND2[0], 1450000, BAND2[1], [[('#9 → #6 hạ liên tiếp', 7.5, GREEN, True)]], GREEN)
-g4 = group(s, 'Bước 4 – #6 → #5 → #2 → về cửa')
-pts = route(chain([6, 5, 2])) + door_back(P[2], 70000)[1:]
-poly(g4.shapes, pts, GREEN)
-for n in (5, 2):
-    x, y = P[n]
-    b = shape(g4.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
-    text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
-ring(g4.shapes, 2, 5, GREEN)
-label(g4.shapes, 7000000, BAND2[0], 1450000, BAND2[1], [[('#5 → #2 hạ liên tiếp', 7.5, GREEN, True)]], GREEN)
-g5 = group(s, 'Bước 5 – Kết luận')
-concl = shape(g5.shapes, MSO_SHAPE.ROUNDED_RECTANGLE, 10340000, BAND1[0] - 40000, 1110000, BAND1[1] + 80000, GREEN, None, adj=0.25)
-text_into(concl, [[('Mỗi khu vực', 7.5, 'FFFFFF', True)], [('chỉ vào 1 lần', 7.5, 'FFFFFF', True)]])
-set_timing(s, [[g1], [g2], [g3], [g4], [g5]])
+    # ================= Slide 4: optimized =================
+    s = prs.slides[3]
+    clear(s)
+    pos = {n: OPT.index(n) + 1 for n in P}
+    g1 = bins(s, 'Bước 1 – Cùng 9 thùng', '8A94A6', {n: n for n in P})
+    label(g1.shapes, 7930000, BAND1[0] - 40000, 1820000, BAND1[1] + 80000, [[('Thứ tự mới', 7, INK, True)], [('1 → 3 → 4 → 7 → 8 → 9 → 6 → 5 → 2', 6.5, GREEN, True)]], GREEN)
+    g2 = group(s, 'Bước 2 – Cửa → #1 → #3 → #4 → #7')
+    poly(g2.shapes, route(chain([1, 3, 4, 7], True)), GREEN)
+    for n in (1, 3, 4, 7):
+        x, y = P[n]
+        b = shape(g2.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
+        text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
+    g3 = group(s, 'Bước 3 – #7 → #8 → #9 → #6')
+    poly(g3.shapes, route(chain([7, 8, 9, 6])), GREEN)
+    for n in (8, 9, 6):
+        x, y = P[n]
+        b = shape(g3.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
+        text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
+    ring(g3.shapes, 6, 9, GREEN)
+    label(g3.shapes, 8750000, BAND2[0], 1450000, BAND2[1], [[('#9 → #6 hạ liên tiếp', 7.5, GREEN, True)]], GREEN)
+    g4 = group(s, 'Bước 4 – #6 → #5 → #2 → về cửa')
+    pts = route(chain([6, 5, 2])) + door_back(P[2], 70000)[1:]
+    poly(g4.shapes, pts, GREEN)
+    for n in (5, 2):
+        x, y = P[n]
+        b = shape(g4.shapes, MSO_SHAPE.OVAL, x + 35000, y - 175000, 170000, 170000, GREEN, 'FFFFFF', 1.0)
+        text_into(b, [[(str(n), 7.5, 'FFFFFF', True)]], inset=0)
+    ring(g4.shapes, 2, 5, GREEN)
+    label(g4.shapes, 7000000, BAND2[0], 1450000, BAND2[1], [[('#5 → #2 hạ liên tiếp', 7.5, GREEN, True)]], GREEN)
+    g5 = group(s, 'Bước 5 – Kết luận')
+    concl = shape(g5.shapes, MSO_SHAPE.ROUNDED_RECTANGLE, 10340000, BAND1[0] - 40000, 1110000, BAND1[1] + 80000, GREEN, None, adj=0.25)
+    text_into(concl, [[('Mỗi khu vực', 7.5, 'FFFFFF', True)], [('chỉ vào 1 lần', 7.5, 'FFFFFF', True)]])
+    set_timing(s, [[g1], [g2], [g3], [g4], [g5]])
 
-# ---- agreed wording for limitation 01 on every slide ----
-NEW = {'Nearby bins missed across different aisles': 'Nearby bins across aisles not handled in sequence',
-       'Không gom các vị trí gần nhau ở các dãy khác nhau': 'Điểm gần nhau khác dãy không được hạ hàng liên tiếp'}
-for sl in prs.slides:
-    for sh in sl.shapes:
-        if sh.has_text_frame:
-            for p in sh.text_frame.paragraphs:
-                for r in p.runs:
-                    if r.text.strip() in NEW:
-                        r.text = NEW[r.text.strip()]
+    # ---- agreed wording for limitation 01 on every slide ----
+    NEW = {'Nearby bins missed across different aisles': 'Nearby bins across aisles not handled in sequence',
+           'Không gom các vị trí gần nhau ở các dãy khác nhau': 'Điểm gần nhau khác dãy không được hạ hàng liên tiếp'}
+    for sl in prs.slides:
+        for sh in sl.shapes:
+            if sh.has_text_frame:
+                for p in sh.text_frame.paragraphs:
+                    for r in p.runs:
+                        if r.text.strip() in NEW:
+                            r.text = NEW[r.text.strip()]
 
-prs.save(DST)
-print(f'saved {DST}  current {L_CUR / 1e5:.1f}  optimized {L_OPT / 1e5:.1f}  (-{SAVE}%)')
+
+
+if __name__ == '__main__':
+    SRC, DST = sys.argv[1], sys.argv[2]
+    prs = Presentation(SRC)
+    load_carton(prs)
+    build(prs)
+    prs.save(DST)
+    print(f'saved {DST}  current {L_CUR / 1e5:.1f}  optimized {L_OPT / 1e5:.1f}  (-{SAVE}%)')
