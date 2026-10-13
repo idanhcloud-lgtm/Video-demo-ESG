@@ -1,8 +1,9 @@
-"""Limitation 01 with a full TO on the map, everything but the focus area dimmed, and routes that run.
+"""Limitation 01 with a full TO on the map, everything but the focus area dimmed, and routes drawn as they run.
 
 - The whole TO (13 bins) is shown; numbers follow the printed order (aisle sweep A → T, same rule as the app).
 - Then the map outside the focus area (aisles C|D … D|…|…) is dimmed: #5 and #7 sit side by side.
-- Routes are drawn segment by segment (wipe in the travel direction) while a forklift drives along them.
+- Routes are revealed segment by segment (wipe in the travel direction).
+- Slide 3 adds a short green arrow #5 → #7: the two bins are right next to each other.
 Slides: 3 = current (#5 → #6 → #7 → #8), 4 = algorithm (#5 → #7 → #6 → #8), 5 = both on one map.
 Input: original deck with slide 4 duplicated after itself (scripts/add_slide.py deck slide4.xml --after slide4.xml).
 Usage: python3 tools/build_hanche_muc1_chay.py <in.pptx> <out.pptx>
@@ -23,7 +24,6 @@ SRC, DST = sys.argv[1], sys.argv[2]
 prs = Presentation(SRC)
 m.load_carton(prs)
 SW, SH = prs.slide_width, prs.slide_height
-FORK = next(sh.image.blob for sh in prs.slides[2].shapes if 'forklift' in sh.name)
 
 # ---- the TO: (aisle index, y). Aisles: 0 A|B, 1 B|C, 2 C|D, 3 D|…, 4 …|…, 6 Q|R, 7 R|S, 8 S|T ----
 RAW = [(0, 4950000), (0, 3500000), (1, 3800000), (1, 5050000), (2, 5110000), (2, 2420000), (3, 5110000),
@@ -87,7 +87,7 @@ def pair_ring(sc, color):
 
 
 def running_route(slide, name, order, color, w=2.75, dash=None, off=0):
-    """Route as straight segments (each revealed in its travel direction) + a forklift driving along it.
+    """Route as straight segments, each revealed in its travel direction.
     Shapes stay top-level (PowerPoint cannot animate shapes inside a group). Returns the effects for the timing."""
     sc = slide.shapes
     legs = []
@@ -105,13 +105,6 @@ def running_route(slide, name, order, color, w=2.75, dash=None, off=0):
             dur = max(150, int(L * SPEED))
             effects.append(('wipe', s, t, dur, d))
             t += dur
-    pts = [p for leg in legs for p in leg]
-    fw, fh = 300000, 205000
-    fx, fy = pts[0][0] - fw / 2, pts[0][1] - fh / 2
-    fk = sc.add_picture(io.BytesIO(FORK), Emu(int(fx)), Emu(int(fy)), Emu(fw), Emu(fh))
-    fk.name = f'{name} – xe nâng'
-    path = 'M 0 0 ' + ' '.join(f'L {(x - pts[0][0]) / SW:.5f} {(y - pts[0][1]) / SH:.5f}' for x, y in pts[1:]) + ' E'
-    effects += [('appear', fk, 0, 1, None), ('motion', fk, 0, t, path)]
     return effects
 
 
@@ -182,14 +175,17 @@ note = m.group(s, 'Bước 1 – Ghi chú phiếu')
 box(note.shapes, 6280000, 1240000, B1, NOTE, m.BLUE)
 g2 = m.group(s, 'Bước 2 – Cặp #5 · #7')
 pair_ring(g2.shapes, m.RED)
-box(g2.shapes, LX, LW, B2, [[('#5 và #7 nằm sát nhau', 7.5, m.RED, True)], [('nhưng không hạ liên tiếp', 7, m.INK, False)]], m.RED)
+box(g2.shapes, LX, LW, B2, [[('#5 và #7 nằm sát nhau (chỉ cách 1 lối)', 7.5, m.RED, True)], [('nhưng không hạ liên tiếp', 7, m.INK, False)]], m.RED)
 run = running_route(s, 'Bước 3 – Xe chạy theo phiếu', CUR, m.RED)
 lab = m.group(s, 'Bước 3 – Chú thích đường đi')
 box(lab.shapes, LX, LW, B1, [[('Hạ #5 → lên hạ #6', 7.5, m.RED, True)], [('→ xuống hạ #7 → lại lên #8', 7.5, m.RED, True)]], m.RED)
+(x5, y5), (x7, _) = P[5], P[7]
+near = m.poly(s.shapes, [(x5 - 120000, y5 + 210000), (x7 + 60000, y5 + 210000)], m.GREEN, 5)
+near.name = 'Bước 4 – Mũi tên xanh: #5 → #7 gần nhau'
 g4 = m.group(s, 'Bước 4 – Kết luận')
 c = m.shape(g4.shapes, MSO_SHAPE.ROUNDED_RECTANGLE, LX, 5600000 - 240000, LW, 230000, m.RED, None, adj=0.3)
 m.text_into(c, [[('Cùng một khu vực, xe phải vào 2 lần', 8, 'FFFFFF', True)]])
-timing(s, [fade(g1, note), fade(veil, g2), run + [('fade', lab, 0)], fade(g4)])
+timing(s, [fade(g1, note), fade(veil, g2), run + [('fade', lab, 0)], [('wipe', near, 0, 500, 'right'), ('fade', g4, 300)]])
 
 # ---------------- Slide 4: algorithm ----------------
 s = prs.slides[3]
