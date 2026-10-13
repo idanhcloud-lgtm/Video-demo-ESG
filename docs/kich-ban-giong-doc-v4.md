@@ -74,11 +74,11 @@ Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 
 ## V5 – Câu kết video (chọn 1 phương án, tạo thành V5.mp3)
 Phương án 1 (đề xuất):
 ```
-[warm] Đó là phần mô phỏng giải pháp tối ưu lộ trình xe reach truck bằng thuật toán. Cảm ơn quý vị đã theo dõi.
+[warm] Trên đây là phần mô phỏng giải pháp tối ưu lộ trình xe reach truck bằng thuật toán. Cảm ơn quý vị đã theo dõi.
 ```
 Phương án 2 (khi video chiếu giữa buổi thuyết trình):
 ```
-[warm] Đó là phần mô phỏng của giải pháp. Tiếp theo, chúng tôi xin trình bày kế hoạch áp dụng tại kho.
+[warm] Trên đây là phần mô phỏng của giải pháp. Tiếp theo, chúng tôi xin trình bày kế hoạch áp dụng tại kho.
 ```
 Phương án 3 (chốt bằng thông điệp):
 ```
