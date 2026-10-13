@@ -5,6 +5,7 @@ scene beats (30-per-second units, relative to each scene) are derived from those
 Output: public/audio/v4/<block>.wav and src/data/voiceV4.json (scene durations + beats, audio blocks, subtitles).
 """
 import json
+import os
 import subprocess
 
 U = 30  # timeline units per second
@@ -48,6 +49,23 @@ SEG = {
 # Inside k6: when each benefit is spoken (file time).
 K6_WORDS = [24.06, 25.26, 26.42]
 
+DIST_TXT = [
+    ('Cùng 28 điểm hạ hàng, lộ trình tối ưu chạy 1.166 m. Cách hiện tại chạy 1.596 m.', 'Same 28 stops: the optimized route drives 1,166 m, today\'s order 1,596 m.'),
+    ('Ngắn hơn khoảng 430 m, tức khoảng 27%, chỉ trong một phiếu TO.', 'About 430 m shorter – roughly 27% – on a single TO.'),
+]
+
+
+def duration(path):
+    return float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path]))
+
+
+def pauses(path, db=-40, d=0.45):
+    log = subprocess.run(['ffmpeg', '-v', 'info', '-i', path, '-af', f'silencedetect=n={db}dB:d={d}', '-f', 'null', '-'], capture_output=True, text=True).stderr
+    st = [float(l.split('silence_start: ')[1]) for l in log.splitlines() if 'silence_start' in l]
+    en = [float(l.split('silence_end: ')[1].split()[0]) for l in log.splitlines() if 'silence_end' in l]
+    return list(zip(st, en))
+
+
 RACE_UNITS = 360          # race length is fixed (keeps the truck speed of the original)
 GREEN_FINISH = 0.7316 * RACE_UNITS / U  # s after race start (track length ratio)
 
@@ -84,7 +102,23 @@ R['race'] = x['right'][1] + 0.6
 x = place('start', R['race'] + 0.1, 'start')
 R['raceEnd'] = R['race'] + RACE_UNITS / U
 x = place('finish', R['race'] + GREEN_FINISH - 1.6, 'finish')
-x = place('why', max(R['raceEnd'] + 0.5, x['finish'][1] + 0.5), 'why', 'look')
+# Distance comparison (V1b). Until V1b.mp3 exists, keep its planned length and show its text as subtitles.
+R['dist'] = max(R['raceEnd'] + 0.3, x['finish'][1] + 0.4)
+if os.path.exists('audio/v4/V1b.mp3'):
+    sil = pauses('audio/v4/V1b.mp3')
+    cut = max(sil, key=lambda p: p[1] - p[0])  # the [long pause] between the two sentences
+    SEG['dist1'] = ('V1b', 0.0, cut[0], DIST_TXT[0][0], DIST_TXT[0][1])
+    SEG['dist2'] = ('V1b', cut[1], duration('audio/v4/V1b.mp3'), DIST_TXT[1][0], DIST_TXT[1][1])
+    x = place('dist', R['dist'] + 0.5, 'dist1', 'dist2')
+    R['distDiff'] = x['dist2'][0]
+    after = x['dist2'][1]
+else:
+    a = R['dist'] + 0.5
+    subs.append((a, a + 6.2, *DIST_TXT[0]))
+    subs.append((a + 7.0, a + 11.0, *DIST_TXT[1]))
+    R['distDiff'] = a + 7.0
+    after = a + 11.0
+x = place('why', after + 0.8, 'why', 'look')
 R['tabs'] = x['why'][0] + 1.55       # "Quy trình hiện tại có 4 hạn chế"
 R['p1'] = x['look'][1] + 0.5
 x = place('p1', R['p1'] + 0.3, 'p1a', 'p1b')
