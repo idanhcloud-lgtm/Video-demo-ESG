@@ -30,9 +30,9 @@ Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 
 
 ## V2 – Hạn chế 01, 02, 03 (bản cập nhật)
 ```
-[clear, confident] Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp. Hai điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm thứ hai chưa tới lượt. Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ... nên xe phải quay lại khu vực này lần thứ hai.
+[clear, confident] Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp. Các điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm bên cạnh chưa tới lượt. Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ... nên xe phải quay lại khu vực này lần thứ hai.
 [long pause]
-[confident] Với thuật toán, hai điểm này được sắp liền nhau trên phiếu. Xe chỉ vào một lần là hạ hàng xong.
+[confident] Với thuật toán, các điểm này được sắp liền nhau trên phiếu. Xe chỉ vào một lần là hạ hàng xong.
 [long pause]
 [clear, confident] Hai: lối đi ngang chưa được sử dụng tối ưu trong một số trường hợp. Sau khi hạ hàng ở sâu trong dãy, xe phải chạy ngược ra đầu dãy để hạ thêm một điểm, rồi mới đổi lối.
 [long pause]
