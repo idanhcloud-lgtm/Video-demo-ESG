@@ -1,7 +1,7 @@
 # Kịch bản giọng đọc – Bản rút gọn, viết cho ElevenLabs v4
 
 v4 bám thẻ cảm xúc mạnh hơn v3, nên dùng thẻ như v3 sẽ bị diễn quá tay. Bản này:
-- Mỗi đoạn chỉ một thẻ giọng ở đầu (`[confident]`, `[engaging]`, `[clear]`...), tránh `[calm]`, `[slow]` vì làm giọng đọc lờ đờ, không dùng thẻ mạnh như `[excited]`, `[surprised]`, `[frustrated]`, `[sighs]`, `[dramatic]`.
+- Mỗi đoạn chỉ một thẻ giọng ở đầu (`[confident]`, `[engaging]`, `[steady]`...), tránh `[calm]`, `[slow]` vì làm giọng đọc lờ đờ, không dùng thẻ mạnh như `[excited]`, `[surprised]`, `[frustrated]`, `[sighs]`, `[dramatic]`.
 - Nhấn nhịp bằng dấu câu: dấu phẩy, dấu chấm, "..." cho chỗ ngừng ngắn.
 - Giữ `[long pause]` giữa các câu để tách file theo khoảng lặng.
 
@@ -30,39 +30,39 @@ Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 
 
 ## V2 – Hạn chế 01, 02, 03 (bản cập nhật)
 ```
-[clear, confident] Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp. Các điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm bên cạnh chưa tới lượt. Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ... nên xe phải quay lại khu vực này lần thứ hai.
+[confident] Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp. Các điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm bên cạnh chưa tới lượt. Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ... nên xe phải quay lại khu vực này lần thứ hai.
 [long pause]
 [confident] Với thuật toán, các điểm này được sắp liền nhau trên phiếu. Xe chỉ vào một lần là hạ hàng xong.
 [long pause]
-[clear, confident] Hai: lối đi ngang chưa được sử dụng tối ưu trong một số trường hợp. Sau khi hạ hàng ở sâu trong dãy, xe phải chạy ngược ra đầu dãy để hạ thêm một điểm, rồi mới đổi lối.
+[confident] Hai: lối đi ngang chưa được sử dụng tối ưu trong một số trường hợp. Sau khi hạ hàng ở sâu trong dãy, xe phải chạy ngược ra đầu dãy để hạ thêm một điểm, rồi mới đổi lối.
 [long pause]
 [confident] Với thuật toán, xe đổi lối ngay tại lối ngang gần nhất, không cần quay ra đầu dãy. Điểm gần đầu dãy được hạ hàng trên đường quay về.
 [long pause]
-[clear, confident] Ba: hàng trong phiếu tê-ô nằm rải rác ở nhiều dãy, nên xe dễ chạy thừa đường. Để dễ so sánh, thử duỗi thẳng hai lộ trình ra.
+[confident] Ba: hàng trong phiếu tê-ô nằm rải rác ở nhiều dãy, nên xe dễ chạy thừa đường. Để dễ so sánh, thử duỗi thẳng hai lộ trình ra.
 [long pause]
 [confident] Phần dây đỏ dài hơn chính là quãng đường xe hiện tại đang chạy thừa. Lộ trình tối ưu đã cắt bỏ phần chạy thừa này.
 ```
 
 ## V3 – Hạn chế 04 (bản cập nhật)
 ```
-[clear, confident] Bốn: ùn tắc đầu ca sáng. Sau khi nhận phiếu tê-ô, các xe nâng cùng lúc dồn về những dãy đầu, gây ùn tắc và tiềm ẩn nguy cơ va chạm. Vì phiếu in sẵn theo thứ tự dãy, tài xế nào cũng bắt đầu từ dãy A và Bê.
+[confident] Bốn: ùn tắc đầu ca sáng. Sau khi nhận phiếu tê-ô, các xe nâng cùng lúc dồn về những dãy đầu, gây ùn tắc và tiềm ẩn nguy cơ va chạm. Vì phiếu in sẵn theo thứ tự dãy, tài xế nào cũng bắt đầu từ dãy A và Bê.
 [long pause]
-[clear] Chỉ ba xe hạ xong và rẽ ra lối ngang. Sáu xe còn lại vẫn còn điểm ở cuối dãy, phải đi tiếp... nên bị kẹt ở giữa dãy.
+[steady] Chỉ ba xe hạ xong và rẽ ra lối ngang. Sáu xe còn lại vẫn còn điểm ở cuối dãy, phải đi tiếp... nên bị kẹt ở giữa dãy.
 [long pause]
 [confident] Với thuật toán, xe không phải đi hết từng dãy. Các điểm được sắp theo vùng, tới lối ngang là xe rẽ đi ngay, hạn chế cảnh dồn xe lúc đầu ca.
 ```
 
 ## V4 – Kết (tổng kết 4 hạn chế, nhịp chậm)
 ```
-[clear, steady] Nhìn lại bốn hạn chế của cách đi hiện tại.
+[steady] Nhìn lại bốn hạn chế của cách đi hiện tại.
 [long pause]
-[clear, steady] Một: các điểm gần nhau không được hạ hàng liên tiếp.
+[steady] Một: các điểm gần nhau không được hạ hàng liên tiếp.
 [long pause]
-[clear, steady] Hai: hạ xong điểm ở sâu trong dãy, xe quay ra đầu dãy rồi lại vào sâu dãy bên cạnh... thay vì đổi lối ngay tại lối ngang gần đó.
+[steady] Hai: hạ xong điểm ở sâu trong dãy, xe quay ra đầu dãy rồi lại vào sâu dãy bên cạnh... thay vì đổi lối ngay tại lối ngang gần đó.
 [long pause]
-[clear, steady] Ba: hàng rải rác, xe chạy thừa nhiều.
+[steady] Ba: hàng rải rác, xe chạy thừa nhiều.
 [long pause]
-[clear, steady] Bốn: ùn tắc dãy A, Bê buổi sáng.
+[steady] Bốn: ùn tắc dãy A, Bê buổi sáng.
 [long pause]
 [confident] Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.
 [long pause]
