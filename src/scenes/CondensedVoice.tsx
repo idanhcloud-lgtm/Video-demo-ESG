@@ -35,7 +35,7 @@ export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false})
         <MainRace clean beats={S.race.beats} />
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.p04.seconds)}>
-        <Problem04 clean shiftStart beats={S.p04.beats} />
+        <Problem04 clean beats={S.p04.beats} />
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.ket.seconds)}>
         <ClosingRecap beats={S.ket.beats} />
