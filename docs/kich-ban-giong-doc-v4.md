@@ -28,28 +28,28 @@ Mỗi khung = 1 lần tạo = 1 file: `V1.mp3` … `V4.mp3`. Nếu vẫn còn di
 ```
 Số liệu tính theo bản đồ Kho C hiện tại (VT 1,4 m, tim lối 8,65 m): 1.166 m và 1.596 m, chênh 430 m (26,9%).
 
-## V2 – Hạn chế 01, 02, 03
+## V2 – Hạn chế 01, 02, 03 (bản cập nhật)
 ```
-[clear, confident] Một: các điểm gần nhau không được hạ hàng liên tiếp. Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này hai lần.
+[clear, confident] Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp. Hai điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm thứ hai chưa tới lượt. Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ... nên xe phải quay lại khu vực này lần thứ hai.
 [long pause]
-[confident] Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực một lần là hạ hàng xong.
+[confident] Với thuật toán, hai điểm này được sắp liền nhau trên phiếu. Xe chỉ vào một lần là hạ hàng xong.
 [long pause]
-[clear, confident] Hai: lối đi ngang chưa được sử dụng tối ưu. Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối... rồi lại vào sâu dãy bên cạnh.
+[clear, confident] Hai: lối đi ngang chưa được sử dụng tối ưu trong một số trường hợp. Sau khi hạ hàng ở sâu trong dãy, xe phải chạy ngược ra đầu dãy để hạ thêm một điểm, rồi mới đổi lối.
 [long pause]
-[confident] Thuật toán cho xe đổi lối ngay tại lối ngang gần đó, không phải quay ra đầu dãy. Các điểm gần cửa được hạ hàng trên đường quay về.
+[confident] Với thuật toán, xe đổi lối ngay tại lối ngang gần nhất, không cần quay ra đầu dãy. Điểm gần đầu dãy được hạ hàng trên đường quay về.
 [long pause]
-[clear, confident] Ba: hàng nằm rải rác nhiều dãy. Thử duỗi thẳng hai lộ trình ra để so độ dài.
+[clear, confident] Ba: hàng trong phiếu tê-ô nằm rải rác ở nhiều dãy, nên xe dễ chạy thừa đường. Để dễ so sánh, thử duỗi thẳng hai lộ trình ra.
 [long pause]
-[confident] Phần dây đỏ dài hơn chính là quãng đường chạy thừa. Lộ trình tối ưu giảm phần chạy thừa này.
+[confident] Phần dây đỏ dài hơn chính là quãng đường xe hiện tại đang chạy thừa. Lộ trình tối ưu đã cắt bỏ phần chạy thừa này.
 ```
 
-## V3 – Hạn chế 04
+## V3 – Hạn chế 04 (bản cập nhật)
 ```
-[clear, confident] Bốn: ùn tắc dãy A, Bê buổi sáng. Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu tê-ô, ai cũng bắt đầu hạ hàng từ dãy A và Bê... vì phiếu đã in sẵn theo thứ tự dãy.
+[clear, confident] Bốn: ùn tắc đầu ca sáng. Sau khi nhận phiếu tê-ô, các xe nâng cùng lúc dồn về những dãy đầu, gây ùn tắc và tiềm ẩn nguy cơ va chạm. Vì phiếu in sẵn theo thứ tự dãy, tài xế nào cũng bắt đầu từ dãy A và Bê.
 [long pause]
-[clear] Các xe cùng dồn vào dãy A, Bê. Chỉ ba xe rẽ ra lối ngang, vì đã hạ xong các điểm trong hai dãy này. Sáu xe còn điểm ở cuối dãy, phải đi tiếp... nên kẹt ở giữa dãy.
+[clear] Chỉ ba xe hạ xong và rẽ ra lối ngang. Sáu xe còn lại vẫn còn điểm ở cuối dãy, phải đi tiếp... nên bị kẹt ở giữa dãy.
 [long pause]
-[confident] Với lộ trình tối ưu, xe không phải đi hết từng dãy. Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình... hạn chế việc dồn vào cùng một chỗ lúc đầu ca.
+[confident] Với thuật toán, xe không phải đi hết từng dãy. Các điểm được sắp theo vùng, tới lối ngang là xe rẽ đi ngay, hạn chế cảnh dồn xe lúc đầu ca.
 ```
 
 ## V4 – Kết (tổng kết 4 hạn chế, nhịp chậm)
