@@ -234,8 +234,8 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
           <Callout
             kind="current"
             p={callP2}
-            en={<>Back to the <Hl c="#d23c3a">front</Hl> to change aisle, then deep again</>}
-            vi="Chạy về đầu dãy để đổi lối, rồi lại vào sâu"
+            en={<>Runs back to the <Hl c="#d23c3a">front</Hl> for one more stop, then changes aisle</>}
+            vi="Chạy ngược ra đầu dãy hạ thêm 1 điểm, rồi mới đổi lối"
           />
         )}
       </RoutePanel>

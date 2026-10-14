@@ -20,24 +20,25 @@ SEG = {
     'finish': ('V1', 20.16, 24.55, 'Xe theo lộ trình tối ưu đã về đích, trong khi xe đi theo dãy vẫn còn đang chạy.', 'The optimized truck has finished, while the aisle-order truck is still driving.'),
     'why': ('V1', 25.31, 28.48, 'Vì sao có chênh lệch này? Quy trình hiện tại có 4 hạn chế.', 'Why the difference? The current process has 4 limitations.'),
     'look': ('V1', 28.91, 30.94, 'Chúng ta xem lần lượt từng hạn chế trên bản đồ.', 'Let\'s look at each one on the map.'),
-    'p1a': ('V2', 0.00, 2.75, 'Một: các điểm gần nhau không được hạ hàng liên tiếp.', 'One: nearby stops are not handled in sequence.'),
-    'p1b': ('V2', 3.34, 7.82, 'Các điểm nằm sát nhau nhưng khác dãy, nên xe hiện tại phải vào khu vực này 2 lần.', 'They sit close together but in different aisles, so today the truck enters this area twice.'),
-    'p1c': ('V2', 9.44, 13.78, 'Thuật toán sắp các điểm này liên tiếp. Xe chỉ vào khu vực 1 lần là hạ hàng xong.', 'The algorithm puts them in sequence – one visit to the area is enough.'),
-    'p2a': ('V2', 14.88, 17.53, 'Hai: lối đi ngang chưa được sử dụng tối ưu.', 'Two: cross aisles are not used optimally.'),
-    'p2b': ('V2', 17.99, 23.66, 'Xe hiện tại hạ xong điểm ở sâu trong dãy, quay ra đầu dãy để đổi lối, rồi lại vào sâu dãy bên cạnh.', 'After a stop deep in the aisle, the truck goes back to the front to change aisle, then deep again.'),
-    'p2c': ('V2', 24.81, 28.79, 'Thuật toán cho xe đổi lối ngay tại lối ngang gần đó, không phải quay ra đầu dãy.', 'The algorithm changes aisle at the nearby cross aisle – no trip back to the front.'),
-    'p2d': ('V2', 29.30, 32.44, 'Các điểm gần đầu dãy được hạ hàng trên đường quay về.', 'Stops near the front are handled on the way back.'),
-    'p3a': ('V2', 33.25, 35.50, 'Ba: hàng nằm rải rác nhiều dãy.', 'Three: stops are scattered over many aisles.'),
-    'p3b': ('V2', 35.92, 38.17, 'Thử duỗi thẳng 2 lộ trình ra để so độ dài.', 'Let\'s straighten both routes and compare their length.'),
-    'p3c': ('V2', 39.22, 41.70, 'Phần dây đỏ dài hơn chính là quãng đường chạy thừa.', 'The extra red length is the wasted travel.'),
-    'p3d': ('V2', 42.15, 44.08, 'Lộ trình tối ưu giảm phần chạy thừa này.', 'The optimized route cuts this waste.'),
-    'p4a': ('V3', 0.00, 2.77, 'Bốn: ùn tắc dãy A, B buổi sáng.', 'Four: morning congestion in aisles A, B.'),
-    'p4b': ('V3', 3.19, 10.65, 'Đầu ca sáng, sau khi nhân viên xe nâng nhận phiếu TO, ai cũng bắt đầu hạ hàng từ dãy A và B, vì phiếu đã in sẵn theo thứ tự dãy.', 'At the start of the morning shift, every driver begins in aisles A and B – the TOs are printed in aisle order.'),
-    'p4c': ('V3', 12.19, 14.25, 'Các xe cùng dồn vào dãy A, B.', 'All trucks crowd into aisles A, B.'),
-    'p4d': ('V3', 14.80, 18.41, 'Chỉ 3 xe rẽ ra lối ngang, vì đã hạ xong các điểm trong 2 dãy này.', 'Only 3 turn off at the cross aisle – they are done with these two aisles.'),
-    'p4e': ('V3', 18.81, 22.66, '6 xe còn điểm ở cuối dãy, phải đi tiếp, nên kẹt ở giữa dãy.', 'The other 6 still have stops further down, so they get stuck mid-aisle.'),
-    'p4f': ('V3', 23.91, 26.65, 'Với lộ trình tối ưu, xe không phải đi hết từng dãy.', 'With the optimized route, trucks don\'t run each aisle to the end.'),
-    'p4g': ('V3', 27.14, 33.56, 'Thuật toán sắp các điểm theo vùng, tới lối ngang là xe rẽ sang vùng của mình, hạn chế việc dồn vào cùng một chỗ lúc đầu ca.', 'Stops are grouped by zone; at the cross aisle each truck turns to its own zone – less crowding at shift start.'),
+    'p1a': ('V2', 0.00, 3.76, 'Một: các điểm gần nhau nhưng khác dãy không được hạ hàng liên tiếp.', 'One: nearby stops in different aisles are not handled in sequence.'),
+    'p1b': ('V2', 4.23, 8.85, 'Các điểm này nằm sát nhau, nhưng vì phiếu in theo thứ tự dãy, điểm bên cạnh chưa tới lượt.', 'They sit side by side, but the TO is printed in aisle order, so the neighbour is not next on the list.'),
+    'p1b2': ('V2', 9.42, 15.05, 'Khi đi ngang qua, tài xế không biết ngay bên cạnh còn hàng cần hạ, nên xe phải quay lại khu vực này lần thứ hai.', 'Passing by, the driver does not know there is a stop right next door – so the truck has to come back a second time.'),
+    'p1c': ('V2', 16.30, 21.40, 'Với thuật toán, các điểm này được sắp liền nhau trên phiếu. Xe chỉ vào một lần là hạ hàng xong.', 'With the algorithm they are listed back to back – one visit is enough.'),
+    'p2a': ('V2', 22.09, 25.53, 'Hai: lối đi ngang chưa được sử dụng tối ưu trong một số trường hợp.', 'Two: in some cases, cross aisles are not used optimally.'),
+    'p2b': ('V2', 26.07, 31.49, 'Sau khi hạ hàng ở sâu trong dãy, xe phải chạy ngược ra đầu dãy để hạ thêm một điểm, rồi mới đổi lối.', 'After a stop deep in the aisle, the truck runs back to the front for one more stop before changing aisle.'),
+    'p2c': ('V2', 32.47, 36.77, 'Với thuật toán, xe đổi lối ngay tại lối ngang gần nhất, không cần quay ra đầu dãy.', 'With the algorithm, the truck changes aisle at the nearest cross aisle – no trip back to the front.'),
+    'p2d': ('V2', 37.13, 39.45, 'Điểm gần đầu dãy được hạ hàng trên đường quay về.', 'The stop near the front is handled on the way back.'),
+    'p3a': ('V2', 40.22, 44.91, 'Ba: hàng trong phiếu TO nằm rải rác ở nhiều dãy, nên xe dễ chạy thừa đường.', 'Three: the stops of a TO are scattered over many aisles, so the truck easily drives extra distance.'),
+    'p3b': ('V2', 45.37, 47.79, 'Để dễ so sánh, thử duỗi thẳng hai lộ trình ra.', 'To compare, let\'s straighten both routes.'),
+    'p3c': ('V2', 48.58, 52.03, 'Phần dây đỏ dài hơn chính là quãng đường xe hiện tại đang chạy thừa.', 'The extra red length is the distance the truck drives for nothing today.'),
+    'p3d': ('V2', 52.42, 54.83, 'Lộ trình tối ưu đã cắt bỏ phần chạy thừa này.', 'The optimized route cuts this waste.'),
+    'p4a': ('V3', 0.00, 1.94, 'Bốn: ùn tắc đầu ca sáng.', 'Four: congestion at the start of the morning shift.'),
+    'p4b': ('V3', 2.31, 8.12, 'Sau khi nhận phiếu TO, các xe nâng cùng lúc dồn về những dãy đầu, gây ùn tắc và tiềm ẩn nguy cơ va chạm.', 'After picking up their TOs, the forklifts all head for the first aisles at once – congestion and a risk of collisions.'),
+    'p4b2': ('V3', 8.48, 12.90, 'Vì phiếu in sẵn theo thứ tự dãy, tài xế nào cũng bắt đầu từ dãy A và B.', 'Because TOs are printed in aisle order, every driver starts in aisles A and B.'),
+    'p4d': ('V3', 14.46, 16.82, 'Chỉ 3 xe hạ xong và rẽ ra lối ngang.', 'Only 3 trucks finish there and turn off at the cross aisle.'),
+    'p4e': ('V3', 17.12, 21.78, '6 xe còn lại vẫn còn điểm ở cuối dãy, phải đi tiếp, nên bị kẹt ở giữa dãy.', 'The other 6 still have stops further down, so they get stuck mid-aisle.'),
+    'p4f': ('V3', 23.16, 25.53, 'Với thuật toán, xe không phải đi hết từng dãy.', 'With the algorithm, trucks don\'t run each aisle to the end.'),
+    'p4g': ('V3', 25.96, 31.10, 'Các điểm được sắp theo vùng, tới lối ngang là xe rẽ đi ngay, hạn chế cảnh dồn xe lúc đầu ca.', 'Stops are grouped by zone; at the cross aisle each truck turns off right away – less crowding at shift start.'),
     'k0': ('V4', 0.24, 2.40, 'Nhìn lại 4 hạn chế của cách đi hiện tại.', 'Looking back at the 4 limitations of today\'s routing.'),
     'k1': ('V4', 3.90, 6.91, 'Một: các điểm gần nhau không được hạ hàng liên tiếp.', 'One: nearby stops are not handled in sequence.'),
     'k2': ('V4', 7.97, 10.83, 'Hai: lối đi ngang chưa được sử dụng tối ưu.', 'Two: cross aisles are not used optimally.'),
@@ -123,9 +124,9 @@ else:
 x = place('why', after + 0.8, 'why', 'look')
 R['tabs'] = x['why'][0] + 1.55       # "Quy trình hiện tại có 4 hạn chế"
 R['p1'] = x['look'][1] + 0.5
-x = place('p1', R['p1'] + 0.3, 'p1a', 'p1b')
+x = place('p1', R['p1'] + 0.3, 'p1a', 'p1b', 'p1b2')
 R['p1Trace'] = x['p1b'][0]
-R['p1Callout'] = x['p1b'][1] + 0.5
+R['p1Callout'] = x['p1b2'][1] + 0.5
 x = place('p1c', R['p1Callout'] + 0.3, 'p1c')
 R['p1Solved'] = x['p1c'][1] + 0.2
 R['p2'] = R['p1Solved'] + 1.3
@@ -150,14 +151,14 @@ t = R['end']
 # ---- Problem 04 ----
 q0 = t
 Q = {'glow': q0 + 0.6, 'cardIn': q0 + 1.3}
-x = place('p4a', Q['cardIn'] + 0.4, 'p4a', 'p4b')
+x = place('p4a', Q['cardIn'] + 0.4, 'p4a', 'p4b', 'p4b2')
 Q['cardOut'] = x['p4a'][1] + 0.3
 Q['panelsIn'] = Q['cardOut'] + 0.5
 Q['clock'] = x['p4b'][0]
-Q['drive'] = x['p4b'][0] + 3.6       # "ai cũng bắt đầu hạ hàng từ dãy A và B"
-x = place('p4c', x['p4b'][1] + 0.5, 'p4c', 'p4d', 'p4e')
+Q['drive'] = x['p4b2'][0]           # "tài xế nào cũng bắt đầu từ dãy A và B"
+x = place('p4d', x['p4b2'][1] + 0.6, 'p4d', 'p4e')
 Q['zoomIn'] = x['p4e'][0]
-Q['jam'] = x['p4e'][0] + 2.7         # "nên kẹt ở giữa dãy"
+Q['jam'] = x['p4e'][0] + 3.4         # "nên bị kẹt ở giữa dãy"
 x = place('p4f', x['p4e'][1] + 0.6, 'p4f', 'p4g')
 Q['callout'] = x['p4f'][0]
 Q['zoomOut'] = x['p4g'][1] + 0.3
