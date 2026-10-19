@@ -7,7 +7,7 @@ import {colors, fontFamily} from '../theme';
  * Current: the TO is printed by aisle, two consecutive pallets on the TO make one trip.
  * Algorithm (planMover in the routing app): saving(a, b) = alone(a) + alone(b) − together(a, b), best pairs first;
  * stops inside a trip in nearest-neighbour order from the door.
- * Toy warehouse: 4 aisles of 50 m, 10 m apart, cross aisles at the front (door side) and the back.
+ * Toy warehouse: 4 aisles of 50 m, 10 m apart, crossings at the front (door side), a cross aisle (25 m) and the back.
  */
 type Bin = [number, number]; // [aisle, metres from the front]
 const AISLES = ['A', 'B', 'C', 'D'];
@@ -16,8 +16,14 @@ const BINS: Bin[] = [[0, 6], [0, 45], [1, 8], [1, 42], [2, 5], [2, 44], [3, 9], 
 const N = BINS.length;
 const PITCH = 10;
 const LEN = 50;
+const CROSS = [0, 25, 50];
 const DOOR_BIN: Bin = [0, 0];
-const dist = (a: Bin, b: Bin) => (a[0] === b[0] ? Math.abs(a[1] - b[1]) : Math.abs(a[0] - b[0]) * PITCH + Math.min(a[1] + b[1], 2 * LEN - a[1] - b[1]));
+const via = (a: Bin, b: Bin) => CROSS.reduce((best, c) => (Math.abs(a[1] - c) + Math.abs(b[1] - c) < Math.abs(a[1] - best) + Math.abs(b[1] - best) ? c : best), CROSS[0]);
+const dist = (a: Bin, b: Bin) => {
+  if (a[0] === b[0]) return Math.abs(a[1] - b[1]);
+  const c = via(a, b);
+  return Math.abs(a[0] - b[0]) * PITCH + Math.abs(a[1] - c) + Math.abs(b[1] - c);
+};
 
 function trip(stops: number[]): {len: number; order: number[]} {
   let cur = DOOR_BIN;
@@ -70,7 +76,7 @@ type Pt = [number, number];
 const DOOR: Pt = [px(-5), py(0)];
 function legPath(a: Bin, b: Bin): Pt[] {
   if (a[0] === b[0]) return [[px(a[1]), py(a[0])], [px(b[1]), py(b[0])]];
-  const c = a[1] + b[1] <= 2 * LEN - a[1] - b[1] ? 0 : LEN;
+  const c = via(a, b);
   return [[px(a[1]), py(a[0])], [px(c), py(a[0])], [px(c), py(b[0])], [px(b[1]), py(b[0])]];
 }
 function tripPts(tr: Trip): Pt[] {
@@ -165,9 +171,14 @@ export const MoverPairing: React.FC = () => {
 
       {/* map */}
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: mapIn}}>
-        {Array.from({length: AISLES.length + 1}, (_, r) => (
-          <rect key={r} x={px(2)} y={py(r - 0.5) - 20} width={(LEN - 4) * PXM} height={40} rx={6} fill="#1a2440" stroke="#26365c" />
-        ))}
+        {Array.from({length: AISLES.length + 1}, (_, r) =>
+          [[2, 23], [27, 48]].map(([a, b]) => (
+            <rect key={`${r}-${a}`} x={px(a)} y={py(r - 0.5) - 20} width={(b - a) * PXM} height={40} rx={6} fill="#1a2440" stroke="#26365c" />
+          )),
+        )}
+        <text x={px(25)} y={py(AISLES.length - 0.5) - 34} textAnchor="middle" fontSize={17} fontWeight={700} fill={colors.amber}>
+          LỐI NGANG
+        </text>
         {AISLES.map((a, k) => (
           <text key={a} x={px(LEN) + 26} y={py(k) + 9} fontSize={24} fontWeight={800} fill={colors.muted}>
             Dãy {a}
