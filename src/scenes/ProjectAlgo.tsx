@@ -14,17 +14,17 @@ import {colors, fontFamily} from '../theme';
 type Pt = [number, number];
 const dd = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const m = (px: number) => Math.round(px / 10);
-const DOOR: Pt = [260, 900];
+const DOOR: Pt = [700, 920];
 type Item = {p: Pt; full: boolean};
 const ITEMS: Item[] = [
-  {p: [470, 760], full: true}, // 1
-  {p: [1120, 280], full: true}, // 2
-  {p: [640, 330], full: true}, // 3
-  {p: [400, 520], full: true}, // 4
-  {p: [990, 380], full: false}, // 5
-  {p: [1200, 470], full: false}, // 6
-  {p: [520, 430], full: false}, // 7
-  {p: [790, 470], full: false}, // 8
+  {p: [900, 800], full: true}, // 1
+  {p: [1130, 300], full: true}, // 2
+  {p: [500, 830], full: true}, // 3
+  {p: [360, 560], full: true}, // 4
+  {p: [1000, 420], full: false}, // 5
+  {p: [1180, 500], full: false}, // 6
+  {p: [300, 380], full: false}, // 7
+  {p: [470, 330], full: false}, // 8
 ];
 // cage pallets: loose items packed until full (two halves per cage here)
 const CAGES = [[4, 5], [6, 7]];
@@ -216,7 +216,7 @@ export const ProjectAlgo: React.FC = () => {
               const goneByPick = tk >= 0 ? 1 - merged(tk) : 1;
               return (
                 <Loop key={k} order={nn(u.items).order} color={exPart && exP(0.4, 0.8) > 0 ? colors.red : '#8f9bb5'} w={exPart ? 6 : 4}
-                  draw={fade(T.alone + k * 0.2, T.alone + k * 0.2 + 0.8)} opacity={0.85 * fadeOther * goneByEx * goneByPick} />
+                  draw={fade(T.alone + k * 0.2, T.alone + k * 0.2 + 0.8)} opacity={0.85 * fadeOther * goneByEx * goneByPick * (t >= T.rank ? 0.35 : 1)} />
               );
             })
           : null}
