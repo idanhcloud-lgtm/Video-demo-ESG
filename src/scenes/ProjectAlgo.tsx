@@ -74,11 +74,15 @@ const EX = PICKS[0];
 const NN_TRIP = TRIPS.reduce((best, tr, k) => (tr.order.length > TRIPS[best].order.length ? k : best), 0);
 const NN_ITEMS = [...UNITS[PICKS[NN_TRIP].a].items, ...UNITS[PICKS[NN_TRIP].b].items];
 const NN_ORDER = TRIPS[NN_TRIP].order;
+const EX_ORDER = TRIPS[0].order;
+const EX_LEG0 = 2.0;
+const EX_LEG = 1.15;
+const EX_DONE = EX_LEG0 + (EX_ORDER.length + 1) * EX_LEG;
 const ALONE_TOTAL = ALONE.reduce((a, b) => a + b, 0);
 const TRIP_COL = [colors.green, '#4dd0e1', '#ff9f6b'];
 
 // ---- timeline (seconds) ----
-const T = {items: 1.2, cages: 5.0, alone: 8.6, ex: 10.6, rank: 17.6, pick0: 19.2, pickStep: 2.4, nn: 0, nnStep: 2.6, sum: 0};
+const T = {items: 1.2, cages: 5.0, alone: 8.6, ex: 10.6, rank: 20.6, pick0: 22.2, pickStep: 2.4, nn: 0, nnStep: 2.6, sum: 0};
 T.nn = T.pick0 + PICKS.length * T.pickStep + 1.0;
 const NN_AT = Array.from({length: NN_ORDER.length + 2}, (_, k) => T.nn + 1.2 + k * T.nnStep);
 T.sum = NN_AT[NN_ORDER.length + 1] + 0.6;
@@ -130,12 +134,14 @@ export const ProjectAlgo: React.FC = () => {
     1: ['The TO: full pallets and loose items to pick', 'Phiếu TO: pallet nguyên và hàng lẻ cần lấy'],
     2: ['① Loose items are packed onto cage pallets until full', '① Hàng lẻ được gom lên pallet lồng cho đầy'],
     3: ['② Savings decides which two pallets ride together', '② Savings quyết định 2 pallet nào đi chung chuyến'],
-    4: ['③ Nearest neighbour orders the stops inside each trip', '③ Láng giềng gần nhất sắp thứ tự ghé trong từng chuyến'],
+    4: ['③ Nearest neighbour gives the final stop order of each trip', '③ Láng giềng gần nhất cho ra thứ tự ghé cuối cùng của từng chuyến'],
     5: ['The plan: who rides together, and in which order', 'Kết quả: hàng nào đi chung, ghé theo thứ tự nào'],
   };
   const sub3: [string, string] | null =
     step !== 3 ? null
       : t < T.ex ? ['Start: every pallet as its own trip, out and back', 'Ban đầu: mỗi pallet một chuyến riêng, đi rồi về']
+      : t < T.ex + EX_LEG0 ? ['Take two pallets, each with its own trip', 'Lấy 2 pallet, mỗi pallet đang là một chuyến riêng']
+      : t < T.ex + EX_DONE ? ['Measure them as one trip with nearest neighbour: closest stop first', 'Đo quãng đường đi chung bằng láng giềng gần nhất: điểm gần nhất trước']
       : t < T.rank ? ['Two trips → one: the metres no longer driven are the saving', 'Gộp 2 chuyến thành 1: quãng đường bớt được chính là "saving"']
       : t < T.pick0 ? ['Score every pair the same way', 'Tính như vậy cho mọi cặp']
       : ['Merge the biggest saving first; a pallet already paired is skipped', 'Gộp cặp tiết kiệm nhất trước; pallet đã có cặp thì bỏ qua'];
@@ -170,6 +176,7 @@ export const ProjectAlgo: React.FC = () => {
                 <div style={{padding: '6px 16px', borderRadius: 20, fontSize: 20, fontWeight: 800, background: on ? (k === 2 ? colors.green : k === 3 ? colors.yellow : '#ffffff') : '#ffffff14',
                   color: on ? '#0b1222' : colors.muted}}>
                   {k ? `${k}. ` : ''}{s}
+                  {k === 2 ? <span style={{marginLeft: 8, padding: '1px 8px', borderRadius: 10, background: colors.yellow, color: '#0b1222', fontSize: 15}}>uses ③</span> : null}
                 </div>
                 {k < stepNames.length - 1 ? <div style={{color: colors.muted, fontSize: 20}}>→</div> : null}
               </div>
@@ -212,7 +219,7 @@ export const ProjectAlgo: React.FC = () => {
               const tk = unitTrip(k);
               const exPart = exOn && (k === EX.a || k === EX.b);
               const fadeOther = exOn && !exPart ? 1 - exP(0, 0.4) * 0.8 : 1;
-              const goneByEx = exPart ? 1 - exP(2.4, 3.0) : 1;
+              const goneByEx = exPart ? 1 - 0.75 * exP(1.6, 2.2) : 1;
               const goneByPick = tk >= 0 ? 1 - merged(tk) : 1;
               return (
                 <Loop key={k} order={nn(u.items).order} color={exPart && exP(0.4, 0.8) > 0 ? colors.red : '#8f9bb5'} w={exPart ? 6 : 4}
@@ -220,7 +227,43 @@ export const ProjectAlgo: React.FC = () => {
               );
             })
           : null}
-        {exOn ? <Loop order={TRIPS[0].order} color={colors.green} w={7} draw={interpolate(t, [T.ex + 2.4, T.ex + 3.4], [0, 1], ease)} /> : null}
+        {/* the "together" trip of the example is built with nearest neighbour, leg by leg */}
+        {exOn
+          ? EX_ORDER.map((_, k) => k).concat([EX_ORDER.length]).map((k) => {
+              const at = T.ex + EX_LEG0 + k * EX_LEG;
+              const u = (t - at) / EX_LEG;
+              if (u < 0) return null;
+              const from: Pt = k === 0 ? DOOR : ITEMS[EX_ORDER[k - 1]].p;
+              const to: Pt = k < EX_ORDER.length ? ITEMS[EX_ORDER[k]].p : DOOR;
+              const cands = k < EX_ORDER.length ? EX_ORDER.slice(k) : [];
+              const draw = interpolate(u, [0.5, 0.95], [0, 1], ease);
+              return (
+                <g key={k}>
+                  {u < 1
+                    ? cands.map((i) => {
+                        const best = i === EX_ORDER[k];
+                        const sh = interpolate(u, [0, 0.2], [0, 1], clamp);
+                        const keep = best ? 1 : interpolate(u, [0.4, 0.55], [1, 0], clamp);
+                        const col = best && u > 0.35 ? colors.yellow : '#8f9bb5';
+                        const q = ITEMS[i].p;
+                        return (
+                          <g key={i} opacity={keep}>
+                            <line x1={from[0]} y1={from[1]} x2={from[0] + (q[0] - from[0]) * sh} y2={from[1] + (q[1] - from[1]) * sh} stroke={col} strokeWidth={3.5} strokeDasharray="9 8" />
+                            <text x={from[0] + (q[0] - from[0]) * 0.7} y={from[1] + (q[1] - from[1]) * 0.7 - 10} textAnchor="middle" fontSize={21} fontWeight={800} fill={col} opacity={sh}
+                              stroke="#0b1222" strokeWidth={6} style={{paintOrder: 'stroke'}}>
+                              {m(dd(from, q))} m
+                            </text>
+                          </g>
+                        );
+                      })
+                    : null}
+                  {draw > 0 ? (
+                    <line x1={from[0]} y1={from[1]} x2={from[0] + (to[0] - from[0]) * draw} y2={from[1] + (to[1] - from[1]) * draw} stroke={colors.green} strokeWidth={7} strokeLinecap="round" />
+                  ) : null}
+                </g>
+              );
+            })
+          : null}
         {step >= 3 && step < 5
           ? PICKS.map((p, k) => (
               <Loop key={k} order={TRIPS[k].order} color={TRIP_COL[k]} w={6} draw={step === 4 ? (k === NN_TRIP ? 0 : 1) : merged(k)} opacity={step === 4 ? (k === NN_TRIP ? 0 : 0.15) : 0.9} />
@@ -324,11 +367,16 @@ export const ProjectAlgo: React.FC = () => {
             <span>{UNITS[EX.b].name} alone</span>
             <span>{m(ALONE[EX.b])} m</span>
           </div>
-          <div style={{fontSize: 28, display: 'flex', justifyContent: 'space-between', color: colors.green, fontWeight: 700, marginTop: 6, opacity: exP(2.6, 3.0)}}>
+          <div style={{display: 'inline-block', marginTop: 14, padding: '5px 14px', borderRadius: 18, background: colors.yellow, color: '#0b1222', fontSize: 19, fontWeight: 800,
+            opacity: exP(EX_LEG0 - 0.3, EX_LEG0)}}>
+            Together = measured with ③ Nearest neighbour
+          </div>
+          <div style={{fontSize: 16, color: colors.muted, marginTop: 4, opacity: exP(EX_LEG0 - 0.3, EX_LEG0)}}>Đi chung = đo bằng láng giềng gần nhất</div>
+          <div style={{fontSize: 28, display: 'flex', justifyContent: 'space-between', color: colors.green, fontWeight: 700, marginTop: 10, opacity: exP(EX_DONE, EX_DONE + 0.4)}}>
             <span>Together, one trip</span>
             <span>{m(nn([...UNITS[EX.a].items, ...UNITS[EX.b].items]).len)} m</span>
           </div>
-          <div style={{borderTop: '2px solid #ffffff33', marginTop: 16, paddingTop: 12, opacity: exP(3.8, 4.2)}}>
+          <div style={{borderTop: '2px solid #ffffff33', marginTop: 16, paddingTop: 12, opacity: exP(EX_DONE + 0.8, EX_DONE + 1.2)}}>
             <div style={{fontSize: 22, color: colors.muted}}>Saving · Tiết kiệm</div>
             <div style={{fontSize: 70, fontWeight: 800, color: colors.green}}>{m(EX.save)} m</div>
           </div>
