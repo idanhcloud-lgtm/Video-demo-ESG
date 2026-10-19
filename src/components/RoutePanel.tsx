@@ -1,6 +1,7 @@
 import {Stop, routeLength, routePolyline, stopPoint} from '../map/route';
 import {LAYOUT, MAP, project} from '../layout';
 import {colors} from '../theme';
+import {useBi, useFlip, useViFirst} from '../lang';
 import {MapBase} from './MapBase';
 
 type Pt = [number, number];
@@ -71,6 +72,7 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
   children,
 }) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
+  const viFirst = useViFirst();
   return (
     <div
       style={{
@@ -103,15 +105,15 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
         <RouteIcon kind={kind} />
         <div style={{flex: 1}}>
           <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
-          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 17, color: colors.muted}}>{kind === 'algo' ? 'S-shape + 2-opt · Lộ trình tối ưu' : 'Aisle order A → T · Hạ hàng theo dãy'}</div>
+          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{viFirst ? (kind === 'algo' ? 'Lộ trình tối ưu' : 'Hạ hàng theo dãy A → T') : kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
+          <div style={{fontSize: 17, color: colors.muted}}>{viFirst ? (kind === 'algo' ? 'S-shape + 2-opt · Optimized route' : 'Aisle order A → T') : kind === 'algo' ? 'S-shape + 2-opt · Lộ trình tối ưu' : 'Aisle order A → T · Hạ hàng theo dãy'}</div>
         </div>
         <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0, opacity: statsOpacity}}>
           <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
             {value}
-            <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>{unit}</span>
+            <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>{viFirst && /^trucks?$/.test(unit) ? 'xe' : unit}</span>
           </div>
-          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>{sub}</div>
+          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>{useFlip()(sub)}</div>
         </div>
       </div>
       {children}
@@ -322,6 +324,8 @@ export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; v
   large = false,
 }) => {
   const accent = kind === 'algo' ? colors.green : colors.red;
+  const [main, small] = useBi()(en, vi);
+  const flip = useFlip();
   return (
     <div
       style={{
@@ -338,11 +342,11 @@ export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; v
       }}
     >
       <div style={{background: accent, color: '#0b1222', fontWeight: 700, fontSize: 19, letterSpacing: 2.5, padding: '10px 24px'}}>
-        {kind === 'algo' ? 'ALGORITHM · THUẬT TOÁN' : 'CURRENT · HIỆN TẠI'}
+        {flip(kind === 'algo' ? 'ALGORITHM · THUẬT TOÁN' : 'CURRENT · HIỆN TẠI')}
       </div>
       <div style={{background: '#f3f5f9', padding: '16px 24px 18px'}}>
-        <div style={{fontSize: large ? 33 : 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{en}</div>
-        <div style={{fontSize: large ? 25 : 20, color: '#5b6478', marginTop: 6}}>{vi}</div>
+        <div style={{fontSize: large ? 33 : 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{main}</div>
+        <div style={{fontSize: large ? 25 : 20, color: '#5b6478', marginTop: 6}}>{small}</div>
       </div>
     </div>
   );

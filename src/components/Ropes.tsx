@@ -1,6 +1,7 @@
 import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
 import {Track, pose} from '../map/track';
 import {TIMELINE_FPS, colors} from '../theme';
+import {useBi, useViFirst} from '../lang';
 import {Forklift} from './Forklift';
 
 /** Truck driving along a track (map pixels); hidden before start and after arrival. */
@@ -23,6 +24,8 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
   const x0 = 200;
   const lenG = TRACK.algo.total * scale;
   const lenR = TRACK.current.total * scale;
+  const bi = useBi();
+  const viFirst = useViFirst();
   const rope = (kind: 'algo' | 'current', y: number) => {
     const t = TRACK[kind];
     const len = t.total * scale * grow;
@@ -30,7 +33,7 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
     return (
       <g>
         <text x={x0 - 8} y={y - 30} fontSize={30} fontWeight={800} fill={accent}>
-          {kind === 'algo' ? 'ALGORITHM · Lộ trình tối ưu' : 'CURRENT · Theo dãy A → T'}
+          {viFirst ? (kind === 'algo' ? 'THUẬT TOÁN · Lộ trình tối ưu' : 'HIỆN TẠI · Theo dãy A → T') : kind === 'algo' ? 'ALGORITHM · Lộ trình tối ưu' : 'CURRENT · Theo dãy A → T'}
         </text>
         <line x1={x0} y1={y} x2={x0 + len} y2={y} stroke={accent} strokeWidth={16} strokeLinecap="round" style={{filter: `drop-shadow(0 0 8px ${accent})`}} />
         {t.stopAt
@@ -49,10 +52,10 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
       <div style={{position: 'absolute', left: 40, top: 176, width: 1840, height: 727, background: 'rgba(6, 10, 22, 0.86)', borderRadius: 16}} />
       <svg width={1920} height={1080} style={{position: 'absolute', left: 0, top: 0}}>
         <text x={960} y={300} textAnchor="middle" fontSize={40} fontWeight={800} fill="#ffffff">
-          Same 28 stops – routes straightened out
+          {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[0]}
         </text>
         <text x={960} y={340} textAnchor="middle" fontSize={26} fill={colors.muted}>
-          Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài
+          {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[1]}
         </text>
         {rope('algo', 470)}
         {rope('current', 640)}
@@ -62,10 +65,10 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
           <rect x={x0 + lenG} y={624} width={lenR - lenG} height={32} rx={6} fill={colors.red} opacity={0.35 + 0.45 * pulse} />
           <rect x={x0 + (lenG + lenR) / 2 - 275} y={690} width={550} height={92} rx={14} fill="#ffffff" stroke={colors.red} strokeWidth={4} />
           <text x={x0 + (lenG + lenR) / 2} y={735} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
-            EXTRA TRAVEL
+            {viFirst ? 'QUÃNG ĐƯỜNG CHẠY THỪA' : 'EXTRA TRAVEL'}
           </text>
           <text x={x0 + (lenG + lenR) / 2} y={766} textAnchor="middle" fontSize={22} fontWeight={600} fill="#5b6478">
-            Quãng đường chạy thừa
+            {viFirst ? 'Extra travel' : 'Quãng đường chạy thừa'}
           </text>
         </g>
       </svg>

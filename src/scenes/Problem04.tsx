@@ -9,6 +9,7 @@ import {Callout, PanelShell, VsBadge} from '../components/RoutePanel';
 import {MAP, laneYpx, project, vtX} from '../layout';
 import {DOORS} from '../map/khoC';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
+import {useBi, useFlip, useViFirst} from '../lang';
 import {useTimelineFrame} from '../timeline';
 
 // Timeline (30 units per second), same beats as the other problems.
@@ -116,7 +117,9 @@ const trucksStuck = (trips: Trip[], frame: number, drive: number) =>
 const ZOOM = {k: 1.9, tx: -1.9 * 200, ty: 580 - 1.9 * 596};
 
 /** Compact two-line label in panel coordinates, placed in an empty part of the map. */
-const MapChip: React.FC<{x: number; y: number; title: string; sub: string; accent: string; p: number}> = ({x, y, title, sub, accent, p}) => (
+const MapChip: React.FC<{x: number; y: number; title: string; sub: string; accent: string; p: number; viTitle?: string; viSub?: string}> = ({x, y, title, sub, accent, p, viTitle, viSub}) => {
+  const vi = useViFirst() && viTitle;
+  return (
   <div
     style={{
       position: 'absolute',
@@ -134,12 +137,14 @@ const MapChip: React.FC<{x: number; y: number; title: string; sub: string; accen
       zIndex: 2,
     }}
   >
-    <div style={{fontSize: 27, fontWeight: 800, lineHeight: 1.15, color: accent === colors.red ? '#d23c3a' : '#0a8f5a'}}>{title}</div>
-    <div style={{fontSize: 18, fontWeight: 600, color: '#5b6478'}}>{sub}</div>
+    <div style={{fontSize: 27, fontWeight: 800, lineHeight: 1.15, color: accent === colors.red ? '#d23c3a' : '#0a8f5a'}}>{vi ? viTitle : title}</div>
+    <div style={{fontSize: 18, fontWeight: 600, color: '#5b6478'}}>{vi ? viSub : sub}</div>
   </div>
-);
+  );
+};
 
 const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number; zoom: number; drive: number}> = ({kind, frame, jam, zoom, drive}) => {
+  const flip = useFlip();
   const trips = kind === 'algo' ? ALGO : CURRENT;
   const accent = kind === 'algo' ? colors.green : colors.red;
   const cam = {k: 1 + (ZOOM.k - 1) * zoom, tx: ZOOM.tx * zoom, ty: ZOOM.ty * zoom};
@@ -189,7 +194,7 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
       <g opacity={0.9}>
         <rect x={MAP.w - 214} y={MAP.h - 40} width={200} height={28} rx={8} fill="#0b1222" stroke="#2a3654" />
         <text x={MAP.w - 114} y={MAP.h - 21} textAnchor="middle" fontSize={13} fontWeight={700} letterSpacing={1.5} fill={colors.muted}>
-          ILLUSTRATION · MINH HỌA
+          {flip('ILLUSTRATION · MINH HỌA')}
         </text>
       </g>
     </svg>
@@ -197,6 +202,7 @@ const TrafficMap: React.FC<{kind: 'algo' | 'current'; frame: number; jam: number
 };
 
 const ClockBanner: React.FC<{p: number; mini: number; shiftStart?: boolean}> = ({p, mini, shiftStart}) => {
+  const flip = useFlip();
   const y = interpolate(mini, [0, 1], [540, 330]);
   const scale = interpolate(mini, [0, 1], [1, 0.55]);
   return (
@@ -216,7 +222,7 @@ const ClockBanner: React.FC<{p: number; mini: number; shiftStart?: boolean}> = (
       }}
     >
       <div style={{fontSize: shiftStart ? 76 : 88, fontWeight: 800, lineHeight: 1}}>{shiftStart ? 'ĐẦU CA SÁNG' : '9:00 AM'}</div>
-      <div style={{fontSize: 26, marginTop: 8}}>{shiftStart ? 'Start of the morning shift' : 'Morning peak · Giờ cao điểm sáng'}</div>
+      <div style={{fontSize: 26, marginTop: 8}}>{shiftStart ? 'Start of the morning shift' : flip('Morning peak · Giờ cao điểm sáng')}</div>
     </div>
   );
 };
@@ -280,7 +286,7 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         <PanelShell kind="algo" value={String(trucksStuck(ALGO, frame, T.drive))} unit="trucks" sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="algo" frame={frame} jam={jam} zoom={0} drive={T.drive} />
           {/* empty corner right of the short aisles 1–3 */}
-          <MapChip x={520} y={99 + 545} title="LESS CONGESTION" sub="aisles A, B · giảm ùn tắc dãy A, B" accent={colors.green} p={badge} />
+          <MapChip x={520} y={99 + 545} title="LESS CONGESTION" sub="aisles A, B · giảm ùn tắc dãy A, B" viTitle="GIẢM ÙN TẮC" viSub="dãy A, B · less congestion" accent={colors.green} p={badge} />
           <Callout
             kind="algo"
             placement="top"
@@ -293,7 +299,7 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         <PanelShell kind="current" value={String(stuckCur)} unit={stuckCur === 1 ? 'truck' : 'trucks'} sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="current" frame={frame} jam={jam} zoom={zoom} drive={T.drive} />
           {/* just behind the queue, only while zoomed in */}
-          <MapChip x={560} y={99 + 440} title={`${STUCK} TRUCKS STUCK`} sub="aisles A, B · xe kẹt ở dãy A, B" accent={colors.red} p={badge * zoom} />
+          <MapChip x={560} y={99 + 440} title={`${STUCK} TRUCKS STUCK`} sub="aisles A, B · xe kẹt ở dãy A, B" viTitle={`${STUCK} XE KẸT`} viSub={`ở dãy A, B · ${STUCK} trucks stuck`} accent={colors.red} p={badge * zoom} />
           <Callout
             kind="current"
             placement="top"

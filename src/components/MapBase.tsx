@@ -1,6 +1,7 @@
 import React from 'react';
 import {DOORS, GAPS, RACKS, TUNNELS} from '../map/khoC';
 import {MAP, laneYpx, project, vtX} from '../layout';
+import {useViFirst} from '../lang';
 import {colors} from '../theme';
 
 const CELL_COLORS = ['#a8834a', '#9c7a52', '#4e8a6a', '#3f7f86', '#3f68a6', '#6c5aa0', '#9a5440', '#b08d4e'];
@@ -18,6 +19,7 @@ const inGap = (code: string, vt: number) => (GAPS[code] ?? []).some(([a, b]) => 
 
 /** Static Kho C floor plan in the visual style of video part 1. */
 export const MapBase: React.FC<{startDoor: string}> = React.memo(({startDoor}) => {
+  const viFirst = useViFirst();
   const rows = RACKS.map((r, ri) => {
     const y = r.side === 'T' ? laneYpx(r.lane) + AISLE_HALF : laneYpx(r.lane) - AISLE_HALF - CELL;
     const segs: [number, number][] = [];
@@ -77,7 +79,7 @@ export const MapBase: React.FC<{startDoor: string}> = React.memo(({startDoor}) =
         letterSpacing={1.5}
         fill={colors.amber}
       >
-        DISPATCH · 25 DOORS · KHU XUẤT HÀNG
+        {viFirst ? 'KHU XUẤT HÀNG · 25 CỬA · DISPATCH' : 'DISPATCH · 25 DOORS · KHU XUẤT HÀNG'}
       </text>
       {/* doors */}
       {DOORS.map((d) => {
@@ -96,7 +98,7 @@ export const MapBase: React.FC<{startDoor: string}> = React.memo(({startDoor}) =
       <line x1={MAP.doorX} y1={MAP.topLineY} x2={MAP.w - 8} y2={MAP.topLineY} stroke="#2a3654" strokeWidth={2} />
       {[34, 75].map((vt) => (
         <text key={vt} x={vtX(vt)} y={15} textAnchor="middle" fontSize={13} fontWeight={700} letterSpacing={1} fill={colors.amber}>
-          CROSS AISLE · LỐI NGANG
+          {viFirst ? 'LỐI NGANG · CROSS AISLE' : 'CROSS AISLE · LỐI NGANG'}
         </text>
       ))}
       {dashX.map((x) => (

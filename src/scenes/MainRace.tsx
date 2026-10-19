@@ -10,6 +10,7 @@ import {LAYOUT, project} from '../layout';
 import {aisleOrder, routeLength, stopPoint} from '../map/route';
 import {track} from '../map/track';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
+import {useBi, useFlip, useViFirst} from '../lang';
 import {useTimelineFrame} from '../timeline';
 
 /**
@@ -69,6 +70,8 @@ const Hl: React.FC<{c: string; children: React.ReactNode}> = ({c, children}) => 
 
 /** clean: no caption bar (bottom strip kept for subtitles); demoSubtitle shows how a subtitle sits there. */
 export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?: MainRaceBeats}> = ({clean = false, demoSubtitle = false, beats}) => {
+  const bi = useBi();
+  const flip = useFlip();
   const T = {...T0, ...beats};
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
@@ -182,8 +185,8 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
           zIndex: 4,
         }}
       >
-        <div style={{fontSize: 30, fontWeight: 800}}>✓ FINISHED · VỀ ĐÍCH</div>
-        <div style={{fontSize: 18, color: '#5b6478'}}>{kind === 'algo' ? 'Optimized route · Lộ trình tối ưu' : 'Aisle order · Theo dãy A → T'}</div>
+        <div style={{fontSize: 30, fontWeight: 800}}>✓ {flip('FINISHED · VỀ ĐÍCH')}</div>
+        <div style={{fontSize: 18, color: '#5b6478'}}>{flip(kind === 'algo' ? 'Optimized route · Lộ trình tối ưu' : 'Aisle order · Theo dãy A → T')}</div>
       </div>
     );
   };
@@ -194,8 +197,8 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
 
       {/* heading before the tabs come in */}
       <div style={{position: 'absolute', left: 0, right: 0, top: 50, textAlign: 'center', opacity: 1 - tabsIn}}>
-        <div style={{fontSize: 44, fontWeight: 800}}>Same TO · 28 stops · Who drives less?</div>
-        <div style={{fontSize: 26, color: colors.muted}}>Cùng 1 phiếu TO · 28 điểm · Xe nào chạy ít hơn?</div>
+        <div style={{fontSize: 44, fontWeight: 800}}>{bi('Same TO · 28 stops · Who drives less?', 'Cùng 1 phiếu TO · 28 điểm · Xe nào chạy ít hơn?')[0]}</div>
+        <div style={{fontSize: 26, color: colors.muted}}>{bi('Same TO · 28 stops · Who drives less?', 'Cùng 1 phiếu TO · 28 điểm · Xe nào chạy ít hơn?')[1]}</div>
       </div>
       <div style={{opacity: tabsIn, transform: `translateY(${(1 - tabsIn) * -20}px)`}}>
         <ProblemTabs states={states} glow={glow} checkScale={check} flash={clean ? {index: flashIdx, p: flashP} : undefined} />
@@ -285,6 +288,8 @@ export const MainRace: React.FC<{clean?: boolean; demoSubtitle?: boolean; beats?
 
 /** The two header counters turn white, lift off their maps and meet in the centre; then the difference appears. */
 const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out: number}> = ({frame, at, diffAt, out}) => {
+  const bi = useBi();
+  const flip = useFlip();
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
   const fps = TIMELINE_FPS;
   if (frame < at || frame > out) return null;
@@ -330,13 +335,13 @@ const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out:
             }}
           >
             <div style={{position: 'absolute', top: -30, fontSize: 18, fontWeight: 800, color: k.c, opacity: fly, whiteSpace: 'nowrap'}}>
-              {k.en} <span style={{fontWeight: 500, color: colors.muted}}>· {k.vi}</span>
+              {bi(k.en, k.vi)[0]} <span style={{fontWeight: 500, color: colors.muted}}>· {bi(k.en, k.vi)[1]}</span>
             </div>
             <div style={{fontSize: 58, fontWeight: 800, lineHeight: 1, color: white > 0.5 ? k.ink : k.c}}>
               {Math.round(LEN[k.kind]).toLocaleString('en-US')}
               <span style={{fontSize: 24, fontWeight: 600, color: white > 0.5 ? '#5b6478' : colors.muted, marginLeft: 6}}>m</span>
             </div>
-            <div style={{fontSize: 16, color: white > 0.5 ? '#5b6478' : colors.muted, marginTop: 4}}>28 / 28 stops · điểm hạ hàng</div>
+            <div style={{fontSize: 16, color: white > 0.5 ? '#5b6478' : colors.muted, marginTop: 4}}>{flip('28 / 28 stops · 28 / 28 điểm hạ hàng')}</div>
           </div>
         );
       })}
@@ -357,7 +362,7 @@ const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out:
       >
         <span style={{fontSize: 56, fontWeight: 800}}>−{Math.round(diff).toLocaleString('en-US')} m</span>
         <span style={{fontSize: 40, fontWeight: 800, marginLeft: 20}}>−{Math.round((100 * diff) / LEN.current)}%</span>
-        <span style={{fontSize: 24, fontWeight: 600, marginLeft: 20}}>shorter · ngắn hơn</span>
+        <span style={{fontSize: 24, fontWeight: 600, marginLeft: 20}}>{flip('shorter · ngắn hơn')}</span>
       </div>
     </div>
   );

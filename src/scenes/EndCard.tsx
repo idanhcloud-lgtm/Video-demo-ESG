@@ -1,6 +1,7 @@
 import {AbsoluteFill, interpolate, spring} from 'remotion';
 import {Background} from '../components/Background';
 import {TIMELINE_FPS, colors, fontFamily, toFrames} from '../theme';
+import {useFlip, useViFirst} from '../lang';
 import {useTimelineFrame} from '../timeline';
 
 /** Closing card (voice V5): project title, then "next: 1-month simulation results". Beats in 30-per-second units. */
@@ -9,6 +10,8 @@ export type EndCardBeats = Partial<typeof T0>;
 export const END_CARD_DURATION = toFrames(T0.end);
 
 export const EndCard: React.FC<{beats?: EndCardBeats}> = ({beats}) => {
+  const vi = useViFirst();
+  const flip = useFlip();
   const T = {...T0, ...beats};
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
@@ -24,10 +27,10 @@ export const EndCard: React.FC<{beats?: EndCardBeats}> = ({beats}) => {
           DTLA WAREHOUSE TEAM · INNOVATION PROJECT
         </div>
         <div style={{textAlign: 'center', fontWeight: 800, fontSize: 76, lineHeight: 1.1, opacity: intro, transform: `translateY(${(1 - intro) * 30}px)`}}>
-          Algorithm-Based Route Optimization
-          <div style={{color: colors.green}}>for Reach Trucks</div>
+          {vi ? 'Tối ưu lộ trình xe Reach Truck' : 'Algorithm-Based Route Optimization'}
+          <div style={{color: colors.green}}>{vi ? 'bằng thuật toán' : 'for Reach Trucks'}</div>
         </div>
-        <div style={{fontSize: 30, color: colors.muted, opacity: intro}}>Tối ưu lộ trình xe Reach Truck bằng thuật toán</div>
+        <div style={{fontSize: 30, color: colors.muted, opacity: intro}}>{vi ? 'Algorithm-Based Route Optimization for Reach Trucks' : 'Tối ưu lộ trình xe Reach Truck bằng thuật toán'}</div>
         <div
           style={{
             marginTop: 40,
@@ -42,10 +45,10 @@ export const EndCard: React.FC<{beats?: EndCardBeats}> = ({beats}) => {
             transform: `translateY(${(1 - next) * 30}px)`,
           }}
         >
-          <div style={{background: colors.green, color: '#062016', fontWeight: 800, fontSize: 22, letterSpacing: 2, padding: '8px 16px', borderRadius: 10}}>NEXT · TIẾP THEO</div>
+          <div style={{background: colors.green, color: '#062016', fontWeight: 800, fontSize: 22, letterSpacing: 2, padding: '8px 16px', borderRadius: 10}}>{flip('NEXT · TIẾP THEO')}</div>
           <div>
-            <div style={{fontSize: 38, fontWeight: 800}}>Results of simulating one month of TOs</div>
-            <div style={{fontSize: 24, color: colors.muted}}>Kết quả mô phỏng các phiếu TO trong 1 tháng</div>
+            <div style={{fontSize: 38, fontWeight: 800}}>{vi ? 'Kết quả mô phỏng các phiếu TO trong 1 tháng' : 'Results of simulating one month of TOs'}</div>
+            <div style={{fontSize: 24, color: colors.muted}}>{vi ? 'Results of simulating one month of TOs' : 'Kết quả mô phỏng các phiếu TO trong 1 tháng'}</div>
           </div>
         </div>
       </AbsoluteFill>

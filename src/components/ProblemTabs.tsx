@@ -1,4 +1,5 @@
 import {LAYOUT} from '../layout';
+import {useBi, useFlip} from '../lang';
 import {colors} from '../theme';
 
 export const PROBLEMS = [
@@ -36,7 +37,10 @@ export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: 
   hidden,
   checkScale = 1,
   flash,
-}) => (
+}) => {
+  const bi = useBi();
+  const flip = useFlip();
+  return (
   <>
     {PROBLEMS.map((p, i) => {
       const st = states[i];
@@ -71,13 +75,13 @@ export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: 
             opacity: hidden === i ? 0 : 1,
           }}
         >
-          {solved ? <Chip text="SOLVED · ĐÃ GIẢI QUYẾT" dark /> : solving ? <Chip text="SOLVING · ĐANG GIẢI QUYẾT" dark={false} /> : null}
+          {solved ? <Chip text={flip("SOLVED · ĐÃ GIẢI QUYẾT")} dark /> : solving ? <Chip text={flip("SOLVING · ĐANG GIẢI QUYẾT")} dark={false} /> : null}
           <div style={{fontSize: 42, fontWeight: 800, color: solved ? '#0b1222' : solving ? '#ffffff' : '#27314a'}}>
             {String(i + 1).padStart(2, '0')}
           </div>
           <div>
-            <div style={{fontSize: 24, fontWeight: 700, lineHeight: 1.2, color: solved ? '#0b1222' : solving ? '#ffffff' : '#4f5a75'}}>{p.en}</div>
-            <div style={{fontSize: 17, color: solved ? '#4a5470' : solving ? '#b8c2d8' : '#3b4560'}}>{p.vi}</div>
+            <div style={{fontSize: 24, fontWeight: 700, lineHeight: 1.2, color: solved ? '#0b1222' : solving ? '#ffffff' : '#4f5a75'}}>{bi(p.en, p.vi)[0]}</div>
+            <div style={{fontSize: 17, color: solved ? '#4a5470' : solving ? '#b8c2d8' : '#3b4560'}}>{bi(p.en, p.vi)[1]}</div>
           </div>
           {solved ? (
             <div
@@ -106,4 +110,5 @@ export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: 
       );
     })}
   </>
-);
+  );
+};

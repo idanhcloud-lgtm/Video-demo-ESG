@@ -1,5 +1,6 @@
 import {AbsoluteFill, interpolate, spring} from 'remotion';
 import {useTimelineFrame} from '../timeline';
+import {useViFirst} from '../lang';
 import {TIMELINE_FPS, colors, fontFamily} from '../theme';
 
 const stats = [
@@ -10,6 +11,7 @@ const stats = [
 ];
 
 export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => {
+  const vi = useViFirst();
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
   const intro = spring({frame, fps, config: {damping: 200}});
@@ -49,11 +51,11 @@ export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => 
           transform: `translateY(${interpolate(intro, [0, 1], [40, 0])}px)`,
         }}
       >
-        Algorithm-Based Route Optimization
-        <div style={{color: colors.green}}>for Reach Trucks</div>
+        {vi ? 'Tối ưu lộ trình xe Reach Truck' : 'Algorithm-Based Route Optimization'}
+        <div style={{color: colors.green}}>{vi ? 'bằng thuật toán' : 'for Reach Trucks'}</div>
       </div>
       <div style={{fontSize: 30, color: colors.muted, opacity: intro}}>
-        Tối ưu lộ trình xe Reach Truck bằng thuật toán
+        {vi ? 'Algorithm-Based Route Optimization for Reach Trucks' : 'Tối ưu lộ trình xe Reach Truck bằng thuật toán'}
       </div>
       <div style={{display: noStats ? 'none' : 'flex', gap: 20, marginTop: 40}}>
         {stats.map((s, i) => {

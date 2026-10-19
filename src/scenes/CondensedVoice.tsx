@@ -6,6 +6,7 @@ import {ClosingRecap} from './ClosingRecap';
 import {EndCard} from './EndCard';
 import {MainRace} from './MainRace';
 import {Problem04} from './Problem04';
+import {LangContext} from '../lang';
 import {TitleScene} from './TitleScene';
 
 const f = (s: number) => Math.round(s * VIDEO.fps);
@@ -26,6 +27,7 @@ const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
 export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false}) => (
+  <LangContext.Provider value={enFirst ? 'en' : 'vi'}>
   <AbsoluteFill>
     <Series>
       <Series.Sequence durationInFrames={f(S.title.seconds)}>
@@ -53,4 +55,5 @@ export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false})
     ))}
     <Subtitles enFirst={enFirst} />
   </AbsoluteFill>
+  </LangContext.Provider>
 );
