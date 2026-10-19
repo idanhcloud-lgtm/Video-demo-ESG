@@ -232,12 +232,12 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
   const glow = interpolate(frame, [T.glow, T.glow + 15], [0, 1], clamp);
   const cardIn = spring({frame: frame - T.cardIn, fps, config: {damping: 200}});
   const cardOut = interpolate(frame, [T.cardOut, T.cardOut + 20], [0, 1], ease);
-  const panels = spring({frame: frame - T.panelsIn, fps, config: {damping: 200}});
+  // clean (final video): no problem card, the tab just glows as for problems 01–03 and the maps stay on screen
+  const panels = clean ? 1 : spring({frame: frame - T.panelsIn, fps, config: {damping: 200}});
   const clockIn = spring({frame: frame - T.clock, fps, config: {damping: 14}});
   const clockMini = interpolate(frame, [T.drive - 25, T.drive], [0, 1], ease);
   const clockOut = interpolate(frame, [T.zoomIn - 10, T.zoomIn + 5], [1, 0], clamp);
-  // no camera zoom: problem 04 is shown like problems 01–03 (whole map, callouts on top)
-  const zoom = 0;
+  const zoom = interpolate(frame, [T.zoomIn, T.zoomIn + 35], [0, 1], ease) - interpolate(frame, [T.zoomOut, T.zoomOut + 35], [0, 1], ease);
   const jam = interpolate(frame, [T.jam, T.jam + 15], [0, 1], clamp);
   const badge = spring({frame: frame - T.jam - 10, fps, config: {damping: 200}}) * interpolate(frame, [T.zoomOut - 10, T.zoomOut + 5], [1, 0], clamp);
   const callout = spring({frame: frame - T.callout, fps, config: {damping: 200}}) * interpolate(frame, [T.zoomOut - 10, T.zoomOut + 5], [1, 0], clamp);
@@ -260,10 +260,11 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
       <ProblemTabs
         states={['solved', 'solved', 'solved', solved ? 'solved' : 'solving']}
         glow={glow}
-        hidden={frame >= T.cardIn && frame < T.cardOut + 15 ? 3 : undefined}
+        hidden={!clean && frame >= T.cardIn && frame < T.cardOut + 15 ? 3 : undefined}
         checkScale={solved ? check : 1}
         flash={clean && solved ? {index: 3, p: interpolate(frame - T.solved, [0, 8, 40, 70], [0, 1, 1, 0], clamp)} : undefined}
       />
+      {clean ? null : (
       <ProblemCard
         n={4}
         en="Morning congestion"
@@ -273,12 +274,13 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         enter={cardIn}
         out={cardOut}
       />
+      )}
 
       <div style={{opacity: panels, transform: `translateY(${(1 - panels) * 40}px)`}}>
         <PanelShell kind="algo" value={String(trucksStuck(ALGO, frame, T.drive))} unit="trucks" sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="algo" frame={frame} jam={jam} zoom={0} drive={T.drive} />
           {/* empty corner right of the short aisles 1–3 */}
-          <MapChip x={500} y={99 + 545} title="LESS CONGESTION" sub="aisles A, B · giảm ùn tắc dãy A, B" accent={colors.green} p={badge} />
+          <MapChip x={520} y={99 + 545} title="LESS CONGESTION" sub="aisles A, B · giảm ùn tắc dãy A, B" accent={colors.green} p={badge} />
           <Callout
             kind="algo"
             placement="top"
@@ -291,7 +293,7 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         <PanelShell kind="current" value={String(stuckCur)} unit={stuckCur === 1 ? 'truck' : 'trucks'} sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="current" frame={frame} jam={jam} zoom={zoom} drive={T.drive} />
           {/* just behind the queue, only while zoomed in */}
-          <MapChip x={520} y={99 + 465} title={`${STUCK} TRUCKS STUCK`} sub="aisles A, B · xe kẹt ở dãy A, B" accent={colors.red} p={badge} />
+          <MapChip x={560} y={99 + 440} title={`${STUCK} TRUCKS STUCK`} sub="aisles A, B · xe kẹt ở dãy A, B" accent={colors.red} p={badge * zoom} />
           <Callout
             kind="current"
             placement="top"
