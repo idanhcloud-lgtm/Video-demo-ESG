@@ -216,7 +216,7 @@ const ClockBanner: React.FC<{p: number; mini: number; shiftStart?: boolean}> = (
       }}
     >
       <div style={{fontSize: shiftStart ? 76 : 88, fontWeight: 800, lineHeight: 1}}>{shiftStart ? 'ĐẦU CA SÁNG' : '9:00 AM'}</div>
-      <div style={{fontSize: 26, marginTop: 8}}>{shiftStart ? 'Start of the morning shift' : 'Giờ cao điểm sáng · Morning peak'}</div>
+      <div style={{fontSize: 26, marginTop: 8}}>{shiftStart ? 'Start of the morning shift' : 'Morning peak · Giờ cao điểm sáng'}</div>
     </div>
   );
 };
@@ -236,7 +236,8 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
   const clockIn = spring({frame: frame - T.clock, fps, config: {damping: 14}});
   const clockMini = interpolate(frame, [T.drive - 25, T.drive], [0, 1], ease);
   const clockOut = interpolate(frame, [T.zoomIn - 10, T.zoomIn + 5], [1, 0], clamp);
-  const zoom = interpolate(frame, [T.zoomIn, T.zoomIn + 35], [0, 1], ease) - interpolate(frame, [T.zoomOut, T.zoomOut + 35], [0, 1], ease);
+  // no camera zoom: problem 04 is shown like problems 01–03 (whole map, callouts on top)
+  const zoom = 0;
   const jam = interpolate(frame, [T.jam, T.jam + 15], [0, 1], clamp);
   const badge = spring({frame: frame - T.jam - 10, fps, config: {damping: 200}}) * interpolate(frame, [T.zoomOut - 10, T.zoomOut + 5], [1, 0], clamp);
   const callout = spring({frame: frame - T.callout, fps, config: {damping: 200}}) * interpolate(frame, [T.zoomOut - 10, T.zoomOut + 5], [1, 0], clamp);
@@ -277,7 +278,7 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         <PanelShell kind="algo" value={String(trucksStuck(ALGO, frame, T.drive))} unit="trucks" sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="algo" frame={frame} jam={jam} zoom={0} drive={T.drive} />
           {/* empty corner right of the short aisles 1–3 */}
-          <MapChip x={606} y={99 + 545} title="GIẢM ÙN TẮC" sub="dãy A, B · less congestion" accent={colors.green} p={badge} />
+          <MapChip x={500} y={99 + 545} title="LESS CONGESTION" sub="aisles A, B · giảm ùn tắc dãy A, B" accent={colors.green} p={badge} />
           <Callout
             kind="algo"
             placement="top"
@@ -290,7 +291,7 @@ export const Problem04: React.FC<{beats?: Problem04Beats; clean?: boolean; shift
         <PanelShell kind="current" value={String(stuckCur)} unit={stuckCur === 1 ? 'truck' : 'trucks'} sub="stuck in aisles A, B · xe kẹt ở dãy A, B">
           <TrafficMap kind="current" frame={frame} jam={jam} zoom={zoom} drive={T.drive} />
           {/* just behind the queue, only while zoomed in */}
-          <MapChip x={640} y={99 + 550} title={`${STUCK} XE KẸT`} sub="ở dãy A, B · trucks stuck" accent={colors.red} p={badge * zoom} />
+          <MapChip x={520} y={99 + 465} title={`${STUCK} TRUCKS STUCK`} sub="aisles A, B · xe kẹt ở dãy A, B" accent={colors.red} p={badge} />
           <Callout
             kind="current"
             placement="top"

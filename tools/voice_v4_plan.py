@@ -168,13 +168,17 @@ p4_beats = {k: round((v - q0) * U) for k, v in Q.items()}
 p4_dur = Q['end'] - q0
 t = Q['end']
 
-# ---- Closing recap (whole V4 kept as recorded) ----
+# ---- Closing recap (whole V4 kept as recorded) – dropped from the video (RECAP = False) ----
+RECAP = False
 c0 = t
-x = place('ket', c0 + 0.8, 'k0', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6')
-off = c0 + 0.8 - SEG['k0'][1]
-C = {'intro': c0, 'i1': x['k1'][0], 'i2': x['k2'][0], 'i3': x['k3'][0], 'i4': x['k4'][0], 'fix': x['k5'][0],
-     'b1': K6_WORDS[0] + off, 'b2': K6_WORDS[1] + off, 'b3': K6_WORDS[2] + off}
-C['end'] = x['k6'][1] + 1.8
+if RECAP:
+    x = place('ket', c0 + 0.8, 'k0', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6')
+    off = c0 + 0.8 - SEG['k0'][1]
+    C = {'intro': c0, 'i1': x['k1'][0], 'i2': x['k2'][0], 'i3': x['k3'][0], 'i4': x['k4'][0], 'fix': x['k5'][0],
+         'b1': K6_WORDS[0] + off, 'b2': K6_WORDS[1] + off, 'b3': K6_WORDS[2] + off}
+    C['end'] = x['k6'][1] + 1.8
+else:
+    C = {'end': c0}
 ket_beats = {k: round((v - c0) * U) for k, v in C.items()}
 ket_dur = C['end'] - c0
 

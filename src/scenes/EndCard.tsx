@@ -42,10 +42,10 @@ export const EndCard: React.FC<{beats?: EndCardBeats}> = ({beats}) => {
             transform: `translateY(${(1 - next) * 30}px)`,
           }}
         >
-          <div style={{background: colors.green, color: '#062016', fontWeight: 800, fontSize: 22, letterSpacing: 2, padding: '8px 16px', borderRadius: 10}}>TIẾP THEO · NEXT</div>
+          <div style={{background: colors.green, color: '#062016', fontWeight: 800, fontSize: 22, letterSpacing: 2, padding: '8px 16px', borderRadius: 10}}>NEXT · TIẾP THEO</div>
           <div>
-            <div style={{fontSize: 38, fontWeight: 800}}>Kết quả mô phỏng các phiếu TO trong 1 tháng</div>
-            <div style={{fontSize: 24, color: colors.muted}}>Results of simulating one month of TOs</div>
+            <div style={{fontSize: 38, fontWeight: 800}}>Results of simulating one month of TOs</div>
+            <div style={{fontSize: 24, color: colors.muted}}>Kết quả mô phỏng các phiếu TO trong 1 tháng</div>
           </div>
         </div>
       </AbsoluteFill>

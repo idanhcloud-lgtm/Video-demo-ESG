@@ -1,5 +1,5 @@
 {
- "total": 187.866,
+ "total": 157.306,
  "scenes": {
   "title": {
    "seconds": 3.84
@@ -50,18 +50,9 @@
    }
   },
   "ket": {
-   "seconds": 30.56,
+   "seconds": 0.0,
    "beats": {
-    "intro": 0,
-    "i1": 134,
-    "i2": 256,
-    "i3": 366,
-    "i4": 473,
-    "fix": 580,
-    "b1": 739,
-    "b2": 775,
-    "b3": 809,
-    "end": 917
+    "end": 0
    }
   },
   "end": {
@@ -134,12 +125,8 @@
    "at": 133.416
   },
   {
-   "file": "audio/v4/ket.wav",
-   "at": 145.856
-  },
-  {
    "file": "audio/v4/v5.wav",
-   "at": 176.416
+   "at": 145.856
   }
  ],
  "subs": [
@@ -319,55 +306,13 @@
   },
   {
    "at": 145.856,
-   "end": 148.266,
-   "vi": "Nhìn lại 4 hạn chế của cách đi hiện tại.",
-   "en": "Looking back at the 4 limitations of today's routing."
-  },
-  {
-   "at": 149.516,
-   "end": 152.776,
-   "vi": "Một: các điểm gần nhau không được hạ hàng liên tiếp.",
-   "en": "One: nearby stops are not handled in sequence."
-  },
-  {
-   "at": 153.586,
-   "end": 156.696,
-   "vi": "Hai: lối đi ngang chưa được sử dụng tối ưu.",
-   "en": "Two: cross aisles are not used optimally."
-  },
-  {
-   "at": 157.256,
-   "end": 160.276,
-   "vi": "Ba: hàng rải rác, xe chạy thừa nhiều.",
-   "en": "Three: scattered stops, a lot of extra travel."
-  },
-  {
-   "at": 160.816,
-   "end": 163.876,
-   "vi": "Bốn: ùn tắc dãy A, B buổi sáng.",
-   "en": "Four: morning congestion in aisles A, B."
-  },
-  {
-   "at": 164.386,
-   "end": 169.176,
-   "vi": "Thuật toán khắc phục các hạn chế này bằng việc sắp xếp lại thứ tự hạ hàng một cách tối ưu hơn.",
-   "en": "The algorithm addresses them by re-sequencing the put-away stops more efficiently."
-  },
-  {
-   "at": 169.676,
-   "end": 174.066,
-   "vi": "Quãng đường ngắn hơn, ít ùn tắc hơn, tiết kiệm điện năng cho mỗi chuyến xe nâng.",
-   "en": "Shorter travel, less congestion, energy saved on every forklift trip."
-  },
-  {
-   "at": 176.416,
-   "end": 180.836,
+   "end": 150.276,
    "vi": "Trên đây là phần mô phỏng giải pháp tối ưu lộ trình xe reach truck bằng thuật toán.",
    "en": "That was the simulation of our algorithm-based reach truck route optimization."
   },
   {
-   "at": 180.896,
-   "end": 185.916,
+   "at": 150.336,
+   "end": 155.356,
    "vi": "Tiếp theo, chúng tôi xin trình bày kết quả chạy mô phỏng trên các phiếu TO trong một tháng.",
    "en": "Next, we present the results of simulating one month of TOs."
   }

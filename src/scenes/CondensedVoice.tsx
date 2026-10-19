@@ -10,7 +10,7 @@ import {TitleScene} from './TitleScene';
 
 const f = (s: number) => Math.round(s * VIDEO.fps);
 const S = vo.scenes;
-export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds) + f(S.end.seconds);
+export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds) + f(S.end.seconds) // ket = 0 when the recap is dropped;
 
 /** Bilingual subtitle for the sentence being spoken. */
 const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
@@ -37,9 +37,11 @@ export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false})
       <Series.Sequence durationInFrames={f(S.p04.seconds)}>
         <Problem04 clean beats={S.p04.beats} />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={f(S.ket.seconds)}>
-        <ClosingRecap beats={S.ket.beats} />
-      </Series.Sequence>
+      {f(S.ket.seconds) > 0 ? (
+        <Series.Sequence durationInFrames={f(S.ket.seconds)}>
+          <ClosingRecap beats={S.ket.beats} />
+        </Series.Sequence>
+      ) : null}
       <Series.Sequence durationInFrames={f(S.end.seconds)}>
         <EndCard beats={S.end.beats} />
       </Series.Sequence>

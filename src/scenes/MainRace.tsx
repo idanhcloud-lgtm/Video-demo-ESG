@@ -330,13 +330,13 @@ const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out:
             }}
           >
             <div style={{position: 'absolute', top: -30, fontSize: 18, fontWeight: 800, color: k.c, opacity: fly, whiteSpace: 'nowrap'}}>
-              {k.vi} <span style={{fontWeight: 500, color: colors.muted}}>· {k.en}</span>
+              {k.en} <span style={{fontWeight: 500, color: colors.muted}}>· {k.vi}</span>
             </div>
             <div style={{fontSize: 58, fontWeight: 800, lineHeight: 1, color: white > 0.5 ? k.ink : k.c}}>
               {Math.round(LEN[k.kind]).toLocaleString('en-US')}
               <span style={{fontSize: 24, fontWeight: 600, color: white > 0.5 ? '#5b6478' : colors.muted, marginLeft: 6}}>m</span>
             </div>
-            <div style={{fontSize: 16, color: white > 0.5 ? '#5b6478' : colors.muted, marginTop: 4}}>28 / 28 điểm hạ hàng</div>
+            <div style={{fontSize: 16, color: white > 0.5 ? '#5b6478' : colors.muted, marginTop: 4}}>28 / 28 stops · điểm hạ hàng</div>
           </div>
         );
       })}
@@ -357,7 +357,7 @@ const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out:
       >
         <span style={{fontSize: 56, fontWeight: 800}}>−{Math.round(diff).toLocaleString('en-US')} m</span>
         <span style={{fontSize: 40, fontWeight: 800, marginLeft: 20}}>−{Math.round((100 * diff) / LEN.current)}%</span>
-        <span style={{fontSize: 24, fontWeight: 600, marginLeft: 20}}>ngắn hơn · shorter</span>
+        <span style={{fontSize: 24, fontWeight: 600, marginLeft: 20}}>shorter · ngắn hơn</span>
       </div>
     </div>
   );
