@@ -12,6 +12,7 @@ import {WithVoice, voDuration} from './scenes/WithVoice';
 import {VIDEO} from './theme';
 import {SSHAPE_2OPT_SECONDS, SShape2Opt} from './scenes/SShape2Opt';
 import {MOVER_PAIRING_SECONDS, MoverPairing} from './scenes/MoverPairing';
+import {MOVER_CAGES_SECONDS, MoverCages} from './scenes/MoverCages';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -64,6 +65,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="CondensedVoiceEN" component={CondensedVoice} defaultProps={{enFirst: true}} durationInFrames={CONDENSED_VOICE_DURATION} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="SShape2Opt" component={SShape2Opt} durationInFrames={Math.round(SSHAPE_2OPT_SECONDS * VIDEO.fps)} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="MoverPairing" component={MoverPairing} durationInFrames={Math.round(MOVER_PAIRING_SECONDS * VIDEO.fps)} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="MoverCages" component={MoverCages} durationInFrames={MOVER_CAGES_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],
