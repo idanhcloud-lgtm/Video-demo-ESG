@@ -161,6 +161,7 @@ export const ProjectAlgo: React.FC = () => {
   void capKey;
 
   const stepNames = ['TO', 'Cage pallets', 'Savings', 'Nearest neighbour'];
+  const callOn = step === 3 ? fade(T.ex + EX_LEG0 - 0.3, T.ex + EX_LEG0) * (1 - fade(T.ex + EX_DONE, T.ex + EX_DONE + 0.3)) : 0;
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
       <Background />
@@ -170,15 +171,24 @@ export const ProjectAlgo: React.FC = () => {
         <div style={{fontSize: 21, color: colors.muted}}>Ứng dụng lập chuyến cho xe mover như thế nào · 2 pallets per trip</div>
         <div style={{display: 'flex', gap: 10, marginTop: 16}}>
           {stepNames.map((s, k) => {
-            const on = step === k + 1 || (step === 5 && true);
+            const calling = k === 3 && step === 3 && t >= T.ex + EX_LEG0 - 0.3 && t < T.ex + EX_DONE + 0.3;
+            const on = step === k + 1 || step === 5 || calling;
             return (
               <div key={s} style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                <div style={{padding: '6px 16px', borderRadius: 20, fontSize: 20, fontWeight: 800, background: on ? (k === 2 ? colors.green : k === 3 ? colors.yellow : '#ffffff') : '#ffffff14',
+                <div style={{padding: '6px 16px', borderRadius: 20, fontSize: 20, fontWeight: 800, boxShadow: calling ? `0 0 ${14 + 10 * Math.sin(t * 8)}px ${colors.yellow}` : 'none', background: on ? (k === 2 ? colors.green : k === 3 ? colors.yellow : '#ffffff') : '#ffffff14',
                   color: on ? '#0b1222' : colors.muted}}>
                   {k ? `${k}. ` : ''}{s}
-                  {k === 2 ? <span style={{marginLeft: 8, padding: '1px 8px', borderRadius: 10, background: colors.yellow, color: '#0b1222', fontSize: 15}}>uses ③</span> : null}
                 </div>
-                {k < stepNames.length - 1 ? <div style={{color: colors.muted, fontSize: 20}}>→</div> : null}
+                {k < stepNames.length - 1 ? (
+                  <div style={{color: k === 2 && callOn > 0 ? colors.yellow : colors.muted, fontSize: 20, fontWeight: 800, position: 'relative'}}>
+                    →
+                    {k === 2 ? (
+                      <div style={{position: 'absolute', left: '50%', top: 30, transform: 'translateX(-50%)', whiteSpace: 'nowrap', opacity: callOn, fontSize: 18, color: colors.yellow}}>
+                        calls · gọi
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             );
           })}
@@ -369,7 +379,7 @@ export const ProjectAlgo: React.FC = () => {
           </div>
           <div style={{display: 'inline-block', marginTop: 14, padding: '5px 14px', borderRadius: 18, background: colors.yellow, color: '#0b1222', fontSize: 19, fontWeight: 800,
             opacity: exP(EX_LEG0 - 0.3, EX_LEG0)}}>
-            Together = measured with ③ Nearest neighbour
+            Measured with Nearest neighbour
           </div>
           <div style={{fontSize: 16, color: colors.muted, marginTop: 4, opacity: exP(EX_LEG0 - 0.3, EX_LEG0)}}>Đi chung = đo bằng láng giềng gần nhất</div>
           <div style={{fontSize: 28, display: 'flex', justifyContent: 'space-between', color: colors.green, fontWeight: 700, marginTop: 10, opacity: exP(EX_DONE, EX_DONE + 0.4)}}>
