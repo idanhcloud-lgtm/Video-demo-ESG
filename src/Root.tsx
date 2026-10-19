@@ -15,6 +15,8 @@ import {MOVER_PAIRING_SECONDS, MoverPairing} from './scenes/MoverPairing';
 import {MOVER_CAGES_SECONDS, MoverCages} from './scenes/MoverCages';
 import {MOVER_RACE_SECONDS, MoverRace} from './scenes/MoverRace';
 import {MOVER_EXPLAIN_SECONDS, MoverExplain} from './scenes/MoverExplain';
+import {ALGO_EXPLAIN_SECONDS, AlgoExplain} from './scenes/AlgoExplain';
+import {PROJECT_ALGO_SECONDS, ProjectAlgo} from './scenes/ProjectAlgo';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -70,6 +72,8 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="MoverCages" component={MoverCages} durationInFrames={MOVER_CAGES_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="MoverRace" component={MoverRace} durationInFrames={MOVER_RACE_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="MoverExplain" component={MoverExplain} durationInFrames={MOVER_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="AlgoExplain" component={AlgoExplain} durationInFrames={ALGO_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="ProjectAlgo" component={ProjectAlgo} durationInFrames={PROJECT_ALGO_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],
