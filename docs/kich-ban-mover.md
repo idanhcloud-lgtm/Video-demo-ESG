@@ -1,4 +1,4 @@
-# Kịch bản giọng đọc – Thuật toán xe mover (khoảng 75 giây)
+# Kịch bản giọng đọc – Thuật toán xe mover (khoảng 70 giây)
 
 Viết cho ElevenLabs v4: mỗi đoạn một thẻ giọng ở đầu, không dùng `[clear]`, tách câu bằng `[long pause]`. Số đọc bằng chữ. Mỗi khung = 1 lần tạo = 1 file.
 
@@ -26,15 +26,13 @@ Ví dụ minh họa: 8 dòng hàng, 4 pallet nguyên và 4 dòng hàng lẻ nử
 |---|---|
 | Bản đồ 4 dãy, số trên pallet = thứ tự in. Lần lượt tô 3 nhóm theo thứ tự in (1+2+4, 3+5+6, 7+8). Nhóm 2 nhấp nháy: một điểm đầu dãy C, một điểm cuối dãy B, một điểm cuối dãy C. |
 
-## M3 – Thuật toán, bước gom (≈ 12 s)
+## M3 – Thuật toán, bước gom (≈ 8 s)
 ```
-[confident] Thuật toán làm khác. Đầu tiên, nó quy đổi từng dòng hàng ra pallet, theo quy cách trên SAP.
-[long pause]
-[steady] Các phần hàng lẻ được gom lên pallet lồng cho đầy. Tám dòng hàng trở thành sáu pallet cần chở, tức là ba chuyến.
+[confident] Thuật toán làm khác. Hàng lẻ vẫn được gom lên pallet lồng cho đầy, nên tám dòng hàng trở thành sáu pallet, tức là ba chuyến.
 ```
 | Hình | |
 |---|---|
-| Bảng 8 dòng: số lượng / quy cách → "1 pallet" hoặc "½ pallet". Bốn mẩu ½ bay vào 2 lồng. Hiện 6 ô: 4 pallet nguyên + 2 lồng. Dòng chốt "6 pallet → 3 chuyến". |
+| Bốn mẩu ½ bay vào 2 lồng. Hiện 6 ô: 4 pallet nguyên + 2 lồng. Dòng chốt "6 pallet → 3 chuyến". |
 
 ## M4 – Thuật toán, bước ghép cặp (≈ 22 s)
 ```
