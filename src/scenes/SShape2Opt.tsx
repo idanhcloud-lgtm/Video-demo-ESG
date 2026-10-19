@@ -79,6 +79,16 @@ function subPts(order: number[], i: number, j: number): Pt[] {
   return pts;
 }
 const toD = (pts: Pt[]) => pts.map(([x, y], k) => `${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+const pointAt = (pts: Pt[], f: number): Pt => {
+  let rest = plen(pts) * f;
+  for (let k = 1; k < pts.length; k++) {
+    const [a, b] = [pts[k - 1], pts[k]];
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (rest <= l && l > 0) return [a[0] + ((b[0] - a[0]) * rest) / l, a[1] + ((b[1] - a[1]) * rest) / l];
+    rest -= l;
+  }
+  return pts[pts.length - 1];
+};
 const plen = (pts: Pt[]) => pts.slice(1).reduce((t, p, k) => t + Math.hypot(p[0] - pts[k][0], p[1] - pts[k][1]), 0);
 
 // ---- timeline (seconds) ----
@@ -94,6 +104,15 @@ const Route: React.FC<{pts: Pt[]; color: string; draw?: number; opacity?: number
       strokeDasharray={`${L * draw} ${L + 10}`} style={{filter: `drop-shadow(0 0 8px ${color}aa)`}} />
   );
 };
+
+// phase tag pinned on the map, so the eye can stay on the routes
+const Tag: React.FC<{at: Pt; color: string; head: string; text?: string; opacity: number}> = ({at, color, head, text, opacity}) => (
+  <div style={{position: 'absolute', left: at[0], top: at[1] - 34, transform: 'translate(-50%, -100%)', opacity, whiteSpace: 'nowrap',
+    background: color, color: '#0b1222', borderRadius: 12, padding: '6px 16px', fontSize: 24, fontWeight: 800, boxShadow: '0 8px 24px #000a'}}>
+    {head}
+    {text ? <span style={{fontWeight: 600, marginLeft: 10}}>{text}</span> : null}
+  </div>
+);
 
 export const SShape2Opt: React.FC = () => {
   const frame = useCurrentFrame();
@@ -143,11 +162,12 @@ export const SShape2Opt: React.FC = () => {
           S-shape <span style={{color: colors.green}}>+ 2-opt</span>
         </div>
         <div style={{fontSize: 24, color: colors.muted}}>Thuật toán sắp xếp lộ trình · How the route is sequenced</div>
-        <div style={{fontSize: 18, color: colors.muted, marginTop: 6, opacity: 0.85}}>Sơ đồ minh họa: hàng ở kệ trái hay kệ phải đều hạ từ cùng một lối đi · Left or right rack, both served from the same aisle</div>
       </div>
       {/* meter */}
       <div style={{position: 'absolute', right: 80, top: 40, textAlign: 'right', opacity: t > T.sDraw - 0.3 ? 1 : 0}}>
-        <div style={{fontSize: 20, color: colors.muted, letterSpacing: 2}}>QUÃNG ĐƯỜNG · DISTANCE</div>
+        <div style={{fontSize: 20, color: colors.muted, letterSpacing: 2}}>
+          <span style={{color: done ? colors.green : k >= 0 ? colors.red : colors.yellow, fontWeight: 800}}>{done ? 'S-SHAPE + 2-OPT' : k >= 0 ? '2-OPT' : 'S-SHAPE'}</span> · QUÃNG ĐƯỜNG
+        </div>
         <div style={{fontSize: 86, fontWeight: 800, lineHeight: 1, color: done ? colors.green : colors.yellow}}>
           {meter}
           <span style={{fontSize: 34, color: colors.muted, marginLeft: 8}}>m</span>
@@ -213,6 +233,20 @@ export const SShape2Opt: React.FC = () => {
           );
         })}
       </svg>
+
+      {/* phase tags on the map */}
+      {k < 0 && t >= T.sDraw ? (
+        <Tag at={pointAt(routePts(SSHAPE), draw)} color={colors.yellow} head="S-SHAPE" text={draw < 1 ? 'đi chữ S' : 'lộ trình ban đầu'}
+          opacity={interpolate(t, [T.sDraw, T.sDraw + 0.3, T.opt - 0.3, T.opt], [0, 1, 1, 0], clamp)} />
+      ) : null}
+      {k >= 0 && !done ? (() => {
+        const seg = subPts(swap < 0.5 ? prevOrder : STEPS[k].order, STEPS[k].i, STEPS[k].j);
+        const top = seg.reduce((a, p) => (p[1] < a[1] ? p : a), seg[0]);
+        return (
+          <Tag at={[pointAt(seg, 0.5)[0], top[1]]} color={swap < 1 ? colors.red : colors.green} head="2-OPT" text={swap < 1 ? 'đảo đoạn này' : 'ngắn hơn → giữ'}
+            opacity={interpolate(local, [0, 0.15, T.step - 0.15, T.step], [0, 1, 1, 0], clamp)} />
+        );
+      })() : null}
 
       {/* caption */}
       <div style={{position: 'absolute', left: 0, right: 0, bottom: 44, textAlign: 'center', opacity: capIn}}>
