@@ -51,7 +51,9 @@ const pathLen = (order: number[]) => {
 };
 
 type Trip = {order: number[]; slot: Record<number, number>; len: number; save?: number; label: string};
-const stopsLabel = (groups: number[][]) => groups.map((g) => g.map((i) => i + 1).join('·')).join(' + ');
+const groupName = (g: number[]) =>
+  ITEMS[g[0]].f >= 1 ? `Pallet ${g[0] + 1}` : `cage ${Math.round(100 * g.reduce((a, i) => a + ITEMS[i].f, 0))}%`;
+const stopsLabel = (groups: number[][]) => groups.map(groupName).join(' + ');
 
 // today: load as you go
 const CUR: Trip[] = [];
@@ -134,7 +136,7 @@ const ALG: Trip[] = [];
     const order = nn(us.flatMap((u) => UNITS[u].items));
     const slot: Record<number, number> = {};
     us.forEach((u, s) => UNITS[u].items.forEach((i) => (slot[i] = s)));
-    ALG.push({order, slot, len: pathLen(order), save, label: stopsLabel(us.map((u) => UNITS[u].items))});
+    ALG.push({order, slot, len: pathLen(order), save, label: us.map((u) => (UNITS[u].cage ? `Cage ${CAGES.indexOf(UNITS[u]) + 1}` : `Pallet ${UNITS[u].items[0] + 1}`)).join(' + ')});
   };
   for (const p of pairs) {
     if (used.has(p.i) || used.has(p.j)) continue;
@@ -186,7 +188,10 @@ const ALG_GEO = ALG.map(tripGeo);
 const CAGE_COL = ['#5aa9dc', '#b58cff'];
 
 // ---- timeline (seconds) ----
-const T = {pal: 0.8, cur: 2.8, curStep: 2.7, cage: 11.4, alg: 14.6, algStep: 2.3, result: 0};
+const INTRO = 6.6;
+const T = {pal: INTRO + 0.5, cur: INTRO + 2.8, curStep: 3.2, cage: 0, alg: 0, algStep: 2.9, result: 0};
+T.cage = T.cur + CUR.length * T.curStep + 0.4;
+T.alg = T.cage + 3.4;
 T.result = T.alg + ALG.length * T.algStep + 0.5;
 export const MOVER_CAGES_SECONDS = Math.ceil(T.result + 5);
 
@@ -196,6 +201,70 @@ const Route: React.FC<{pts: Pt[]; L: number; color: string; draw: number; opacit
       strokeDasharray={`${L * draw} ${L + 10}`} style={{filter: `drop-shadow(0 0 7px ${color}aa)`}} />
   ) : null;
 
+const Intro: React.FC<{t: number}> = ({t}) => {
+  const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+  const out = interpolate(t, [INTRO - 0.5, INTRO], [1, 0], clamp);
+  const p = (a: number, b: number) => interpolate(t, [a, b], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+  const full = p(0.9, 1.5);
+  const loose = [0.3, 0.4, 0.3];
+  const looseAt = [2.3, 2.9, 3.5];
+  const drive = p(4.9, 5.9);
+  const lines: [number, string, string][] = [
+    [0.9, 'A full pallet takes one slot', 'Pallet nguyên chiếm trọn 1 chỗ'],
+    [2.3, 'Loose items share one cage pallet until full', 'Hàng lẻ xếp chung lên pallet lồng đến khi đầy'],
+    [4.6, 'Both slots used → back to the door', 'Đủ 2 pallet → về cửa'],
+  ];
+  const SLOT_H = 210;
+  let acc = 0;
+  return (
+    <div style={{position: 'absolute', inset: 0, opacity: out}}>
+      <div style={{position: 'absolute', left: 0, right: 0, top: 210, textAlign: 'center'}}>
+        <div style={{fontSize: 44, fontWeight: 800}}>How the pallet mover is loaded</div>
+        <div style={{fontSize: 24, color: colors.muted}}>Xe mover chở hàng thế nào</div>
+      </div>
+      <div style={{position: 'absolute', left: 300 + drive * 120, top: 400, display: 'flex', alignItems: 'flex-end', gap: 18}}>
+        <div style={{width: 120, height: 150, borderRadius: 18, background: '#1d6fa3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800}}>
+          MOVER
+        </div>
+        {[0, 1].map((s) => (
+          <div key={s} style={{width: 170, height: SLOT_H, borderRadius: 14, border: `4px ${s ? 'dashed' : 'solid'} ${colors.muted}`, position: 'relative', overflow: 'hidden'}}>
+            {s === 0 ? (
+              <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, height: SLOT_H * full, background: colors.amber, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#0b1222', fontSize: 26, fontWeight: 800}}>
+                {full > 0.6 ? 'FULL' : ''}
+              </div>
+            ) : (
+              loose.map((f, i) => {
+                const y = acc;
+                acc += f;
+                const k = p(looseAt[i], looseAt[i] + 0.45);
+                return (
+                  <div key={i} style={{position: 'absolute', left: 6, right: 6, bottom: 4 + y * (SLOT_H - 8) + (1 - k) * 160, height: f * (SLOT_H - 8) - 4, opacity: k,
+                    borderRadius: 6, background: colors.amber, color: '#0b1222', fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    {Math.round(f * 100)}%
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{position: 'absolute', left: 300 + drive * 120 + 138, top: 620, display: 'flex', gap: 18, fontSize: 20, color: colors.muted}}>
+        <div style={{width: 170, textAlign: 'center'}}>full pallet</div>
+        <div style={{width: 170, textAlign: 'center'}}>cage pallet</div>
+      </div>
+      <div style={{position: 'absolute', left: 1000, top: 410, width: 860}}>
+        {lines.map(([at, en, vi]) => (
+          <div key={en} style={{marginBottom: 30, opacity: p(at, at + 0.4), transform: `translateX(${(1 - p(at, at + 0.4)) * 30}px)`}}>
+            <div style={{fontSize: 34, fontWeight: 700}}>{en}</div>
+            <div style={{fontSize: 22, color: colors.muted}}>{vi}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const MoverCages: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
@@ -204,9 +273,9 @@ export const MoverCages: React.FC = () => {
   const ease = {...clamp, easing: Easing.inOut(Easing.linear)};
 
   const titleP = spring({frame, fps, config: {damping: 200}});
-  const mapIn = interpolate(t, [0.2, 0.9], [0, 1], clamp);
-  const curDraw = (k: number) => interpolate(t, [T.cur + k * T.curStep, T.cur + k * T.curStep + 2.0], [0, 1], ease);
-  const algDraw = (k: number) => interpolate(t, [T.alg + k * T.algStep, T.alg + k * T.algStep + 1.7], [0, 1], ease);
+  const mapIn = interpolate(t, [INTRO - 0.4, INTRO + 0.3], [0, 1], clamp);
+  const curDraw = (k: number) => interpolate(t, [T.cur + k * T.curStep, T.cur + k * T.curStep + 2.3], [0, 1], ease);
+  const algDraw = (k: number) => interpolate(t, [T.alg + k * T.algStep, T.alg + k * T.algStep + 2.1], [0, 1], ease);
   const inAlg = t >= T.cage;
 
   // active trip for the mover panel
@@ -231,20 +300,21 @@ export const MoverCages: React.FC = () => {
   const cageIn = interpolate(t, [T.cage + 0.3, T.cage + 1.0], [0, 1], clamp);
   const cageOut = interpolate(t, [T.alg - 0.3, T.alg + 0.3], [1, 0.35], clamp);
 
-  const stage = t < T.cur ? 1 : !inAlg ? 2 : t < T.alg ? 3 : t < T.result ? 4 : 5;
+  const stage = t < INTRO ? 0 : t < T.cur ? 1 : !inAlg ? 2 : t < T.alg ? 3 : t < T.result ? 4 : 5;
   const captions: Record<number, [string, string]> = {
-    1: ['The TO lists full pallets and loose items, by aisle', 'Phiếu TO gồm pallet nguyên và hàng lẻ, in theo dãy'],
+    0: ['', ''],
+    1: ['The TO lists full pallets and loose items, aisle by aisle', 'Phiếu TO gồm pallet nguyên và hàng lẻ, in theo từng dãy'],
     2: ['Today: pick in print order, load as you go, back when the mover is full', 'Hiện tại: lấy theo thứ tự in, lấy đến đâu xếp đến đó, xe đầy thì về'],
     3: ['① Algorithm: pack loose items onto full cage pallets first', 'Thuật toán: gom hàng lẻ cho đầy pallet lồng trước'],
-    4: ['② Pair the two pallets that save the most metres', 'Ghép 2 pallet đi chung tiết kiệm nhiều mét nhất'],
+    4: ['② Then choose which 2 pallets ride together: the pair that saves the most metres', 'Chọn 2 pallet đi chung chuyến: cặp tiết kiệm nhiều mét nhất'],
     5: ['Fuller pallets, better-paired trips', 'Pallet đầy hơn, chuyến ghép hợp lý hơn'],
   };
-  const capStart = [0, 0, T.cur, T.cage, T.alg, T.result][stage];
+  const capStart = [0, INTRO, T.cur, T.cage, T.alg, T.result][stage];
   const capIn = interpolate(t, [capStart, capStart + 0.35], [0, 1], clamp);
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
 
-  const curRow = (kk: number) => interpolate(t, [T.cur + kk * T.curStep + 1.9, T.cur + kk * T.curStep + 2.2], [0, 1], clamp);
-  const algRow = (kk: number) => interpolate(t, [T.alg + kk * T.algStep + 1.6, T.alg + kk * T.algStep + 1.9], [0, 1], clamp);
+  const curRow = (kk: number) => interpolate(t, [T.cur + kk * T.curStep + 2.2, T.cur + kk * T.curStep + 2.5], [0, 1], clamp);
+  const algRow = (kk: number) => interpolate(t, [T.alg + kk * T.algStep + 2.0, T.alg + kk * T.algStep + 2.3], [0, 1], clamp);
   // warning when today's trip goes back with a cage that is far from full
   const curTripCage = (kk: number) => {
     const tr = CUR[kk];
@@ -261,6 +331,17 @@ export const MoverCages: React.FC = () => {
         </div>
         <div style={{fontSize: 24, color: colors.muted}}>Full pallets + loose items on cage pallets</div>
       </div>
+
+      {/* legend */}
+      <div style={{position: 'absolute', left: 82, top: 168, display: 'flex', gap: 30, fontSize: 20, color: colors.muted, opacity: mapIn}}>
+        <span><span style={{display: 'inline-block', width: 22, height: 22, borderRadius: 5, background: colors.amber, verticalAlign: -4, marginRight: 8}} />Full pallet</span>
+        <span><span style={{display: 'inline-block', width: 22, height: 22, borderRadius: 5, border: `3px dashed ${colors.muted}`, verticalAlign: -5, marginRight: 8,
+          background: `linear-gradient(to top, ${colors.amber} 35%, transparent 35%)`}} />Loose item · % of a pallet</span>
+        <span>Numbers = order on the printed TO</span>
+      </div>
+
+      {/* intro: how the mover is loaded */}
+      {t < INTRO + 0.3 ? <Intro t={t} /> : null}
 
       {/* map */}
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: mapIn}}>
@@ -349,7 +430,7 @@ export const MoverCages: React.FC = () => {
         : null}
 
       {/* mover panel + trip lists */}
-      <div style={{position: 'absolute', left: 1440, top: 205, width: 430}}>
+      <div style={{position: 'absolute', left: 1440, top: 205, width: 440, opacity: mapIn}}>
         <div style={{display: 'flex', alignItems: 'flex-end', gap: 14, height: 150, opacity: phase ? 1 : 0.35}}>
           <div style={{fontSize: 18, color: colors.muted, width: 70, lineHeight: 1.2}}>MOVER{k >= 0 ? <><br />trip {k + 1}</> : null}</div>
           {[0, 1].map((s) => (
@@ -368,7 +449,7 @@ export const MoverCages: React.FC = () => {
           <div style={{fontSize: 19, letterSpacing: 2, color: colors.red, fontWeight: 800}}>TODAY · BY AISLE</div>
           {CUR.map((tr, kk) => (
             <div key={kk} style={{display: 'flex', gap: 12, alignItems: 'baseline', height: 38, opacity: curRow(kk)}}>
-              <div style={{fontSize: 22, fontWeight: 800, width: 210}}>{tr.label}</div>
+              <div style={{fontSize: 21, fontWeight: 700, width: 300}}>Trip {kk + 1}: {tr.label}</div>
               <div style={{fontSize: 24, fontWeight: 800, color: colors.red}}>{tr.len} m</div>
             </div>
           ))}
@@ -378,9 +459,8 @@ export const MoverCages: React.FC = () => {
           <div style={{fontSize: 19, letterSpacing: 2, color: colors.green, fontWeight: 800}}>ALGORITHM</div>
           {ALG.map((tr, kk) => (
             <div key={kk} style={{display: 'flex', gap: 12, alignItems: 'baseline', height: 38, opacity: algRow(kk)}}>
-              <div style={{fontSize: 22, fontWeight: 800, width: 210}}>{tr.label}</div>
-              <div style={{fontSize: 24, fontWeight: 800, color: colors.green, width: 84}}>{tr.len} m</div>
-              <div style={{fontSize: 17, color: colors.muted}}>{tr.save ? `saves ${tr.save} m` : 'single'}</div>
+              <div style={{fontSize: 21, fontWeight: 700, width: 300}}>Trip {kk + 1}: {tr.label}</div>
+              <div style={{fontSize: 24, fontWeight: 800, color: colors.green}}>{tr.len} m</div>
             </div>
           ))}
           <div style={{fontSize: 23, fontWeight: 800, color: colors.green}}>Total {Math.round(ALG.reduce((a, x, kk) => a + x.len * algRow(kk), 0))} m</div>
@@ -388,7 +468,7 @@ export const MoverCages: React.FC = () => {
       </div>
 
       {/* caption */}
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: 34, textAlign: 'center', opacity: capIn, zIndex: 5}}>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: 34, textAlign: 'center', opacity: stage ? capIn : 0, zIndex: 5}}>
         <div style={{display: 'inline-block', background: 'rgba(0,0,0,0.6)', borderRadius: 14, padding: '10px 28px'}}>
           <div style={{fontSize: 34, fontWeight: 700}}>{captions[stage][0]}</div>
           <div style={{fontSize: 22, color: colors.muted}}>{captions[stage][1]}</div>
