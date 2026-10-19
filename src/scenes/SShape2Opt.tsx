@@ -8,7 +8,7 @@ import {colors, fontFamily} from '../theme';
  * The numbers on screen are computed here with the same rules as the routing app (serpentine start, first-improvement 2-opt).
  */
 type Bin = [number, number]; // [aisle, metres from the front]
-const BINS: Bin[] = [[1, 95], [1, 8], [1, 70], [5, 61], [2, 78], [2, 64], [2, 94], [4, 27], [2, 41], [0, 10]];
+const BINS: Bin[] = [[1, 95], [1, 8], [1, 70], [5, 61], [2, 78], [2, 64], [2, 94], [4, 27], [2, 41], [0, 88]];
 const PITCH = 12;
 const CROSS = [0, 50, 100];
 const N = BINS.length;
@@ -143,6 +143,7 @@ export const SShape2Opt: React.FC = () => {
           S-shape <span style={{color: colors.green}}>+ 2-opt</span>
         </div>
         <div style={{fontSize: 24, color: colors.muted}}>Thuật toán sắp xếp lộ trình · How the route is sequenced</div>
+        <div style={{fontSize: 18, color: colors.muted, marginTop: 6, opacity: 0.85}}>Sơ đồ minh họa: hàng ở kệ trái hay kệ phải đều hạ từ cùng một lối đi · Left or right rack, both served from the same aisle</div>
       </div>
       {/* meter */}
       <div style={{position: 'absolute', right: 80, top: 40, textAlign: 'right', opacity: t > T.sDraw - 0.3 ? 1 : 0}}>
@@ -227,12 +228,12 @@ export const SShape2Opt: React.FC = () => {
           background: '#0b1222f2', border: '2px solid #ffffff33', borderRadius: 26, padding: '30px 60px', display: 'flex', alignItems: 'center', gap: 50, boxShadow: '0 30px 80px #000c'}}>
           <div style={{textAlign: 'center'}}>
             <div style={{fontSize: 24, color: colors.muted}}>S-shape</div>
-            <div style={{fontSize: 72, fontWeight: 800, color: colors.yellow}}>{L0} m</div>
+            <div style={{fontSize: 72, fontWeight: 800, color: colors.yellow, whiteSpace: 'nowrap'}}>{L0} m</div>
           </div>
           <div style={{fontSize: 60, color: colors.muted}}>→</div>
           <div style={{textAlign: 'center'}}>
             <div style={{fontSize: 24, color: colors.muted}}>S-shape + 2-opt</div>
-            <div style={{fontSize: 72, fontWeight: 800, color: colors.green}}>{LF} m</div>
+            <div style={{fontSize: 72, fontWeight: 800, color: colors.green, whiteSpace: 'nowrap'}}>{LF} m</div>
           </div>
           <div style={{background: colors.green, color: '#062016', borderRadius: 40, padding: '12px 28px', fontSize: 44, fontWeight: 800}}>−{SAVE}%</div>
         </div>
