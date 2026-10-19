@@ -1,6 +1,7 @@
 import {AbsoluteFill, Audio, Sequence, Series, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Subtitle} from '../components/Subtitle';
-import vo from '../data/voiceV4.json';
+import voEN from '../data/voiceEN.json';
+import voV4 from '../data/voiceV4.json';
 import {VIDEO} from '../theme';
 import {ClosingRecap} from './ClosingRecap';
 import {EndCard} from './EndCard';
@@ -10,11 +11,14 @@ import {LangContext} from '../lang';
 import {TitleScene} from './TitleScene';
 
 const f = (s: number) => Math.round(s * VIDEO.fps);
-const S = vo.scenes;
-export const CONDENSED_VOICE_DURATION = f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds) + f(S.end.seconds) // ket = 0 when the recap is dropped;
+type Voice = typeof voV4;
+const duration = (S: Voice['scenes']) => f(S.title.seconds) + f(S.race.seconds) + f(S.p04.seconds) + f(S.ket.seconds) + f(S.end.seconds); // ket = 0 when the recap is dropped
+export const CONDENSED_VOICE_DURATION = duration(voV4.scenes);
+/** English voice-over (audio/en): same scenes, beats placed on the English sentences. */
+export const CONDENSED_VOICE_EN_AUDIO_DURATION = duration((voEN as unknown as Voice).scenes);;
 
 /** Bilingual subtitle for the sentence being spoken. */
-const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
+const Subtitles: React.FC<{enFirst?: boolean; vo: Voice}> = ({enFirst, vo}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const t = frame / fps;
@@ -26,7 +30,10 @@ const Subtitles: React.FC<{enFirst?: boolean}> = ({enFirst}) => {
 
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
-export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false}) => (
+export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean}> = ({enFirst = false, englishVoice = false}) => {
+  const vo = (englishVoice ? voEN : voV4) as unknown as Voice;
+  const S = vo.scenes;
+  return (
   <LangContext.Provider value={enFirst ? 'en' : 'vi'}>
   <AbsoluteFill>
     <Series>
@@ -53,7 +60,8 @@ export const CondensedVoice: React.FC<{enFirst?: boolean}> = ({enFirst = false})
         <Audio src={staticFile(a.file)} />
       </Sequence>
     ))}
-    <Subtitles enFirst={enFirst} />
+    <Subtitles enFirst={enFirst} vo={vo} />
   </AbsoluteFill>
   </LangContext.Provider>
-);
+  );
+};
