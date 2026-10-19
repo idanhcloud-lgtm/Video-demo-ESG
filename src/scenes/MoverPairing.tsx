@@ -3,56 +3,107 @@ import {Background} from '../components/Background';
 import {colors, fontFamily} from '../theme';
 
 /**
- * ~20 s explainer without voice: how the pallet mover pairs pallets (2 per trip) by savings.
- * Toy example on one aisle, door at 0 m: a trip goes out to its farthest pallet and back.
- * Same rule as planMover in the routing app: saving(a, b) = alone(a) + alone(b) − together(a, b), best pairs first.
+ * ~21 s explainer without voice: pallet mover (2 pallets per trip), current practice vs the algorithm.
+ * Current: the TO is printed by aisle, two consecutive pallets on the TO make one trip.
+ * Algorithm (planMover in the routing app): saving(a, b) = alone(a) + alone(b) − together(a, b), best pairs first;
+ * stops inside a trip in nearest-neighbour order from the door.
+ * Toy warehouse: 4 aisles of 50 m, 10 m apart, cross aisles at the front (door side) and the back.
  */
-const PAL: {name: string; m: number}[] = [
-  {name: 'P1', m: 10},
-  {name: 'P2', m: 12},
-  {name: 'P3', m: 40},
-  {name: 'P4', m: 45},
-];
-const alone = (i: number) => 2 * PAL[i].m;
-const together = (i: number, j: number) => 2 * Math.max(PAL[i].m, PAL[j].m);
-const PAIRS = PAL.flatMap((_, i) => PAL.map((__, j) => [i, j] as const).filter(([a, b]) => a < b))
-  .map(([i, j]) => ({i, j, sep: alone(i) + alone(j), tog: together(i, j), save: alone(i) + alone(j) - together(i, j)}))
-  .sort((p, q) => q.save - p.save || p.i - q.i || p.j - q.j);
-// greedy matching on savings
-const MATE: Record<number, number> = {};
-const CHOSEN: number[] = []; // indexes into PAIRS, in pick order
-PAIRS.forEach((p, k) => {
-  if (MATE[p.i] === undefined && MATE[p.j] === undefined) {
-    MATE[p.i] = p.j;
-    MATE[p.j] = p.i;
-    CHOSEN.push(k);
-  }
-});
-const ALONE_TOTAL = PAL.reduce((t, _, i) => t + alone(i), 0);
-const PAIRED_TOTAL = CHOSEN.reduce((t, k) => t + PAIRS[k].tog, 0);
-const RANDOM_TOTAL = together(0, 2) + together(1, 3); // P1+P3, P2+P4: pairing that ignores distance
+type Bin = [number, number]; // [aisle, metres from the front]
+const AISLES = ['A', 'B', 'C', 'D'];
+// printed order = by aisle, front → back
+const BINS: Bin[] = [[0, 6], [0, 45], [1, 8], [1, 42], [2, 5], [2, 44], [3, 9], [3, 47]];
+const N = BINS.length;
+const PITCH = 10;
+const LEN = 50;
+const DOOR_BIN: Bin = [0, 0];
+const dist = (a: Bin, b: Bin) => (a[0] === b[0] ? Math.abs(a[1] - b[1]) : Math.abs(a[0] - b[0]) * PITCH + Math.min(a[1] + b[1], 2 * LEN - a[1] - b[1]));
 
-// ---- layout ----
-const mx = (m: number) => 300 + m * 30;
-const AISLE_Y = 480;
-const DOOR_X = mx(0);
+function trip(stops: number[]): {len: number; order: number[]} {
+  let cur = DOOR_BIN;
+  const rest = [...stops];
+  const order: number[] = [];
+  let len = 0;
+  while (rest.length) {
+    rest.sort((p, q) => dist(cur, BINS[p]) - dist(cur, BINS[q]));
+    const n = rest.shift()!;
+    len += dist(cur, BINS[n]);
+    cur = BINS[n];
+    order.push(n);
+  }
+  return {len: len + dist(cur, DOOR_BIN), order};
+}
+
+type Trip = {pal: number[]; len: number; order: number[]; save?: number};
+// current practice: consecutive pallets on the printed TO
+const CUR: Trip[] = Array.from({length: N / 2}, (_, k) => ({pal: [2 * k, 2 * k + 1], ...trip([2 * k, 2 * k + 1])}));
+// algorithm: greedy matching on savings
+const ALG: Trip[] = [];
+{
+  const alone = BINS.map((_, i) => trip([i]).len);
+  const pairs: {i: number; j: number; s: number}[] = [];
+  for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) pairs.push({i, j, s: alone[i] + alone[j] - trip([i, j]).len});
+  pairs.sort((p, q) => q.s - p.s);
+  const used = new Set<number>();
+  for (const p of pairs) {
+    if (used.has(p.i) || used.has(p.j)) continue;
+    used.add(p.i);
+    used.add(p.j);
+    ALG.push({pal: [p.i, p.j], ...trip([p.i, p.j]), save: p.s});
+  }
+}
+const CUR_TOTAL = CUR.reduce((t, x) => t + x.len, 0);
+const ALG_TOTAL = ALG.reduce((t, x) => t + x.len, 0);
+const SAVE = Math.round((100 * (CUR_TOTAL - ALG_TOTAL)) / CUR_TOTAL);
+const DEEP = (tr: Trip) => tr.pal.some((i) => BINS[i][1] > LEN / 2);
+const CUR_DEEP = CUR.filter(DEEP).length;
+const ALG_DEEP = ALG.filter(DEEP).length;
+
+// ---- drawing ----
+const X0 = 330;
+const PXM = 18.5;
+const Y0 = 850;
+const LANE = 118;
+const px = (m: number) => X0 + m * PXM;
+const py = (a: number) => Y0 - a * LANE;
+type Pt = [number, number];
+const DOOR: Pt = [px(-5), py(0)];
+function legPath(a: Bin, b: Bin): Pt[] {
+  if (a[0] === b[0]) return [[px(a[1]), py(a[0])], [px(b[1]), py(b[0])]];
+  const c = a[1] + b[1] <= 2 * LEN - a[1] - b[1] ? 0 : LEN;
+  return [[px(a[1]), py(a[0])], [px(c), py(a[0])], [px(c), py(b[0])], [px(b[1]), py(b[0])]];
+}
+function tripPts(tr: Trip): Pt[] {
+  const stops = [DOOR_BIN, ...tr.order.map((i) => BINS[i]), DOOR_BIN];
+  const pts: Pt[] = [DOOR];
+  for (let k = 1; k < stops.length; k++) pts.push(...legPath(stops[k - 1], stops[k]));
+  pts.push(DOOR);
+  return pts;
+}
+const toD = (pts: Pt[]) => pts.map(([x, y], k) => `${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+const plen = (pts: Pt[]) => pts.slice(1).reduce((t, p, k) => t + Math.hypot(p[0] - pts[k][0], p[1] - pts[k][1]), 0);
+
+const Route: React.FC<{tr: Trip; color: string; draw: number; opacity: number; off: number}> = ({tr, color, draw, opacity, off}) => {
+  const pts = tripPts(tr).map(([x, y]) => [x + off, y + off] as Pt);
+  const L = plen(pts);
+  return draw > 0 ? (
+    <path d={toD(pts)} fill="none" stroke={color} strokeWidth={7} strokeLinejoin="round" strokeLinecap="round" opacity={opacity}
+      strokeDasharray={`${L * draw} ${L + 10}`} style={{filter: `drop-shadow(0 0 7px ${color}aa)`}} />
+  ) : null;
+};
 
 // ---- timeline (seconds) ----
-const T = {pal: 1.0, alone: 3.4, aloneStep: 0.65, table: 7.0, pick1: 9.0, block: 9.9, pick2: 10.9, pair: 12.4, result: 16.0};
-export const MOVER_PAIRING_SECONDS = 20;
+const T = {pal: 1.0, cur: 3.4, curStep: 1.15, deep: 8.4, alg: 10.2, algStep: 1.25, result: 16.0};
+export const MOVER_PAIRING_SECONDS = 21;
+const OFFS = [-9, -3, 3, 9];
 
-const Bar: React.FC<{y: number; to: number; color: string; draw: number; label: string; opacity?: number}> = ({y, to, color, draw, label, opacity = 1}) => {
-  const x1 = DOOR_X + (mx(to) - DOOR_X) * draw;
-  return (
-    <g opacity={draw > 0 ? opacity : 0}>
-      <line x1={DOOR_X} y1={y} x2={x1} y2={y} stroke={color} strokeWidth={8} strokeLinecap="round" style={{filter: `drop-shadow(0 0 6px ${color}99)`}} />
-      <line x1={mx(to)} y1={y} x2={mx(to)} y2={AISLE_Y - 60} stroke={color} strokeWidth={2} strokeDasharray="6 6" opacity={draw >= 1 ? 0.7 : 0} />
-      <text x={x1 + 16} y={y + 9} fontSize={26} fontWeight={800} fill={color} opacity={draw >= 1 ? 1 : 0}>
-        {label}
-      </text>
-    </g>
-  );
-};
+const Row: React.FC<{tr: Trip; p: number; col: string; save?: boolean}> = ({tr, p, col, save}) => (
+  <div style={{display: 'flex', alignItems: 'baseline', gap: 14, height: 44, opacity: p}}>
+    <div style={{fontSize: 27, fontWeight: 800, width: 120}}>{tr.pal.map((i) => i + 1).join(' + ')}</div>
+    <div style={{fontSize: 27, fontWeight: 800, color: col, width: 110}}>{tr.len} m</div>
+    <div style={{fontSize: 19, color: colors.muted}}>{save ? (tr.save ? `tiết kiệm ${tr.save} m` : 'cặp còn lại') : DEEP(tr) ? 'vào sâu' : ''}</div>
+  </div>
+);
 
 export const MoverPairing: React.FC = () => {
   const frame = useCurrentFrame();
@@ -63,131 +114,115 @@ export const MoverPairing: React.FC = () => {
 
   const titleP = spring({frame, fps, config: {damping: 200}});
   const mapIn = interpolate(t, [0.2, 0.9], [0, 1], clamp);
-  const aloneDraw = (i: number) => interpolate(t, [T.alone + i * T.aloneStep, T.alone + (i + 0.8) * T.aloneStep], [0, 1], ease);
-  const aloneFade = interpolate(t, [T.pair - 0.4, T.pair], [1, 0], clamp);
-  const pairDraw = (n: number) => interpolate(t, [T.pair + n * 0.9, T.pair + n * 0.9 + 0.8], [0, 1], ease);
+  const curDraw = (k: number) => interpolate(t, [T.cur + k * T.curStep, T.cur + k * T.curStep + 0.85], [0, 1], ease);
+  const algDraw = (k: number) => interpolate(t, [T.alg + k * T.algStep, T.alg + k * T.algStep + 0.9], [0, 1], ease);
+  // the trip being drawn is bright, finished ones dim; in the "deep" beat all current trips come back
+  const curOp = (k: number) => {
+    if (t >= T.alg - 0.3) return interpolate(t, [T.alg - 0.3, T.alg], [0.9, 0], clamp);
+    if (t >= T.deep) return 0.9;
+    const end = T.cur + (k + 1) * T.curStep;
+    return k === CUR.length - 1 ? 1 : interpolate(t, [end - 0.1, end + 0.2], [1, 0.22], clamp);
+  };
+  const algOp = (k: number) => {
+    if (t >= T.result - 0.3) return 0.9;
+    const end = T.alg + (k + 1) * T.algStep;
+    return k === ALG.length - 1 ? 1 : interpolate(t, [end - 0.1, end + 0.2], [1, 0.3], clamp);
+  };
 
-  // meter
-  const aloneSum = Math.round(PAL.reduce((s, _, i) => s + alone(i) * aloneDraw(i), 0));
-  const toPaired = interpolate(t, [T.pair, T.pair + 1.8], [0, 1], ease);
-  const meter = Math.round(aloneSum + (PAIRED_TOTAL - ALONE_TOTAL) * toPaired);
-  const paired = t >= T.pair + 1.8;
-
-  const stage = t < T.alone ? 1 : t < T.table ? 2 : t < T.pair ? 3 : t < T.result ? 4 : 5;
+  const stage = t < T.cur ? 1 : t < T.deep ? 2 : t < T.alg ? 3 : t < T.result ? 4 : 5;
   const captions: Record<number, [string, string]> = {
-    1: ['Xe mover chở 2 pallet mỗi chuyến → nên ghép pallet nào đi chung?', 'The mover carries 2 pallets per trip → which pallets should share a trip?'],
-    2: [`① Nếu mỗi pallet đi riêng một chuyến: ${ALONE_TOTAL} m`, `One trip per pallet: ${ALONE_TOTAL} m`],
-    3: ['② Tính mỗi cặp đi chung tiết kiệm bao nhiêu → chọn cặp tiết kiệm nhất trước', 'Saving of each pair → take the biggest saving first'],
-    4: ['③ Pallet gần nhau đi chung một chuyến', 'Pallets close together share a trip'],
-    5: ['Ghép theo mét tiết kiệm: cặp lợi nhất được chọn trước', 'Pair by metres saved: the best pair goes first'],
+    1: ['Phiếu TO in theo dãy A → D · số trên pallet = thứ tự in', 'The TO is printed by aisle A → D · number = print order'],
+    2: ['Hiện tại: 2 pallet liền nhau trên phiếu = 1 chuyến', 'Today: two consecutive pallets on the TO = one trip'],
+    3: [`Chuyến nào cũng phải chạy vào tận cuối dãy (${CUR_DEEP}/${CUR.length} chuyến)`, `Every trip drives to the far end of an aisle (${CUR_DEEP}/${CUR.length})`],
+    4: ['Thuật toán: ghép 2 pallet đi chung tiết kiệm nhiều mét nhất trước', 'Algorithm: pair the pallets that save the most metres first'],
+    5: ['Pallet gần nhau đi chung chuyến, kể cả khác dãy', 'Pallets close together share a trip, even across aisles'],
   };
-  const capStart = [0, 0, T.alone, T.table, T.pair, T.result][stage];
+  const capStart = [0, 0, T.cur, T.deep, T.alg, T.result][stage];
   const capIn = interpolate(t, [capStart, capStart + 0.35], [0, 1], clamp);
-
-  // table state
-  const tableIn = (k: number) => interpolate(t, [T.table + k * 0.22, T.table + k * 0.22 + 0.35], [0, 1], clamp);
-  const rowState = (k: number) => {
-    const ci = CHOSEN.indexOf(k);
-    if (ci >= 0) return t >= (ci === 0 ? T.pick1 : T.pick2) ? 'pick' : 'idle';
-    const p = PAIRS[k];
-    const first = PAIRS[CHOSEN[0]];
-    const blockedByFirst = [first.i, first.j].includes(p.i) || [first.i, first.j].includes(p.j);
-    if (blockedByFirst ? t >= T.block : t >= T.pick2 + 0.5) return 'block';
-    return 'idle';
-  };
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
-  const tableFade = interpolate(t, [T.result - 0.3, T.result], [1, 0.25], clamp);
+  const deepFlash = t >= T.deep && t < T.alg - 0.2 ? 0.6 + 0.4 * Math.sin((t - T.deep) * 8) : 0;
 
-  // pallet colour: by trip once paired
-  const palColor = (i: number) => {
-    if (t < T.pick1) return colors.amber;
-    const k = CHOSEN.findIndex((c) => PAIRS[c].i === i || PAIRS[c].j === i);
-    const at = k === 0 ? T.pick1 : T.pick2;
-    return t >= at ? (k === 0 ? colors.green : '#5aa9dc') : colors.amber;
+  const curRows = CUR.map((_, k) => interpolate(t, [T.cur + k * T.curStep + 0.6, T.cur + k * T.curStep + 0.9], [0, 1], clamp));
+  const algRows = ALG.map((_, k) => interpolate(t, [T.alg + k * T.algStep + 0.6, T.alg + k * T.algStep + 0.9], [0, 1], clamp));
+  const curSum = Math.round(CUR.reduce((s, x, k) => s + x.len * curRows[k], 0));
+  const algSum = Math.round(ALG.reduce((s, x, k) => s + x.len * algRows[k], 0));
+
+  // pallet colour by trip
+  const palCol = (i: number) => {
+    if (t >= T.alg) return algDraw(ALG.findIndex((x) => x.pal.includes(i))) > 0 ? colors.green : colors.amber;
+    return curDraw(CUR.findIndex((x) => x.pal.includes(i))) > 0 ? colors.red : colors.amber;
   };
-  const tripColors = [colors.green, '#5aa9dc'];
 
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
       <Background />
       <div style={{position: 'absolute', left: 80, top: 46, opacity: titleP}}>
         <div style={{fontSize: 54, fontWeight: 800}}>
-          Xe mover <span style={{color: colors.green}}>· ghép 2 pallet / chuyến</span>
+          Xe mover <span style={{color: colors.green}}>· 2 pallet mỗi chuyến</span>
         </div>
-        <div style={{fontSize: 24, color: colors.muted}}>Thuật toán ghép chuyến theo mét tiết kiệm · Pairing pallets by savings</div>
-      </div>
-      <div style={{position: 'absolute', right: 80, top: 40, textAlign: 'right', opacity: t > T.alone - 0.2 ? 1 : 0}}>
-        <div style={{fontSize: 20, color: colors.muted, letterSpacing: 2}}>
-          <span style={{color: paired ? colors.green : colors.yellow, fontWeight: 800}}>{t >= T.pair ? 'GHÉP CẶP' : 'ĐI RIÊNG'}</span> · TỔNG QUÃNG ĐƯỜNG
-        </div>
-        <div style={{fontSize: 86, fontWeight: 800, lineHeight: 1, color: paired ? colors.green : colors.yellow}}>
-          {meter}
-          <span style={{fontSize: 34, color: colors.muted, marginLeft: 8}}>m</span>
-        </div>
+        <div style={{fontSize: 24, color: colors.muted}}>Lấy theo dãy so với ghép chuyến bằng thuật toán · By aisle vs algorithm pairing</div>
       </div>
 
-      {/* aisle map */}
+      {/* map */}
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: mapIn}}>
-        <rect x={mx(0) + 20} y={AISLE_Y - 62} width={mx(48) - mx(0)} height={26} rx={6} fill="#1a2440" stroke="#26365c" />
-        <rect x={mx(0) + 20} y={AISLE_Y + 36} width={mx(48) - mx(0)} height={26} rx={6} fill="#1a2440" stroke="#26365c" />
-        {[0, 10, 20, 30, 40].map((m) => (
-          <text key={m} x={mx(m)} y={AISLE_Y + 100} textAnchor="middle" fontSize={20} fill={colors.muted}>
-            {m} m
+        {Array.from({length: AISLES.length + 1}, (_, r) => (
+          <rect key={r} x={px(2)} y={py(r - 0.5) - 20} width={(LEN - 4) * PXM} height={40} rx={6} fill="#1a2440" stroke="#26365c" />
+        ))}
+        {AISLES.map((a, k) => (
+          <text key={a} x={px(LEN) + 26} y={py(k) + 9} fontSize={24} fontWeight={800} fill={colors.muted}>
+            Dãy {a}
           </text>
         ))}
-        <rect x={DOOR_X - 90} y={AISLE_Y - 28} width={80} height={56} rx={8} fill={colors.amber} />
-        <text x={DOOR_X - 50} y={AISLE_Y + 8} textAnchor="middle" fontSize={21} fontWeight={800} fill="#0b1222">
+        <text x={px(0)} y={py(AISLES.length - 0.5) - 34} textAnchor="middle" fontSize={17} fontWeight={700} fill={colors.amber}>
+          ĐẦU DÃY
+        </text>
+        <text x={px(LEN)} y={py(AISLES.length - 0.5) - 34} textAnchor="middle" fontSize={17} fontWeight={700} fill={colors.amber}>
+          CUỐI DÃY
+        </text>
+        <rect x={DOOR[0] - 72} y={DOOR[1] - 26} width={72} height={52} rx={8} fill={colors.amber} />
+        <text x={DOOR[0] - 36} y={DOOR[1] + 7} textAnchor="middle" fontSize={20} fontWeight={800} fill="#0b1222">
           CỬA
         </text>
+        {/* far-end band flashes while showing that every current trip goes deep */}
+        <rect x={px(LEN / 2 + 12)} y={py(AISLES.length - 0.5) + 24} width={(LEN / 2 - 10) * PXM} height={py(-0.5) - py(AISLES.length - 0.5) - 48} rx={10}
+          fill={colors.red} opacity={deepFlash} fillOpacity={0.14} stroke={colors.red} strokeWidth={3} strokeDasharray="10 8" />
 
-        {/* trips: alone first, then paired */}
-        {PAL.map((p, i) => (
-          <Bar key={p.name} y={400 - i * 44} to={p.m} color={colors.yellow} draw={aloneDraw(i)} label={`${p.name}: ${alone(i)} m`} opacity={aloneFade} />
+        {CUR.map((tr, k) => (
+          <Route key={`c${k}`} tr={tr} color={colors.red} draw={curDraw(k)} opacity={curOp(k)} off={OFFS[k]} />
         ))}
-        {CHOSEN.map((k, n) => {
-          const p = PAIRS[k];
-          const to = Math.max(PAL[p.i].m, PAL[p.j].m);
-          return <Bar key={k} y={n === 0 ? 300 : 370} to={to} color={tripColors[n]} draw={pairDraw(n)} label={`${PAL[p.i].name} + ${PAL[p.j].name}: ${p.tog} m`} />;
-        })}
+        {ALG.map((tr, k) => (
+          <Route key={`a${k}`} tr={tr} color={colors.green} draw={algDraw(k)} opacity={algOp(k)} off={OFFS[k]} />
+        ))}
 
-        {PAL.map((p, i) => {
-          const s = spring({frame: frame - (T.pal + i * 0.18) * fps, fps, config: {damping: 14}});
+        {BINS.map(([a, m], i) => {
+          const s = spring({frame: frame - (T.pal + i * 0.15) * fps, fps, config: {damping: 14}});
           return (
-            <g key={p.name} transform={`translate(${mx(p.m)} ${AISLE_Y}) scale(${s})`}>
-              <rect x={-24} y={-24} width={48} height={48} rx={8} fill={palColor(i)} stroke="#0b1222" strokeWidth={3} />
-              <text y={8} textAnchor="middle" fontSize={20} fontWeight={800} fill="#0b1222">
-                {p.name}
+            <g key={i} transform={`translate(${px(m)} ${py(a)}) scale(${s})`}>
+              <rect x={-23} y={-23} width={46} height={46} rx={8} fill={palCol(i)} stroke="#0b1222" strokeWidth={3} />
+              <text y={9} textAnchor="middle" fontSize={24} fontWeight={800} fill="#0b1222">
+                {i + 1}
               </text>
             </g>
           );
         })}
       </svg>
 
-      {/* savings table */}
-      <div style={{position: 'absolute', left: 330, top: 600, width: 1260, opacity: tableFade}}>
-        <div style={{display: 'flex', fontSize: 19, color: colors.muted, letterSpacing: 1.5, marginBottom: 6, opacity: tableIn(0)}}>
-          <div style={{width: 150}}>CẶP</div>
-          <div>MÉT TIẾT KIỆM KHI ĐI CHUNG = ĐI RIÊNG − ĐI CHUNG</div>
+      {/* trip panel */}
+      <div style={{position: 'absolute', left: 1430, top: 250, width: 440}}>
+        <div style={{opacity: interpolate(t, [T.cur - 0.3, T.cur], [0, 1], clamp)}}>
+          <div style={{fontSize: 20, letterSpacing: 2, color: colors.red, fontWeight: 800, marginBottom: 6}}>HIỆN TẠI · THEO DÃY</div>
+          {CUR.map((tr, k) => (
+            <Row key={k} tr={tr} p={curRows[k]} col={colors.red} />
+          ))}
+          <div style={{fontSize: 24, fontWeight: 800, color: colors.red, marginTop: 4}}>Tổng {curSum} m</div>
         </div>
-        {PAIRS.map((p, k) => {
-          const st = rowState(k);
-          const col = st === 'pick' ? tripColors[CHOSEN.indexOf(k)] : st === 'block' ? '#4a5570' : colors.yellow;
-          return (
-            <div key={k} style={{display: 'flex', alignItems: 'center', height: 46, opacity: tableIn(k + 1) * (st === 'block' ? 0.55 : 1)}}>
-              <div style={{width: 150, fontSize: 28, fontWeight: 800, color: st === 'block' ? colors.muted : colors.text, textDecoration: st === 'block' ? 'line-through' : 'none'}}>
-                {PAL[p.i].name} + {PAL[p.j].name}
-              </div>
-              <div style={{width: p.save * 8, height: 24, borderRadius: 6, background: col}} />
-              <div style={{marginLeft: 14, fontSize: 26, fontWeight: 800, color: col, width: 110}}>{p.save} m</div>
-              <div style={{fontSize: 20, color: colors.muted, width: 200}}>
-                = {p.sep} − {p.tog}
-              </div>
-              <div style={{fontSize: 24, fontWeight: 800, color: col}}>
-                {st === 'pick' ? '✓ ghép' : st === 'block' ? 'đã có cặp → bỏ' : ''}
-              </div>
-            </div>
-          );
-        })}
+        <div style={{marginTop: 26, opacity: interpolate(t, [T.alg - 0.3, T.alg], [0, 1], clamp)}}>
+          <div style={{fontSize: 20, letterSpacing: 2, color: colors.green, fontWeight: 800, marginBottom: 6}}>THUẬT TOÁN</div>
+          {ALG.map((tr, k) => (
+            <Row key={k} tr={tr} p={algRows[k]} col={colors.green} save />
+          ))}
+          <div style={{fontSize: 24, fontWeight: 800, color: colors.green, marginTop: 4}}>Tổng {algSum} m</div>
+        </div>
       </div>
 
       {/* caption */}
@@ -200,18 +235,23 @@ export const MoverPairing: React.FC = () => {
 
       {/* result */}
       {stage === 5 ? (
-        <div style={{position: 'absolute', left: 960, top: 745, transform: `translate(-50%, -50%) scale(${0.85 + 0.15 * res})`, opacity: res,
-          background: '#0b1222f2', border: '2px solid #ffffff33', borderRadius: 26, padding: '26px 54px', display: 'flex', alignItems: 'center', gap: 46, boxShadow: '0 30px 80px #000c'}}>
-          {[
-            ['Đi riêng', ALONE_TOTAL, colors.muted],
-            ['Ghép bừa', RANDOM_TOTAL, colors.red],
-            ['Ghép theo tiết kiệm', PAIRED_TOTAL, colors.green],
-          ].map(([label, v, c]) => (
-            <div key={label as string} style={{textAlign: 'center'}}>
-              <div style={{fontSize: 24, color: colors.muted}}>{label}</div>
-              <div style={{fontSize: 68, fontWeight: 800, color: c as string, whiteSpace: 'nowrap'}}>{v} m</div>
+        <div style={{position: 'absolute', left: 790, top: 560, transform: `translate(-50%, -50%) scale(${0.85 + 0.15 * res})`, opacity: res,
+          background: '#0b1222f2', border: '2px solid #ffffff33', borderRadius: 26, padding: '26px 50px', boxShadow: '0 30px 80px #000c'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: 40}}>
+            <div style={{textAlign: 'center'}}>
+              <div style={{fontSize: 24, color: colors.muted}}>Theo dãy</div>
+              <div style={{fontSize: 68, fontWeight: 800, color: colors.red, whiteSpace: 'nowrap'}}>{CUR_TOTAL} m</div>
             </div>
-          ))}
+            <div style={{fontSize: 56, color: colors.muted}}>→</div>
+            <div style={{textAlign: 'center'}}>
+              <div style={{fontSize: 24, color: colors.muted}}>Thuật toán</div>
+              <div style={{fontSize: 68, fontWeight: 800, color: colors.green, whiteSpace: 'nowrap'}}>{ALG_TOTAL} m</div>
+            </div>
+            <div style={{background: colors.green, color: '#062016', borderRadius: 40, padding: '10px 26px', fontSize: 42, fontWeight: 800}}>−{SAVE}%</div>
+          </div>
+          <div style={{textAlign: 'center', fontSize: 26, marginTop: 10}}>
+            Chuyến phải vào sâu cuối dãy: <b style={{color: colors.red}}>{CUR_DEEP}</b> → <b style={{color: colors.green}}>{ALG_DEEP}</b>
+          </div>
         </div>
       ) : null}
     </AbsoluteFill>
