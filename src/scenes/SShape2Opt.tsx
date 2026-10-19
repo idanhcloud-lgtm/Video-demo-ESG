@@ -58,9 +58,9 @@ const TRY_LOG: Try[] = [];
   }
 }
 const TRIES = TRY_LOG.length;
+const KEPT = TRY_LOG.filter((x) => x.ok).length;
 const L0 = length(SSHAPE);
 const LF = TRY_LOG[TRIES - 1].len;
-const SAVE = Math.round((100 * (L0 - LF)) / L0);
 
 // ---- drawing ----
 const X0 = 300;
@@ -159,11 +159,12 @@ export const SShape2Opt: React.FC = () => {
   const routeColor = done ? colors.green : colors.yellow;
 
   const stage = t < T.opt ? 1 : t < T.done ? 2 : t < T.result ? 3 : 4;
+  // English first (large), Vietnamese below (small)
   const captions: Record<number, [string, string]> = {
-    1: ['① S-shape: đi chữ S qua các lối có hàng → có ngay lộ trình ban đầu', 'S-shape: snake through the aisles → an instant first route'],
-    2: ['② 2-opt: thử đảo lần lượt từng đoạn → ngắn hơn thì giữ, dài hơn thì bỏ', '2-opt: try reversing every stretch in turn → keep it only if shorter'],
-    3: ['Thử hết một vòng không còn đoạn nào ngắn hơn → dừng', 'A full pass finds nothing shorter → stop'],
-    4: ['S-shape cho điểm xuất phát, 2-opt sửa các đoạn đi vòng', 'S-shape gives the start, 2-opt fixes the detours'],
+    1: ['① S-shape: snake through the aisles → an instant first route', 'Đi chữ S qua các lối có hàng → có ngay lộ trình ban đầu'],
+    2: ['② 2-opt: try reversing each stretch in turn → keep it only if shorter', 'Thử đảo lần lượt từng đoạn → ngắn hơn thì giữ, dài hơn thì bỏ'],
+    3: ['A full pass finds nothing shorter → stop', 'Thử hết một vòng không còn đoạn nào ngắn hơn → dừng'],
+    4: ['S-shape builds the first route, 2-opt fixes its detours', 'S-shape tạo lộ trình ban đầu, 2-opt sửa các đoạn đi vòng'],
   };
   const capStart = [0, 0, T.opt, T.done, T.result][stage];
   const capIn = interpolate(t, [capStart, capStart + 0.35], [0, 1], clamp);
@@ -192,12 +193,12 @@ export const SShape2Opt: React.FC = () => {
         <div style={{fontSize: 54, fontWeight: 800}}>
           S-shape <span style={{color: colors.green}}>+ 2-opt</span>
         </div>
-        <div style={{fontSize: 24, color: colors.muted}}>Thuật toán sắp xếp lộ trình · How the route is sequenced</div>
+        <div style={{fontSize: 24, color: colors.muted}}>How the algorithm orders the stops</div>
       </div>
       {/* meter */}
       <div style={{position: 'absolute', right: 80, top: 40, textAlign: 'right', opacity: t > T.sDraw - 0.3 ? 1 : 0}}>
         <div style={{fontSize: 20, color: colors.muted, letterSpacing: 2}}>
-          <span style={{color: done ? colors.green : tr ? colors.red : colors.yellow, fontWeight: 800}}>{done ? 'S-SHAPE + 2-OPT' : tr ? '2-OPT' : 'S-SHAPE'}</span> · QUÃNG ĐƯỜNG
+          <span style={{color: done ? colors.green : tr ? colors.red : colors.yellow, fontWeight: 800}}>{done ? 'S-SHAPE + 2-OPT' : tr ? '2-OPT' : 'S-SHAPE'}</span> · DISTANCE
         </div>
         <div style={{fontSize: 86, fontWeight: 800, lineHeight: 1, color: done ? colors.green : colors.yellow}}>
           {meterLen}
@@ -208,15 +209,15 @@ export const SShape2Opt: React.FC = () => {
       {/* order strip: the visiting order, with the stretch being tried framed */}
       <div style={{position: 'absolute', inset: 0, opacity: stripIn}}>
         <div style={{position: 'absolute', left: stripX(-1) - CHIP / 2, top: STRIP_Y - 36, fontSize: 18, color: colors.muted, letterSpacing: 2}}>
-          THỨ TỰ ĐI · VISIT ORDER
+          VISIT ORDER
         </div>
         <div style={{position: 'absolute', right: 1920 - stripX(N) - CHIP / 2, top: STRIP_Y - 36, fontSize: 18, color: colors.muted}}>
-          {tr && !done ? `vòng ${tr.pass} · lần thử ${k + 1}` : done ? `${TRIES} lần thử · ${TRY_LOG.filter((x) => x.ok).length} lần giữ` : ''}
+          {tr && !done ? `pass ${tr.pass} · try ${k + 1}` : done ? `${TRIES} tries · ${KEPT} kept` : ''}
         </div>
         {[-1, N].map((p) => (
           <div key={p} style={{position: 'absolute', left: stripX(p) - CHIP / 2, top: STRIP_Y, width: CHIP, height: CHIP, borderRadius: 12,
             background: colors.amber, color: '#0b1222', fontSize: 17, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            CỬA
+            DOOR
           </div>
         ))}
         {stripOrder.map((b, p) => (
@@ -233,11 +234,11 @@ export const SShape2Opt: React.FC = () => {
         {keeping ? (
           <div style={{position: 'absolute', left: (stripX(tr!.i) + stripX(tr!.j)) / 2, top: STRIP_Y + CHIP + 14, transform: 'translateX(-50%)', whiteSpace: 'nowrap',
             fontSize: 22, fontWeight: 800, color: u < 0.3 ? colors.amber : colors.green}}>
-            {u < 0.3 ? `Đảo đoạn ${LETTER[before[tr!.i]]}…${LETTER[before[tr!.j]]}?` : `Ngắn hơn ${Math.round(tr!.prev - tr!.len)} m → giữ`}
+            {u < 0.3 ? `Reverse ${LETTER[before[tr!.i]]}…${LETTER[before[tr!.j]]}?` : `${Math.round(tr!.prev - tr!.len)} m shorter → keep`}
           </div>
         ) : tr && !done ? (
           <div style={{position: 'absolute', left: (stripX(tr.i) + stripX(tr.j)) / 2, top: STRIP_Y + CHIP + 14, transform: 'translateX(-50%)', fontSize: 22, fontWeight: 800, color: colors.red}}>
-            ✗ dài hơn → bỏ
+            ✗ longer → drop
           </div>
         ) : null}
       </div>
@@ -252,12 +253,12 @@ export const SShape2Opt: React.FC = () => {
         })}
         {[0, 50, 100].map((c) => (
           <text key={c} x={px(c)} y={py(5.5) - 28} textAnchor="middle" fontSize={17} fontWeight={700} fill={colors.amber}>
-            {c === 50 ? 'LỐI NGANG' : c === 0 ? 'ĐẦU DÃY' : 'CUỐI DÃY'}
+            {c === 50 ? 'CROSS AISLE' : c === 0 ? 'FRONT' : 'BACK'}
           </text>
         ))}
         <rect x={DOOR[0] - 70} y={DOOR[1] - 26} width={70} height={52} rx={8} fill={colors.amber} />
-        <text x={DOOR[0] - 35} y={DOOR[1] + 7} textAnchor="middle" fontSize={20} fontWeight={800} fill="#0b1222">
-          CỬA
+        <text x={DOOR[0] - 35} y={DOOR[1] + 7} textAnchor="middle" fontSize={17} fontWeight={800} fill="#0b1222">
+          DOOR
         </text>
 
         {!tr ? (
@@ -289,7 +290,7 @@ export const SShape2Opt: React.FC = () => {
 
       {/* map tags */}
       {!tr && t >= T.sDraw ? (
-        <Tag at={pointAt(routePts(SSHAPE), draw)} color={colors.yellow} head="S-SHAPE" text={draw < 1 ? 'đi chữ S' : 'lộ trình ban đầu'}
+        <Tag at={pointAt(routePts(SSHAPE), draw)} color={colors.yellow} head="S-SHAPE" text={draw < 1 ? 'snake' : 'first route'}
           opacity={interpolate(t, [T.sDraw, T.sDraw + 0.3, T.opt - 0.3, T.opt], [0, 1, 1, 0], clamp)} />
       ) : null}
       {keeping
@@ -305,28 +306,40 @@ export const SShape2Opt: React.FC = () => {
         : null}
 
       {/* caption */}
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: 40, textAlign: 'center', opacity: capIn}}>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: 40, textAlign: 'center', opacity: capIn, zIndex: 5}}>
         <div style={{display: 'inline-block', background: 'rgba(0,0,0,0.6)', borderRadius: 14, padding: '10px 28px'}}>
           <div style={{fontSize: 34, fontWeight: 700}}>{captions[stage][0]}</div>
           <div style={{fontSize: 22, color: colors.muted}}>{captions[stage][1]}</div>
         </div>
       </div>
 
-      {/* result */}
+      {/* result: dim + blur the map so only the takeaway is read */}
       {stage === 4 ? (
-        <div style={{position: 'absolute', left: 960, top: 560, transform: `translate(-50%, -50%) scale(${0.85 + 0.15 * res})`, opacity: res,
-          background: '#0b1222f2', border: '2px solid #ffffff33', borderRadius: 26, padding: '30px 60px', display: 'flex', alignItems: 'center', gap: 50, boxShadow: '0 30px 80px #000c'}}>
-          <div style={{textAlign: 'center'}}>
-            <div style={{fontSize: 24, color: colors.muted}}>S-shape</div>
-            <div style={{fontSize: 72, fontWeight: 800, color: colors.yellow, whiteSpace: 'nowrap'}}>{Math.round(L0)} m</div>
+        <>
+          <div style={{position: 'absolute', inset: 0, zIndex: 3, opacity: res, background: 'rgba(5,8,16,0.72)', backdropFilter: 'blur(7px)'}} />
+          <div style={{position: 'absolute', left: 960, top: 500, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res, textAlign: 'center',
+            background: '#0e1628', border: '2px solid #ffffff2e', borderRadius: 28, padding: '34px 64px 30px', boxShadow: '0 30px 90px #000'}}>
+            <div style={{fontSize: 30, fontWeight: 800}}>What 2-opt did to the S-shape route</div>
+            <div style={{fontSize: 20, color: colors.muted, marginBottom: 18}}>2-opt sửa lại lộ trình ban đầu của S-shape</div>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 46}}>
+              <div>
+                <div style={{fontSize: 22, color: colors.muted}}>S-shape (first route)</div>
+                <div style={{fontSize: 70, fontWeight: 800, color: colors.yellow, whiteSpace: 'nowrap'}}>{Math.round(L0)} m</div>
+              </div>
+              <div style={{fontSize: 56, color: colors.muted}}>→</div>
+              <div>
+                <div style={{fontSize: 22, color: colors.muted}}>after 2-opt</div>
+                <div style={{fontSize: 70, fontWeight: 800, color: colors.green, whiteSpace: 'nowrap'}}>{Math.round(LF)} m</div>
+              </div>
+            </div>
+            <div style={{display: 'flex', justifyContent: 'center', gap: 16, marginTop: 18}}>
+              {[`${TRIES} tries`, `${KEPT} kept`, `${Math.round(L0 - LF)} m of detours removed`].map((x) => (
+                <div key={x} style={{fontSize: 24, fontWeight: 700, padding: '8px 20px', borderRadius: 30, background: '#ffffff12', border: '1px solid #ffffff22'}}>{x}</div>
+              ))}
+            </div>
+            <div style={{fontSize: 18, color: colors.muted, marginTop: 16}}>Illustrative layout · Sơ đồ minh họa</div>
           </div>
-          <div style={{fontSize: 60, color: colors.muted}}>→</div>
-          <div style={{textAlign: 'center'}}>
-            <div style={{fontSize: 24, color: colors.muted}}>S-shape + 2-opt</div>
-            <div style={{fontSize: 72, fontWeight: 800, color: colors.green, whiteSpace: 'nowrap'}}>{Math.round(LF)} m</div>
-          </div>
-          <div style={{background: colors.green, color: '#062016', borderRadius: 40, padding: '12px 28px', fontSize: 44, fontWeight: 800}}>−{SAVE}%</div>
-        </div>
+        </>
       ) : null}
     </AbsoluteFill>
   );
