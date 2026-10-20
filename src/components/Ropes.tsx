@@ -33,7 +33,18 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
     return (
       <g>
         <text x={x0 - 8} y={y - 30} fontSize={30} fontWeight={800} fill={accent}>
-          {viFirst ? (kind === 'algo' ? 'THUẬT TOÁN · Lộ trình tối ưu' : 'HIỆN TẠI · Theo dãy A → T') : kind === 'algo' ? 'ALGORITHM · Lộ trình tối ưu' : 'CURRENT · Theo dãy A → T'}
+          {(() => {
+            const en = kind === 'algo' ? 'ALGORITHM · Optimized route' : 'CURRENT · Aisle order A → T';
+            const vi = kind === 'algo' ? 'THUẬT TOÁN · Lộ trình tối ưu' : 'HIỆN TẠI · Theo dãy A → T';
+            return (
+              <>
+                {viFirst ? vi : en}
+                <tspan dx={16} fontSize={22} fontWeight={700} fill="#ffffff">
+                  {viFirst ? (kind === 'algo' ? 'Optimized route' : 'Aisle order A → T') : kind === 'algo' ? 'Lộ trình tối ưu' : 'Theo dãy A → T'}
+                </tspan>
+              </>
+            );
+          })()}
         </text>
         <line x1={x0} y1={y} x2={x0 + len} y2={y} stroke={accent} strokeWidth={16} strokeLinecap="round" style={{filter: `drop-shadow(0 0 8px ${accent})`}} />
         {t.stopAt
@@ -54,7 +65,7 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
         <text x={960} y={300} textAnchor="middle" fontSize={40} fontWeight={800} fill="#ffffff">
           {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[0]}
         </text>
-        <text x={960} y={340} textAnchor="middle" fontSize={26} fill={colors.muted}>
+        <text x={960} y={340} textAnchor="middle" fontSize={26} fill="#d6dcea">
           {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[1]}
         </text>
         {rope('algo', 470)}
