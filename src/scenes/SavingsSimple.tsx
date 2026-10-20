@@ -14,7 +14,7 @@ type Pt = [number, number];
 const dd = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]) / 10;
 const DEPOT: Pt = [810, 900];
 const NAMES = ['A', 'B', 'C', 'D', 'E', 'F'];
-const P: Pt[] = [[290, 430], [470, 310], [700, 320], [900, 290], [1180, 560], [1350, 660]];
+const P: Pt[] = [[290, 480], [470, 370], [700, 380], [840, 370], [1220, 540], [1350, 700]];
 const LOAD = [0.4, 0.3, 0.3, 0.3, 0.4, 0.3]; // share of one pallet
 const CAP = 1;
 const N = P.length;
@@ -65,6 +65,11 @@ const ROUTES_AFTER: number[][][] = []; // routes (as stop lists) after each step
 const FINAL = ROUTES_AFTER[ROUTES_AFTER.length - 1]
   .map((r) => nn(r))
   .sort((x, y) => P[x.order[0]][0] - P[y.order[0]][0]);
+/** Length of a trip driven in the order Savings built it (Door → chain → Door). */
+const chainLen = (r: number[]) => {
+  const pts: Pt[] = [DEPOT, ...r.map((i) => P[i]), DEPOT];
+  return pts.slice(1).reduce((t, q, k) => t + dd(pts[k], q), 0);
+};
 const ALONE_TOTAL = R(P.reduce((t, p) => t + 2 * dd(DEPOT, p), 0));
 const SAV_TOTAL = R(FINAL.reduce((t, r) => t + r.len, 0));
 const TRIP_COL = [colors.green, '#4dd0e1'];
@@ -141,7 +146,7 @@ export const SavingsSimple: React.FC = () => {
   const inNN = t >= T.nn;
   const result = t >= T.result;
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
-  const total = R(routes.reduce((s, r) => s + nn(r).len, 0));
+  const total = R(inNN ? FINAL.reduce((s, r) => s + r.len, 0) : routes.reduce((s, r) => s + chainLen(r), 0));
   const routeOf = (i: number) => routes.findIndex((r) => r.includes(i));
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
 
@@ -152,7 +157,7 @@ export const SavingsSimple: React.FC = () => {
       : t < T.step0 ? ['Tính tiết kiệm cho mọi cặp, xếp từ lớn đến nhỏ', 'Score every pair, biggest saving first']
       : choosing
         ? u < 2.4
-          ? [`Chuyến ${CH_TRIP.map((i) => NAMES[i]).join('+')} còn trống 0,3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} (0,3) đều vừa`, `Trip ${CH_TRIP.map((i) => NAMES[i]).join('+')} has room for 0.3: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
+          ? [`Chuyến ${CH_TRIP.map((i) => NAMES[i]).join('+')} còn trống 0.3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} đều vừa`, `Trip ${CH_TRIP.map((i) => NAMES[i]).join('+')} has room for 0.3: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
           : [`Chọn ${NAMES[CH_WIN]} vì gần hơn: tiết kiệm ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`, `${NAMES[CH_WIN]} is closer: it saves ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`]
       : !inNN ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
@@ -169,7 +174,23 @@ export const SavingsSimple: React.FC = () => {
         <div style={{fontSize: 48, fontWeight: 800}}>
           <span style={{color: colors.green}}>Savings</span> <span style={{color: colors.muted, fontWeight: 600}}>+</span> <span style={{color: colors.yellow}}>Nearest Neighbour</span>
         </div>
-        <div style={{fontSize: 22, color: colors.muted}}>The simplest example · Ví dụ đơn giản nhất: Savings + Láng giềng gần nhất</div>
+        <div style={{fontSize: 22, color: colors.muted}}>Simulation · Mô phỏng</div>
+      </div>
+      {/* which algorithm is working now */}
+      <div style={{position: 'absolute', left: 70, top: 150, display: 'flex', gap: 14, opacity: fade(T.ex - 0.4, T.ex) * (1 - fade(T.result - 0.3, T.result))}}>
+        {[
+          {on: !inNN, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which stops share a trip (within capacity)', vi: 'quyết định điểm nào đi chung chuyến (trong sức chứa)'},
+          {on: inNN, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'decides the visit order inside each trip', vi: 'quyết định thứ tự ghé trong từng chuyến'},
+        ].map((a) => (
+          <div key={a.n} style={{padding: '10px 18px', borderRadius: 14, border: `3px solid ${a.on ? a.c : '#2a3654'}`, background: a.on ? `${a.c}1f` : 'transparent', opacity: a.on ? 1 : 0.4,
+            boxShadow: a.on ? `0 0 18px ${a.c}66` : 'none', maxWidth: 520}}>
+            <div style={{fontSize: 22, fontWeight: 800, color: a.on ? a.c : colors.muted}}>
+              STEP {a.n} · {a.name}
+            </div>
+            <div style={{fontSize: 19, fontWeight: 600}}>{a.en}</div>
+            <div style={{fontSize: 15, color: colors.muted}}>{a.vi}</div>
+          </div>
+        ))}
       </div>
       <div style={{position: 'absolute', right: 70, top: 40, textAlign: 'right', opacity: fade(T.alone, T.alone + 0.5) * (1 - fade(T.result - 0.3, T.result))}}>
         <div style={{fontSize: 19, color: colors.muted, letterSpacing: 2}}>{routes.length} TRIPS · TOTAL DISTANCE</div>
@@ -187,14 +208,14 @@ export const SavingsSimple: React.FC = () => {
               const exPart = t >= T.ex && t < T.rank && r.length === 1 && (r[0] === EX.a || r[0] === EX.b);
               const col = isMergedNow || exPart ? colors.red : r.length > 1 ? colors.green : '#8f9bb5';
               return (
-                <Loop key={`r${ri}-${r.join('')}`} order={nn(r).order} color={col} w={r.length > 1 ? 6 : 4}
+                <Loop key={`r${ri}-${r.join('')}`} order={r} color={col} w={r.length > 1 ? 6 : 4}
                   draw={fade(T.alone + ri * 0.25, T.alone + ri * 0.25 + 0.8)}
                   opacity={(t >= T.ex && t < T.rank && !exPart ? 0.25 : 0.85) * (isMergedNow ? 1 - merging : 1)} />
               );
             })
           : null}
         {step && step.kind === 'merge' && slow && merging < 1 && !inNN ? (
-          <Loop order={nn(routes.find((r) => r.includes(step.a))!).order} color={colors.green} w={6} draw={merging} />
+          <Loop order={routes.find((r) => r.includes(step.a))!} color={colors.green} w={6} draw={merging} />
         ) : null}
         {/* worked example: the new link and the two removed spokes */}
         {t >= T.ex && t < T.rank ? (
@@ -223,13 +244,18 @@ export const SavingsSimple: React.FC = () => {
                   <path d={`M${from[0]} ${from[1]} Q${(from[0] + P[i][0]) / 2} ${Math.min(from[1], P[i][1]) - (win ? 0 : 130)} ${P[i][0]} ${P[i][1]}`} fill="none" stroke={col} strokeWidth={5}
                     strokeDasharray="12 9" opacity={judged && !win ? 0.6 : 1} />
                   <circle cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={col} strokeWidth={5} />
-                  <text x={P[i][0]} y={P[i][1] + 92} textAnchor="middle" fontSize={26} fontWeight={800} fill={col}
+                  <text x={win ? P[i][0] - 30 : P[i][0] + 62} y={win ? P[i][1] + 92 : P[i][1] + 10} textAnchor={win ? 'middle' : 'start'} fontSize={26} fontWeight={800} fill={col}
                     stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}>
                     {judged ? `${win ? '✓ chosen' : '✗'} · saves ${linkSave(i)} m` : `+0.3 → 1.0 fits`}
                   </text>
                 </g>
               );
             })
+          : null}
+
+        {/* Savings result kept faint underneath while nearest neighbour redraws each trip */}
+        {inNN && !result
+          ? ROUTES_AFTER[ROUTES_AFTER.length - 1].map((r) => <Loop key={`c${r.join('')}`} order={r} color="#8f9bb5" w={4} opacity={0.45} dash="10 10" />)
           : null}
 
         {/* nearest neighbour, trip by trip */}
@@ -325,7 +351,8 @@ export const SavingsSimple: React.FC = () => {
           <div style={{position: 'absolute', left: 1410, top: 250, width: 490, opacity: fade(T.ex + 0.2, T.ex + 0.6) * (1 - fade(T.rank - 0.4, T.rank)),
             background: '#0e1628', border: '2px solid #ffffff22', borderRadius: 20, padding: '22px 26px'}}>
             <div style={{fontSize: 24, fontWeight: 800}}>SAVING({A}, {B})</div>
-            <div style={{fontSize: 17, color: colors.muted, marginBottom: 14}}>Tiết kiệm khi gộp {A} và {B}</div>
+            <div style={{fontSize: 19, fontWeight: 600, marginTop: 4}}>Should {A} and {B} share a trip? Compare the metres driven.</div>
+            <div style={{fontSize: 16, color: colors.muted, marginBottom: 14}}>Mục đích: {A} và {B} có nên đi chung chuyến không? So số mét phải chạy.</div>
             <div style={row(0.7)}>
               <div style={{fontSize: 22, fontWeight: 800, color: colors.red}}>2 separate trips <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 2 chuyến riêng</span></div>
               <div style={{fontSize: 22, marginTop: 6, lineHeight: 1.7}}>
@@ -379,7 +406,7 @@ export const SavingsSimple: React.FC = () => {
 
       {/* trip cards during nearest neighbour */}
       {inNN && !result ? (
-        <div style={{position: 'absolute', left: 1380, top: 520, width: 520}}>
+        <div style={{position: 'absolute', left: 1440, top: 330, width: 460}}>
           {FINAL.map((tr, ti) => (
             <div key={ti} style={{marginBottom: 22, opacity: fade(NN_AT[ti] - 0.3, NN_AT[ti])}}>
               <div style={{fontSize: 26, fontWeight: 800, color: TRIP_COL[ti]}}>
