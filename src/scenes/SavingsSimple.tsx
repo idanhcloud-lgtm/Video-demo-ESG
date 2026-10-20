@@ -4,7 +4,7 @@ import {colors, fontFamily} from '../theme';
 
 /**
  * Simplest example of Savings (Clarke–Wright) + Nearest Neighbour, without voice.
- * 5 stops whose loads add up to 2 pallets; the vehicle carries 1 pallet per trip.
+ * 6 stops whose loads add up to 2 pallets; the vehicle carries 1 pallet per trip.
  * Savings starts with one trip per stop, ranks every pair by saving = d(K,i) + d(K,j) − d(i,j) and merges the two
  * trips when the merged load still fits (≤ 1 pallet) – so it optimises both distance and how full each trip is.
  * Nearest neighbour then gives the visit order of each trip. Straight-line distances, 1 m = 10 px.
@@ -13,9 +13,9 @@ import {colors, fontFamily} from '../theme';
 type Pt = [number, number];
 const dd = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]) / 10;
 const DEPOT: Pt = [810, 900];
-const NAMES = ['A', 'B', 'C', 'D', 'E'];
-const P: Pt[] = [[290, 430], [470, 310], [730, 320], [950, 300], [1290, 440]];
-const LOAD = [0.4, 0.3, 0.3, 0.6, 0.4]; // share of one pallet
+const NAMES = ['A', 'B', 'C', 'D', 'E', 'F'];
+const P: Pt[] = [[290, 430], [470, 310], [700, 320], [900, 290], [1180, 560], [1350, 660]];
+const LOAD = [0.4, 0.3, 0.3, 0.3, 0.4, 0.3]; // share of one pallet
 const CAP = 1;
 const N = P.length;
 const R = (x: number) => Math.round(x);
@@ -68,6 +68,16 @@ const SAV_TOTAL = R(FINAL.reduce((t, r) => t + r.len, 0));
 const TRIP_COL = [colors.green, '#4dd0e1'];
 const EX = STEPS[0];
 const CAP_STEP = STEPS.findIndex((s) => s.kind === 'cap');
+// The moment to highlight: the first trip has room for one more 0,3 pallet and two stops (both 0,3) would fit;
+// savings takes the one that saves more, i.e. the closer one.
+const CHOICE = 1;
+const CH = STEPS[CHOICE];
+const CH_TRIP = ROUTES_AFTER[CHOICE - 1].find((r) => r.length > 1 && (r.includes(CH.a) || r.includes(CH.b)))!;
+const CH_WIN = CH_TRIP.includes(CH.a) ? CH.b : CH.a;
+const CH_RIVAL = P.map((_, i) => i).find((i) => i !== CH_WIN && !CH_TRIP.includes(i) && LOAD[i] === LOAD[CH_WIN])!;
+const linkSave = (i: number) => Math.max(...CH_TRIP.map((j) => dd(DEPOT, P[i]) + dd(DEPOT, P[j]) - dd(P[i], P[j])));
+const linkFrom = (i: number) => CH_TRIP.reduce((b, j) => (dd(DEPOT, P[i]) + dd(DEPOT, P[j]) - dd(P[i], P[j]) > dd(DEPOT, P[i]) + dd(DEPOT, P[b]) - dd(P[i], P[b]) ? j : b), CH_TRIP[0]);
+const HOLD = 6.0; // extra seconds on the choice
 
 // ---- timeline (seconds) ----
 const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 15.5, step0: 17.0, nn: 0, result: 0};
@@ -78,7 +88,7 @@ const STEP_AT: number[] = [];
   let at = T.step0;
   STEPS.forEach((_, k) => {
     STEP_AT.push(at);
-    at += k <= CAP_STEP + 1 ? SLOW : FAST;
+    at += (k <= CAP_STEP + 1 ? SLOW : FAST) + (k === CHOICE ? HOLD : 0);
   });
   T.nn = at + 0.6;
 }
@@ -120,9 +130,11 @@ export const SavingsSimple: React.FC = () => {
   const step = k >= 0 ? STEPS[k] : null;
   const u = k >= 0 ? t - STEP_AT[k] : 0;
   const slow = k >= 0 && k <= CAP_STEP + 1;
-  const decided = !slow || u > 1.0;
+  const hold = k === CHOICE ? HOLD : 0;
+  const choosing = k === CHOICE && u < 1.0 + hold;
+  const decided = !slow || u > 1.0 + hold;
   const routes = k < 0 ? P.map((_, i) => [i]) : decided ? ROUTES_AFTER[k] : k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
-  const merging = step && step.kind === 'merge' && slow ? interpolate(u, [1.0, 1.8], [0, 1], ease) : 1;
+  const merging = step && step.kind === 'merge' && slow ? interpolate(u, [1.0 + hold, 1.8 + hold], [0, 1], ease) : 1;
   const prevRoutes = k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
   const inNN = t >= T.nn;
   const result = t >= T.result;
@@ -132,10 +144,14 @@ export const SavingsSimple: React.FC = () => {
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
 
   const cap: [string, string] =
-    t < T.alone ? ['5 điểm giao, tổng cộng 2 pallet hàng. Xe chở tối đa 1 pallet mỗi chuyến.', '5 stops, 2 pallets in total. The vehicle carries 1 pallet per trip.']
-      : t < T.ex ? ['Ban đầu: mỗi điểm một chuyến riêng – 5 chuyến, xe chạy gần như rỗng', 'Start: one trip per stop – 5 trips, the vehicle almost empty']
+    t < T.alone ? ['6 điểm giao, tổng cộng 2 pallet hàng. Xe chở tối đa 1 pallet mỗi chuyến.', '6 stops, 2 pallets in total. The vehicle carries 1 pallet per trip.']
+      : t < T.ex ? ['Ban đầu: mỗi điểm một chuyến riêng – 6 chuyến, xe chạy gần như rỗng', 'Start: one trip per stop – 6 trips, the vehicle almost empty']
       : t < T.rank ? [`Tiết kiệm khi gộp ${NAMES[EX.a]} và ${NAMES[EX.b]}: bớt một lượt về kho và một lượt đi`, `Saving of ${NAMES[EX.a]} + ${NAMES[EX.b]}: one way back and one way out are no longer needed`]
       : t < T.step0 ? ['Tính tiết kiệm cho mọi cặp, xếp từ lớn đến nhỏ', 'Score every pair, biggest saving first']
+      : choosing
+        ? u < 2.4
+          ? [`Chuyến ${CH_TRIP.map((i) => NAMES[i]).join('+')} còn trống 0,3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} (0,3) đều vừa`, `Trip ${CH_TRIP.map((i) => NAMES[i]).join('+')} has room for 0.3: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
+          : [`Chọn ${NAMES[CH_WIN]} vì gần hơn: tiết kiệm ${R(linkSave(CH_WIN))} m > ${R(linkSave(CH_RIVAL))} m`, `${NAMES[CH_WIN]} is closer: it saves ${R(linkSave(CH_WIN))} m vs ${R(linkSave(CH_RIVAL))} m`]
       : !inNN ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
           : step?.kind === 'same' && slow
@@ -186,10 +202,33 @@ export const SavingsSimple: React.FC = () => {
           </>
         ) : null}
         {/* pair being examined */}
-        {step && slow && !inNN && u < 1.2 ? (
+        {step && slow && !inNN && !choosing && u < 1.2 + hold ? (
           <line x1={P[step.a][0]} y1={P[step.a][1]} x2={P[step.b][0]} y2={P[step.b][1]} stroke={step.kind === 'cap' ? colors.red : step.kind === 'same' ? '#8f9bb5' : colors.yellow}
-            strokeWidth={5} strokeDasharray="12 9" opacity={interpolate(u, [0, 0.2, 1.0, 1.2], [0, 1, 1, 0], clamp)} />
+            strokeWidth={5} strokeDasharray="12 9" opacity={interpolate(u, [hold, hold + 0.2, hold + 1.0, hold + 1.2], [0, 1, 1, 0], clamp)} />
         ) : null}
+
+        {/* the choice: two candidates fit the open trip, the closer one wins */}
+        {choosing
+          ? [CH_WIN, CH_RIVAL].map((i, n) => {
+              const from = P[linkFrom(i)];
+              const win = i === CH_WIN;
+              const judged = u > 2.4;
+              const col = judged ? (win ? colors.green : colors.red) : colors.yellow;
+              const pulse = 1 + 0.12 * Math.sin(t * 7);
+              const sh = interpolate(u, [0.3 + n * 0.4, 0.8 + n * 0.4], [0, 1], clamp);
+              return (
+                <g key={i} opacity={sh}>
+                  <path d={`M${from[0]} ${from[1]} Q${(from[0] + P[i][0]) / 2} ${Math.min(from[1], P[i][1]) - (win ? 0 : 130)} ${P[i][0]} ${P[i][1]}`} fill="none" stroke={col} strokeWidth={5}
+                    strokeDasharray="12 9" opacity={judged && !win ? 0.6 : 1} />
+                  <circle cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={col} strokeWidth={5} />
+                  <text x={P[i][0]} y={P[i][1] + 92} textAnchor="middle" fontSize={26} fontWeight={800} fill={col}
+                    stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}>
+                    {judged ? `${win ? '✓ chọn' : '✗'} · tiết kiệm ${R(linkSave(i))} m` : `+0,3 → 1,0 vừa`}
+                  </text>
+                </g>
+              );
+            })
+          : null}
 
         {/* nearest neighbour, trip by trip */}
         {inNN
@@ -285,7 +324,7 @@ export const SavingsSimple: React.FC = () => {
 
       {/* ranking + decisions */}
       {t >= T.rank && !inNN ? (
-        <div style={{position: 'absolute', left: 1380, top: 300, width: 520, opacity: fade(T.rank, T.rank + 0.4)}}>
+        <div style={{position: 'absolute', left: 1440, top: 300, width: 470, opacity: fade(T.rank, T.rank + 0.4)}}>
           <div style={{fontSize: 18, color: colors.muted, letterSpacing: 2, marginBottom: 6}}>MỌI CẶP · MÉT TIẾT KIỆM · TẢI SAU KHI GỘP</div>
           {STEPS.map((s, r) => {
             const done = r < k || (r === k && decided);
