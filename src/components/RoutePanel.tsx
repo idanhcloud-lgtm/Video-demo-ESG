@@ -105,15 +105,24 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
         <RouteIcon kind={kind} />
         <div style={{flex: 1}}>
           <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
-          <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{viFirst ? (kind === 'algo' ? 'Lộ trình tối ưu' : 'Hạ hàng theo dãy A → T') : kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 19, fontWeight: 600, color: '#d6dcea'}}>{viFirst ? (kind === 'algo' ? 'S-shape + 2-opt · Optimized route' : 'Aisle order A → T') : kind === 'algo' ? 'S-shape + 2-opt · Lộ trình tối ưu' : 'Aisle order A → T · Hạ hàng theo dãy'}</div>
+          {(() => {
+            const vi = kind === 'algo' ? 'Lộ trình tối ưu' : 'Theo dãy A → T';
+            const en = kind === 'algo' ? 'Optimized route' : 'Aisle order A → T';
+            const [first, second] = viFirst ? [vi, en] : [en, vi];
+            return (
+              <div style={{fontSize: 27, fontWeight: 700, lineHeight: 1.15, whiteSpace: 'nowrap'}}>
+                {first} <span style={{color: '#d6dcea'}}>· {second}</span>
+              </div>
+            );
+          })()}
+          <div style={{fontSize: 19, fontWeight: 600, color: '#d6dcea'}}>{kind === 'algo' ? 'S-shape + 2-opt' : "Today's practice"}</div>
         </div>
         <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0, opacity: statsOpacity}}>
           <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
             {value}
             <span style={{fontSize: 24, fontWeight: 600, color: colors.muted, marginLeft: 6}}>{viFirst && /^trucks?$/.test(unit) ? 'xe' : unit}</span>
           </div>
-          <div style={{fontSize: 18, color: colors.muted, marginTop: 4}}>{useFlip()(sub)}</div>
+          <div style={{fontSize: 16, color: colors.muted, marginTop: 4, whiteSpace: 'nowrap'}}>{useFlip()(sub)}</div>
         </div>
       </div>
       {children}
