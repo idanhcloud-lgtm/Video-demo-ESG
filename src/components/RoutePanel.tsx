@@ -108,12 +108,8 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
           {(() => {
             const vi = kind === 'algo' ? 'Lộ trình tối ưu' : 'Theo dãy A → T';
             const en = kind === 'algo' ? 'Optimized route' : 'Aisle order A → T';
-            const [first, second] = viFirst ? [vi, en] : [en, vi];
-            return (
-              <div style={{fontSize: 27, fontWeight: 700, lineHeight: 1.15, whiteSpace: 'nowrap'}}>
-                {first} <span style={{color: '#d6dcea'}}>· {second}</span>
-              </div>
-            );
+            void vi; // exception: the panel title is English only in every cut (simple words)
+            return <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15, whiteSpace: 'nowrap'}}>{en}</div>;
           })()}
           <div style={{fontSize: 19, fontWeight: 600, color: '#d6dcea'}}>{kind === 'algo' ? 'S-shape + 2-opt' : "Today's practice"}</div>
         </div>
