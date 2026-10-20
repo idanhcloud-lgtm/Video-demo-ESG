@@ -63,11 +63,11 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
         <line x1={x0 + lenG} y1={430} x2={x0 + lenG} y2={680} stroke="#ffffff" strokeWidth={2.5} strokeDasharray="8 7" opacity={waste} />
         <g opacity={waste}>
           <rect x={x0 + lenG} y={624} width={lenR - lenG} height={32} rx={6} fill={colors.red} opacity={0.35 + 0.45 * pulse} />
-          <rect x={x0 + (lenG + lenR) / 2 - 275} y={690} width={550} height={92} rx={14} fill="#ffffff" stroke={colors.red} strokeWidth={4} />
-          <text x={x0 + (lenG + lenR) / 2} y={735} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
+          <rect x={x0 + (lenG + lenR) / 2 - 275} y={688} width={550} height={108} rx={14} fill="#ffffff" stroke={colors.red} strokeWidth={4} />
+          <text x={x0 + (lenG + lenR) / 2} y={734} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
             {viFirst ? 'QUÃNG ĐƯỜNG CHẠY THỪA' : 'EXTRA TRAVEL'}
           </text>
-          <text x={x0 + (lenG + lenR) / 2} y={770} textAnchor="middle" fontSize={26} fontWeight={700} fill="#4a5268">
+          <text x={x0 + (lenG + lenR) / 2} y={778} textAnchor="middle" fontSize={32} fontWeight={800} fill="#3e4660">
             {viFirst ? 'Extra travel' : 'Quãng đường chạy thừa'}
           </text>
         </g>
