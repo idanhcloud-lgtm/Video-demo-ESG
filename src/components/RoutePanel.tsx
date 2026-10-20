@@ -351,7 +351,7 @@ export const Callout: React.FC<{kind: 'algo' | 'current'; en: React.ReactNode; v
       </div>
       <div style={{background: '#f3f5f9', padding: '16px 24px 18px'}}>
         <div style={{fontSize: large ? 33 : 28, fontWeight: 700, color: '#141a2b', lineHeight: 1.25}}>{main}</div>
-        <div style={{fontSize: large ? 25 : 20, color: '#5b6478', marginTop: 6}}>{small}</div>
+        <div style={{fontSize: large ? 28 : 24, fontWeight: 500, color: '#4a5268', marginTop: 6}}>{small}</div>
       </div>
     </div>
   );

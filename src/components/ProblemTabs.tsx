@@ -81,7 +81,7 @@ export const ProblemTabs: React.FC<{states: TabState[]; glow?: number; hidden?: 
           </div>
           <div>
             <div style={{fontSize: 24, fontWeight: 700, lineHeight: 1.2, color: solved ? '#0b1222' : solving ? '#ffffff' : '#4f5a75'}}>{bi(p.en, p.vi)[0]}</div>
-            <div style={{fontSize: 17, color: solved ? '#4a5470' : solving ? '#b8c2d8' : '#3b4560'}}>{bi(p.en, p.vi)[1]}</div>
+            <div style={{fontSize: 19, color: solved ? '#3e4660' : solving ? '#d0d7e6' : '#3b4560'}}>{bi(p.en, p.vi)[1]}</div>
           </div>
           {solved ? (
             <div

@@ -54,7 +54,7 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
         <text x={960} y={300} textAnchor="middle" fontSize={40} fontWeight={800} fill="#ffffff">
           {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[0]}
         </text>
-        <text x={960} y={340} textAnchor="middle" fontSize={26} fill="#d6dcea">
+        <text x={960} y={344} textAnchor="middle" fontSize={30} fill="#d6dcea">
           {bi('Same 28 stops – routes straightened out', 'Cùng 28 điểm – duỗi thẳng hai lộ trình để so độ dài')[1]}
         </text>
         {rope('algo', 470)}
@@ -67,7 +67,7 @@ export const Ropes: React.FC<{frame: number; start: number; waste: number; track
           <text x={x0 + (lenG + lenR) / 2} y={735} textAnchor="middle" fontSize={34} fontWeight={800} fill="#d23c3a">
             {viFirst ? 'QUÃNG ĐƯỜNG CHẠY THỪA' : 'EXTRA TRAVEL'}
           </text>
-          <text x={x0 + (lenG + lenR) / 2} y={766} textAnchor="middle" fontSize={22} fontWeight={600} fill="#5b6478">
+          <text x={x0 + (lenG + lenR) / 2} y={770} textAnchor="middle" fontSize={26} fontWeight={700} fill="#4a5268">
             {viFirst ? 'Extra travel' : 'Quãng đường chạy thừa'}
           </text>
         </g>

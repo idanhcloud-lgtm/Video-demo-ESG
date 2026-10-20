@@ -13,7 +13,7 @@ export const Subtitle: React.FC<{vi: string; en: string; opacity?: number; enFir
       }}
     >
       <div style={{fontSize: 34, fontWeight: 600, lineHeight: 1.25, color: '#ffffff'}}>{enFirst ? en : vi}</div>
-      <div style={{fontSize: 24, lineHeight: 1.25, color: colors.muted}}>{enFirst ? vi : en}</div>
+      <div style={{fontSize: 28, lineHeight: 1.25, color: '#c9d1e3'}}>{enFirst ? vi : en}</div>
     </div>
   </div>
 );
