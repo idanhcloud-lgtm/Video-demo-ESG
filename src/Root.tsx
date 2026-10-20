@@ -17,6 +17,7 @@ import {MOVER_RACE_SECONDS, MoverRace} from './scenes/MoverRace';
 import {MOVER_EXPLAIN_SECONDS, MoverExplain} from './scenes/MoverExplain';
 import {ALGO_EXPLAIN_SECONDS, AlgoExplain} from './scenes/AlgoExplain';
 import {PROJECT_ALGO_SECONDS, ProjectAlgo} from './scenes/ProjectAlgo';
+import {SAVINGS_SIMPLE_SECONDS, SavingsSimple} from './scenes/SavingsSimple';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -75,6 +76,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="MoverExplain" component={MoverExplain} durationInFrames={MOVER_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="AlgoExplain" component={AlgoExplain} durationInFrames={ALGO_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="ProjectAlgo" component={ProjectAlgo} durationInFrames={PROJECT_ALGO_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="SavingsSimple" component={SavingsSimple} durationInFrames={SAVINGS_SIMPLE_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
         [
           ['Problem02VO', '02', Problem02],
