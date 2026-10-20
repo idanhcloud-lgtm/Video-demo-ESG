@@ -335,7 +335,7 @@ const DistanceCompare: React.FC<{frame: number; at: number; diffAt: number; out:
             }}
           >
             <div style={{position: 'absolute', top: -30, fontSize: 18, fontWeight: 800, color: k.c, opacity: fly, whiteSpace: 'nowrap'}}>
-              {bi(k.en, k.vi)[0]} <span style={{fontWeight: 500, color: colors.muted}}>· {bi(k.en, k.vi)[1]}</span>
+              {bi(k.en, k.vi)[0]} <span style={{fontWeight: 700, color: '#ffffff'}}>· {bi(k.en, k.vi)[1]}</span>
             </div>
             <div style={{fontSize: 58, fontWeight: 800, lineHeight: 1, color: white > 0.5 ? k.ink : k.c}}>
               {Math.round(LEN[k.kind]).toLocaleString('en-US')}
