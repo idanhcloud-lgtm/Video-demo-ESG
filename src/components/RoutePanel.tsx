@@ -106,7 +106,7 @@ export const PanelShell: React.FC<{kind: 'algo' | 'current'; value: string; unit
         <div style={{flex: 1}}>
           <div style={{fontSize: 14, fontWeight: 700, letterSpacing: 3, color: accent}}>● {kind === 'algo' ? 'ALGORITHM' : 'CURRENT'}</div>
           <div style={{fontSize: 29, fontWeight: 700, lineHeight: 1.15}}>{viFirst ? (kind === 'algo' ? 'Lộ trình tối ưu' : 'Hạ hàng theo dãy A → T') : kind === 'algo' ? 'Optimized route' : 'Aisle order A → T'}</div>
-          <div style={{fontSize: 17, color: colors.muted}}>{viFirst ? (kind === 'algo' ? 'S-shape + 2-opt · Optimized route' : 'Aisle order A → T') : kind === 'algo' ? 'S-shape + 2-opt · Lộ trình tối ưu' : 'Aisle order A → T · Hạ hàng theo dãy'}</div>
+          <div style={{fontSize: 19, fontWeight: 600, color: '#d6dcea'}}>{viFirst ? (kind === 'algo' ? 'S-shape + 2-opt · Optimized route' : 'Aisle order A → T') : kind === 'algo' ? 'S-shape + 2-opt · Lộ trình tối ưu' : 'Aisle order A → T · Hạ hàng theo dãy'}</div>
         </div>
         <div style={{textAlign: 'right', paddingRight: kind === 'algo' ? 28 : 0, opacity: statsOpacity}}>
           <div style={{fontSize: 58, fontWeight: 800, color: accent, lineHeight: 1}}>
