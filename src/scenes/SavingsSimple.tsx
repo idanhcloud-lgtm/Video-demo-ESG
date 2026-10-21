@@ -193,7 +193,7 @@ export const SavingsSimple: React.FC = () => {
         {step && step.kind === 'merge' && slow && merging < 1 && !done ? (
           (() => {
             // the new link grows first, in the order Savings picked it, then the merged trip replaces the old ones
-            const r = routes.find((x) => x.includes(step.a))!;
+            const r = ROUTES_AFTER[k].find((x) => x.includes(step.a))!;
             const ra = prevRoutes.find((x) => x.includes(r[0]))!;
             const p0 = P[ra[ra.length - 1]];
             const p1 = P[r[ra.length]];
