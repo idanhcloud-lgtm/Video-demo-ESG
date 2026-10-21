@@ -7,8 +7,8 @@ import {colors, fontFamily} from '../theme';
  * 6 stops whose loads add up to 2 pallets; the vehicle carries 1 pallet per trip.
  * Savings starts with one trip per stop, ranks every pair by saving = d(K,i) + d(K,j) − d(i,j) and merges the two
  * trips when the merged load still fits (≤ 1 pallet) – so it optimises both distance and how full each trip is.
- * Every trip is measured and drawn in nearest-neighbour order as soon as it is formed, so there is no separate
- * nearest-neighbour pass. Straight-line distances, 1 m = 10 px.
+ * Each trip is drawn in the order Savings picked its stops; on this map that loop is also the nearest-neighbour
+ * order, so there is no separate nearest-neighbour pass. Straight-line distances, 1 m = 10 px.
  * Vietnamese is the large line.
  */
 type Pt = [number, number];
@@ -23,21 +23,6 @@ const R = (x: number) => Math.round(x);
 const fmt = (x: number) => x.toFixed(1);
 /** Saving as shown on screen: built from the rounded distances, so the on-screen arithmetic adds up. */
 const SV = (a: number, b: number) => R(dd(DEPOT, P[a])) + R(dd(DEPOT, P[b])) - R(dd(P[a], P[b]));
-
-function nn(items: number[]) {
-  let cur = DEPOT;
-  const rest = [...items];
-  const order: number[] = [];
-  let len = 0;
-  while (rest.length) {
-    rest.sort((a, b) => dd(cur, P[a]) - dd(cur, P[b]));
-    const n = rest.shift()!;
-    len += dd(cur, P[n]);
-    cur = P[n];
-    order.push(n);
-  }
-  return {order, len: len + dd(cur, DEPOT)};
-}
 
 // ---- Savings with capacity ----
 type Step = {a: number; b: number; save: number; kind: 'merge' | 'same' | 'cap'; load: number};
@@ -64,10 +49,8 @@ const ROUTES_AFTER: number[][][] = []; // routes (as stop lists) after each step
   }
 }
 const FINAL = ROUTES_AFTER[ROUTES_AFTER.length - 1]
-  .map((r) => nn(r))
+  .map((r) => ({order: r}))
   .sort((x, y) => P[x.order[0]][0] - P[y.order[0]][0]);
-/** Visit order of a trip: nearest neighbour from the door. */
-const ordOf = (r: number[]) => nn(r).order;
 const TRIP_COL = [colors.green, '#4dd0e1'];
 const EX = STEPS[0];
 const CAP_STEP = STEPS.findIndex((s) => s.kind === 'cap');
@@ -91,7 +74,7 @@ const linkFrom = (i: number) => CH_TRIP.reduce((b, j) => (dd(DEPOT, P[i]) + dd(D
 const HOLD = 6.0; // extra seconds on the choice
 
 // ---- timeline (seconds) ----
-const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 17.0, step0: 18.5, done: 0, result: 0};
+const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 13.0, step0: 14.5, done: 0, result: 0};
 const SLOW = 2.6; // first steps, up to the first capacity refusal
 const FAST = 0.45;
 const STEP_AT: number[] = [];
@@ -143,7 +126,7 @@ export const SavingsSimple: React.FC = () => {
   const choosing = k === CHOICE && u < 1.0 + hold;
   const decided = !slow || u > 1.0 + hold;
   const routes = k < 0 ? P.map((_, i) => [i]) : decided ? ROUTES_AFTER[k] : k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
-  const merging = step && step.kind === 'merge' && slow ? interpolate(u, [1.0 + hold, 1.8 + hold], [0, 1], ease) : 1;
+  const merging = step && step.kind === 'merge' && slow ? interpolate(u, [1.0 + hold, 2.2 + hold], [0, 1], clamp) : 1;
   const prevRoutes = k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
   const done = t >= T.done;
   const result = t >= T.result;
@@ -154,12 +137,12 @@ export const SavingsSimple: React.FC = () => {
   const cap: [string, string] =
     t < T.alone ? ['6 vị trí lấy hàng, tổng 2 pallet. Mỗi chuyến xe pallet mover chở tối đa 1 pallet ra cửa.', '6 pick locations, 2 pallets of goods in total. The pallet mover carries 1 pallet per trip to the door.']
       : t < T.ex ? ['Ban đầu: mỗi vị trí một chuyến riêng – 6 chuyến, xe về cửa gần như rỗng', 'Start: one trip per location – 6 trips, the mover returns almost empty']
-      : t < T.rank ? [`Lấy ${NAMES[EX.a]} và ${NAMES[EX.b]} trong cùng một chuyến: số mét bớt được là "tiết kiệm"`, `Pick ${NAMES[EX.a]} and ${NAMES[EX.b]} in the same trip: the metres no longer driven are the saving`]
-      : t < T.step0 ? ['Tính tiết kiệm cho mọi cặp, xếp từ lớn đến nhỏ', 'Score every pair, biggest saving first']
+      : t < T.rank ? [`Lấy ${NAMES[EX.a]} và ${NAMES[EX.b]} trong cùng một chuyến thay vì 2 chuyến: xe chạy ít mét hơn`, `Pick ${NAMES[EX.a]} and ${NAMES[EX.b]} in one trip instead of two: fewer metres driven`]
+      : t < T.step0 ? ['Tính cho mọi cặp số mét giảm được, cặp giảm nhiều nhất xét trước', 'Score every pair by metres cut, biggest cut first']
       : choosing
         ? u < 2.4
           ? [`Xe còn chỗ cho ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} đều vừa, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} quá nặng`, `The mover has room for ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} fit, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} too heavy`]
-          : [`Chọn ${NAMES[CH_WIN]} vì tiết kiệm nhiều nhất: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`, `${NAMES[CH_WIN]} saves the most: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`]
+          : [`Chọn ${NAMES[CH_WIN]} vì giảm được nhiều mét nhất: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`, `${NAMES[CH_WIN]} cuts the most metres: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`]
       : !done ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
           : step?.kind === 'same' && slow
@@ -180,12 +163,12 @@ export const SavingsSimple: React.FC = () => {
       {/* which algorithm is working now */}
       <div style={{position: 'absolute', left: 70, top: 150, display: 'flex', gap: 14, opacity: fade(T.ex - 0.4, T.ex) * (1 - fade(T.result - 0.3, T.result))}}>
         {[
-          {on: true, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
-          {on: true, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'orders and measures each trip as it is formed', vi: 'sắp thứ tự và đo từng chuyến ngay khi gộp'},
+          {on: true, n: '1', name: 'SAVINGS ALGORITHM', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
+          {on: true, n: '2', name: 'NEAREST NEIGHBOUR ALGORITHM', c: colors.yellow, en: 'orders and measures each trip as it is formed', vi: 'sắp thứ tự và đo từng chuyến ngay khi gộp'},
         ].map((a) => (
           <div key={a.n} style={{padding: '10px 18px', borderRadius: 14, border: `3px solid ${a.on ? a.c : '#2a3654'}`, background: a.on ? `${a.c}1f` : 'transparent', opacity: a.on ? 1 : 0.4,
-            boxShadow: a.on ? `0 0 18px ${a.c}66` : 'none', maxWidth: 520}}>
-            <div style={{fontSize: 22, fontWeight: 800, color: a.on ? a.c : colors.muted}}>
+            boxShadow: a.on ? `0 0 18px ${a.c}66` : 'none', maxWidth: 600}}>
+            <div style={{fontSize: 22, fontWeight: 800, color: a.on ? a.c : colors.muted, whiteSpace: 'nowrap'}}>
               STEP {a.n} · {a.name}
             </div>
             <div style={{fontSize: 19, fontWeight: 600}}>{a.en}</div>
@@ -199,16 +182,29 @@ export const SavingsSimple: React.FC = () => {
           ? (merging < 1 ? prevRoutes : routes).map((r, ri) => {
               const isMergedNow = step && step.kind === 'merge' && slow && merging < 1 && [step.a, step.b].some((x) => r.includes(x));
               const exPart = t >= T.ex && t < T.rank && r.length === 1 && (r[0] === EX.a || r[0] === EX.b);
-              const col = isMergedNow || exPart ? colors.red : r.length > 1 ? colors.green : '#8f9bb5';
+              const col = exPart ? colors.red : r.length > 1 ? colors.green : '#8f9bb5';
               return (
-                <Loop key={`r${ri}-${r.join('')}`} order={ordOf(r)} color={col} w={r.length > 1 ? 6 : 4}
+                <Loop key={`r${ri}-${r.join('')}`} order={r} color={col} w={r.length > 1 ? 6 : 4}
                   draw={fade(T.alone + ri * 0.25, T.alone + ri * 0.25 + 0.8)}
-                  opacity={(t >= T.ex && t < T.rank && !exPart ? 0.25 : 0.85) * (isMergedNow ? 1 - merging : 1)} />
+                  opacity={(t >= T.ex && t < T.rank && !exPart ? 0.25 : 0.85) * (isMergedNow ? 1 - interpolate(merging, [0.6, 1], [0, 1], clamp) : 1)} />
               );
             })
           : null}
         {step && step.kind === 'merge' && slow && merging < 1 && !done ? (
-          <Loop order={ordOf(routes.find((r) => r.includes(step.a))!)} color={colors.green} w={6} draw={merging} />
+          (() => {
+            // the new link grows first, in the order Savings picked it, then the merged trip replaces the old ones
+            const r = routes.find((x) => x.includes(step.a))!;
+            const ra = prevRoutes.find((x) => x.includes(r[0]))!;
+            const p0 = P[ra[ra.length - 1]];
+            const p1 = P[r[ra.length]];
+            const g = interpolate(merging, [0, 0.6], [0, 1], ease);
+            return (
+              <>
+                <line x1={p0[0]} y1={p0[1]} x2={p0[0] + (p1[0] - p0[0]) * g} y2={p0[1] + (p1[1] - p0[1]) * g} stroke={colors.green} strokeWidth={7} strokeLinecap="round" />
+                <Loop order={r} color={colors.green} w={6} opacity={interpolate(merging, [0.6, 1], [0, 1], clamp)} />
+              </>
+            );
+          })()
         ) : null}
         {/* worked example: the new link and the two removed spokes */}
         {t >= T.ex && t < T.rank ? (
@@ -242,7 +238,7 @@ export const SavingsSimple: React.FC = () => {
               const label = heavy
                 ? `+${fmt(LOAD[i])} → ${fmt(1 - CH_ROOM + LOAD[i])} too heavy`
                 : judged
-                  ? `${win ? '✓ chosen' : '✗'} · saves ${linkSave(i)} m`
+                  ? `${win ? '✓ chosen' : '✗'} · −${linkSave(i)} m`
                   : `+${fmt(LOAD[i])} → 1.0 fits`;
               return (
                 <g key={i} opacity={sh * (heavy ? 0.85 : 1)}>
@@ -297,56 +293,6 @@ export const SavingsSimple: React.FC = () => {
           );
         })}
       </svg>
-
-      {/* worked example card: two separate trips vs one shared trip */}
-      {t >= T.ex && t < T.rank ? (() => {
-        const A = NAMES[EX.a];
-        const B = NAMES[EX.b];
-        const ka = R(dd(DEPOT, P[EX.a]));
-        const kb = R(dd(DEPOT, P[EX.b]));
-        const ab = R(dd(P[EX.a], P[EX.b]));
-        const sep = 2 * ka + 2 * kb;
-        const tog = ka + ab + kb;
-        const row = (at: number) => ({opacity: fade(T.ex + at, T.ex + at + 0.4), transform: `translateY(${(1 - fade(T.ex + at, T.ex + at + 0.4)) * 14}px)`});
-        const Seg: React.FC<{txt: string; m: number; c: string}> = ({txt, m, c}) => (
-          <span style={{display: 'inline-block', padding: '3px 10px', borderRadius: 8, background: `${c}26`, border: `2px solid ${c}`, color: c, fontWeight: 800, margin: '0 3px'}}>
-            {txt} <span style={{opacity: 0.85}}>{m}</span>
-          </span>
-        );
-        return (
-          <div style={{position: 'absolute', left: 1410, top: 250, width: 490, opacity: fade(T.ex + 0.2, T.ex + 0.6) * (1 - fade(T.rank - 0.4, T.rank)),
-            background: '#0e1628', border: '2px solid #ffffff22', borderRadius: 20, padding: '22px 26px'}}>
-            <div style={{fontSize: 24, fontWeight: 800}}>SAVING({A}, {B})</div>
-            <div style={{fontSize: 19, fontWeight: 600, marginTop: 4}}>Should {A} and {B} be picked in the same trip? Compare the metres driven.</div>
-            <div style={{fontSize: 16, color: colors.muted, marginBottom: 14}}>Mục đích: có nên lấy {A} và {B} trong cùng một chuyến không? So số mét phải chạy.</div>
-            <div style={row(0.7)}>
-              <div style={{fontSize: 22, fontWeight: 800, color: colors.red}}>2 separate trips <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 2 chuyến riêng</span></div>
-              <div style={{fontSize: 22, marginTop: 6, lineHeight: 1.7}}>
-                <Seg txt={`Door→${A}→Door`} m={2 * ka} c={colors.red} /> + <Seg txt={`Door→${B}→Door`} m={2 * kb} c={colors.red} />
-              </div>
-              <div style={{fontSize: 30, fontWeight: 800, color: colors.red, textAlign: 'right'}}>= {sep} m</div>
-            </div>
-            <div style={{...row(2.3), marginTop: 10}}>
-              <div style={{fontSize: 22, fontWeight: 800, color: colors.green}}>1 trip picking both <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 1 chuyến lấy cả hai</span></div>
-              <div style={{fontSize: 22, marginTop: 6, lineHeight: 1.7}}>
-                <Seg txt={`Door→${A}`} m={ka} c={colors.green} /> + <Seg txt={`${A}→${B}`} m={ab} c={colors.green} /> + <Seg txt={`${B}→Door`} m={kb} c={colors.green} />
-              </div>
-              <div style={{fontSize: 30, fontWeight: 800, color: colors.green, textAlign: 'right'}}>= {tog} m</div>
-            </div>
-            <div style={{...row(3.9), marginTop: 12, paddingTop: 12, borderTop: '2px solid #ffffff33', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
-              <div>
-                <div style={{fontSize: 22, fontWeight: 700}}>Saved · Tiết kiệm</div>
-                <div style={{fontSize: 17, color: colors.muted}}>{sep} − {tog}</div>
-              </div>
-              <div style={{fontSize: 64, fontWeight: 800, color: colors.green}}>{sep - tog} m</div>
-            </div>
-            <div style={{...row(5.0), fontSize: 21, marginTop: 6}}>
-              Load {fmt(LOAD[EX.a])} + {fmt(LOAD[EX.b])} = {fmt(LOAD[EX.a] + LOAD[EX.b])} ≤ 1 → <b style={{color: colors.green}}>fits</b>
-              <span style={{fontSize: 16, color: colors.muted}}> · tải vừa</span>
-            </div>
-          </div>
-        );
-      })() : null}
 
       {/* trip cards once savings is done */}
       {done && !result ? (
