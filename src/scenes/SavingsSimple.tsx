@@ -148,7 +148,6 @@ export const SavingsSimple: React.FC = () => {
   const done = t >= T.done;
   const result = t >= T.result;
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
-  const total = R(routes.reduce((s, r) => s + nn(r).len, 0));
   const routeOf = (i: number) => routes.findIndex((r) => r.includes(i));
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
 
@@ -194,14 +193,6 @@ export const SavingsSimple: React.FC = () => {
           </div>
         ))}
       </div>
-      <div style={{position: 'absolute', right: 70, top: 40, textAlign: 'right', opacity: fade(T.alone, T.alone + 0.5) * (1 - fade(T.result - 0.3, T.result))}}>
-        <div style={{fontSize: 19, color: colors.muted, letterSpacing: 2}}>{routes.length} TRIPS · TOTAL DISTANCE</div>
-        <div style={{fontSize: 74, fontWeight: 800, lineHeight: 1, color: colors.green}}>
-          {total}
-          <span style={{fontSize: 30, color: colors.muted, marginLeft: 8}}>m</span>
-        </div>
-      </div>
-
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
         {/* trips before nearest neighbour: drawn as spokes/loops per current route */}
         {!done
