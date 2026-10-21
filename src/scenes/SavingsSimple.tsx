@@ -183,10 +183,10 @@ export const SavingsSimple: React.FC = () => {
     }
     if (seedI >= 0) {
       const [a, b] = [...TRIPS[seedI].seed].sort((x, y) => x - y).map((i) => NAMES[i]);
-      const m = SV(TRIPS[seedI].seed[0], TRIPS[seedI].seed[1]);
+      const m = DIST(TRIPS[seedI].seed[0], TRIPS[seedI].seed[1]);
       return seedI === 0
-        ? [`Chuyến 1: lấy ${a} + ${b} chung một chuyến → chạy ít hơn ${m} m so với 2 chuyến riêng`, `Trip 1: ${a} + ${b} in one trip → ${m} m less driving than two separate trips`]
-        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, lấy ${a} + ${b} chung → chạy ít hơn ${m} m`, `Trip ${seedI + 1}: among the rest, ${a} + ${b} in one trip → ${m} m less driving`];
+        ? [`Chuyến 1 bắt đầu với ${a} + ${b}: cùng xa cửa, cách nhau chỉ ${m} m → 1 chuyến thay vì 2`, `Trip 1 starts with ${a} + ${b}: both far from the door, only ${m} m apart → one trip instead of two`]
+        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, ${a} + ${b} cùng xa cửa, cách nhau chỉ ${m} m`, `Trip ${seedI + 1}: among the rest, ${a} + ${b} are far from the door, only ${m} m apart`];
     }
     if (!done) return ['Lần lượt gộp chuyến, miễn xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the mover can still carry it (≤ 1 pallet)'];
     if (!result) return ['Hai chuyến đều đầy, mọi vị trí đã được lấy: mỗi chuyến đi một vòng từ cửa rồi về cửa', 'Both trips are full and every location is picked: each trip is one loop from the door and back'];
@@ -247,8 +247,8 @@ export const SavingsSimple: React.FC = () => {
                 nx = -nx;
                 ny = -ny;
               }
-              const mx = (P[a][0] + P[b][0]) / 2 + (nx / nl) * 60;
-              const my = (P[a][1] + P[b][1]) / 2 + (ny / nl) * 60 + 10;
+              const mx = (P[a][0] + P[b][0]) / 2 + (nx / nl) * 30;
+              const my = (P[a][1] + P[b][1]) / 2 + (ny / nl) * 30 + 10;
               const pulse = 1 + 0.12 * Math.sin(t * 7);
               return (
                 <g opacity={o}>
@@ -256,7 +256,7 @@ export const SavingsSimple: React.FC = () => {
                   {[a, b].map((i) => <circle key={i} cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={colors.yellow} strokeWidth={5} />)}
                   <text x={mx} y={my} textAnchor={nx < 0 ? 'end' : 'start'} fontSize={28} fontWeight={800} fill={colors.yellow} stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}
                     opacity={interpolate(su, [0.6, 1.0], [0, 1], clamp)}>
-                    {SV(a, b)} m less
+                    {DIST(a, b)} m
                   </text>
                 </g>
               );
