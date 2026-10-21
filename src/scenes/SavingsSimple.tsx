@@ -7,16 +7,19 @@ import {colors, fontFamily} from '../theme';
  * 6 stops whose loads add up to 2 pallets; the vehicle carries 1 pallet per trip.
  * Savings starts with one trip per stop, ranks every pair by saving = d(K,i) + d(K,j) − d(i,j) and merges the two
  * trips when the merged load still fits (≤ 1 pallet) – so it optimises both distance and how full each trip is.
- * Each trip is drawn in the order Savings picked its stops; on this map that loop is also the nearest-neighbour
- * order, so there is no separate nearest-neighbour pass. Straight-line distances, 1 m = 10 px.
+ * Nearest neighbour then orders each trip from the door: closest location first, then the closest to it.
+ * The map is laid out so that this order also reads as the stops being picked one by one (A is just closest to
+ * the door). Straight-line distances, 1 m = 10 px.
  * Vietnamese is the large line.
  */
 type Pt = [number, number];
 const dd = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]) / 10;
 const DEPOT: Pt = [810, 900];
 const NAMES = ['A', 'B', 'C', 'D', 'E', 'F'];
-const P: Pt[] = [[290, 480], [470, 370], [700, 380], [840, 370], [1220, 540], [1350, 700]];
+const P: Pt[] = [[420, 590], [470, 370], [700, 380], [980, 400], [1220, 540], [1350, 700]];
 const LOAD = [0.4, 0.3, 0.3, 0.3, 0.4, 0.3]; // share of one pallet
+// load gauge above each stop; A's goes below, since its link to B runs straight up
+const LBL_Y = [96, -62, -62, -62, -62, -62];
 const CAP = 1;
 const N = P.length;
 const R = (x: number) => Math.round(x);
@@ -51,19 +54,25 @@ const ROUTES_AFTER: number[][][] = []; // routes (as stop lists) after each step
   }
 }
 // ---- trips as Savings builds them ----
-// Each final route, started from its first merged pair and grown one stop at a time, in pick order.
+// Each Savings trip in nearest-neighbour order from the door, grown one stop at a time.
 type Trip = {chain: number[]; seed: [number, number]};
 const TRIPS: Trip[] = [];
 {
-  const finals = ROUTES_AFTER[ROUTES_AFTER.length - 1].filter((r) => r.length > 1);
-  const firstMerge = (r: number[]) => STEPS.findIndex((st) => st.kind === 'merge' && r.includes(st.a));
-  finals.sort((x, y) => firstMerge(x) - firstMerge(y));
-  for (const r of finals) {
-    const st = STEPS[firstMerge(r)];
-    // orient the chain so the first pair comes first and every later stop joins at the end
-    const chain = r.indexOf(st.a) <= 1 && r.indexOf(st.b) <= 1 ? [...r] : [...r].reverse();
-    TRIPS.push({chain, seed: [chain[0], chain[1]]});
-  }
+  const nnOrder = (r: number[]) => {
+    const rest = [...r];
+    const order: number[] = [];
+    let cur = DEPOT;
+    while (rest.length) {
+      rest.sort((x, y) => dd(cur, P[x]) - dd(cur, P[y]));
+      order.push(rest.shift()!);
+      cur = P[order[order.length - 1]];
+    }
+    return order;
+  };
+  const chains = ROUTES_AFTER[ROUTES_AFTER.length - 1].map(nnOrder);
+  // the trip with the location closest to the door goes first
+  chains.sort((x, y) => dd(DEPOT, P[x[0]]) - dd(DEPOT, P[y[0]]));
+  for (const chain of chains) TRIPS.push({chain, seed: [chain[0], chain[1]]});
 }
 const TRIP_COL = [colors.green, '#4dd0e1'];
 const loadOf = (r: number[]) => r.reduce((a, i) => a + LOAD[i], 0);
@@ -182,14 +191,15 @@ export const SavingsSimple: React.FC = () => {
       return [`Chọn ${w} vì gần ${f} nhất: ${list}`, `${w} is the closest to ${f}: ${list}`];
     }
     if (seedI >= 0) {
-      const [a, b] = [...TRIPS[seedI].seed].sort((x, y) => x - y).map((i) => NAMES[i]);
+      const [a, b] = TRIPS[seedI].seed.map((i) => NAMES[i]);
+      const d0 = R(dd(DEPOT, P[TRIPS[seedI].seed[0]]));
       const m = DIST(TRIPS[seedI].seed[0], TRIPS[seedI].seed[1]);
       return seedI === 0
-        ? [`Chuyến 1 bắt đầu với ${a} + ${b}: cùng xa cửa, cách nhau chỉ ${m} m → 1 chuyến thay vì 2`, `Trip 1 starts with ${a} + ${b}: both far from the door, only ${m} m apart → one trip instead of two`]
-        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, ${a} + ${b} cùng xa cửa, cách nhau chỉ ${m} m`, `Trip ${seedI + 1}: among the rest, ${a} + ${b} are far from the door, only ${m} m apart`];
+        ? [`Chuyến 1 bắt đầu từ ${a}, vị trí gần cửa nhất (${d0} m) → ${b} gần ${a} nhất (${m} m)`, `Trip 1 starts at ${a}, the closest location to the door (${d0} m) → ${b} is the closest to ${a} (${m} m)`]
+        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, ${a} gần cửa nhất (${d0} m) → ${b} gần ${a} nhất (${m} m)`, `Trip ${seedI + 1}: of the rest, ${a} is the closest to the door (${d0} m) → ${b} is the closest to ${a} (${m} m)`];
     }
     if (!done) return ['Lần lượt gộp chuyến, miễn xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the mover can still carry it (≤ 1 pallet)'];
-    if (!result) return ['Hai chuyến đều đầy, mọi vị trí đã được lấy: mỗi chuyến đi một vòng từ cửa rồi về cửa', 'Both trips are full and every location is picked: each trip is one loop from the door and back'];
+    if (!result) return ['Hai chuyến đều đầy, mọi vị trí đã được lấy: mỗi chuyến đi từ vị trí gần cửa nhất, lấy xong về cửa', 'Both trips are full and every location is picked: each trip starts closest to the door and ends at the door'];
     return ['', ''];
   })();
 
@@ -206,7 +216,7 @@ export const SavingsSimple: React.FC = () => {
       <div style={{position: 'absolute', left: 70, top: 150, display: 'flex', gap: 14, opacity: fade(T.build - 0.4, T.build) * (1 - fade(T.result - 0.3, T.result))}}>
         {[
           {n: '1', name: 'SAVINGS ALGORITHM', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
-          {n: '2', name: 'NEAREST NEIGHBOUR ALGORITHM', c: colors.yellow, en: 'orders and measures each trip as it is formed', vi: 'sắp thứ tự và đo từng chuyến ngay khi gộp'},
+          {n: '2', name: 'NEAREST NEIGHBOUR ALGORITHM', c: colors.yellow, en: 'orders each trip, nearest location first', vi: 'sắp thứ tự từng chuyến, vị trí gần nhất trước'},
         ].map((a) => (
           <div key={a.n} style={{padding: '10px 18px', borderRadius: 14, border: `3px solid ${a.c}`, background: `${a.c}1f`, boxShadow: `0 0 18px ${a.c}66`, maxWidth: 600}}>
             <div style={{fontSize: 22, fontWeight: 800, color: a.c, whiteSpace: 'nowrap'}}>
@@ -252,11 +262,14 @@ export const SavingsSimple: React.FC = () => {
               const pulse = 1 + 0.12 * Math.sin(t * 7);
               return (
                 <g opacity={o}>
-                  <line x1={P[a][0]} y1={P[a][1]} x2={P[b][0]} y2={P[b][1]} stroke={colors.yellow} strokeWidth={5} strokeDasharray="12 9" />
+                  {/* the start: the location closest to the door */}
+                  <line x1={DEPOT[0]} y1={DEPOT[1]} x2={P[a][0]} y2={P[a][1]} stroke={colors.yellow} strokeWidth={5} strokeDasharray="12 9" />
+                  <line x1={P[a][0]} y1={P[a][1]} x2={P[b][0]} y2={P[b][1]} stroke={colors.yellow} strokeWidth={5} strokeDasharray="12 9"
+                    opacity={interpolate(su, [0.5, 0.9], [0, 1], clamp)} />
                   {[a, b].map((i) => <circle key={i} cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={colors.yellow} strokeWidth={5} />)}
                   <text x={mx} y={my} textAnchor={nx < 0 ? 'end' : 'start'} fontSize={28} fontWeight={800} fill={colors.yellow} stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}
                     opacity={interpolate(su, [0.6, 1.0], [0, 1], clamp)}>
-                    {DIST(a, b)} m
+                    {DIST(a, b)} m · closest
                   </text>
                 </g>
               );
@@ -307,7 +320,7 @@ export const SavingsSimple: React.FC = () => {
           if (t < FULL_AT[ti] || result) return null;
           // on the open side of the map, so it never sits on a line
           const left = tr.chain.reduce((a, i) => a + P[i][0], 0) / tr.chain.length < DEPOT[0];
-          const [cx, cy] = left ? [340, 700] : [1590, 790];
+          const [cx, cy] = left ? [250, 790] : [1590, 790];
           const col = TRIP_COL[ti];
           const sc = spring({frame: frame - FULL_AT[ti] * fps, fps, config: {damping: 12}});
           return (
@@ -340,9 +353,9 @@ export const SavingsSimple: React.FC = () => {
               <text y={11} textAnchor="middle" fontSize={32} fontWeight={800} fill="#0b1222">
                 {NAMES[i]}
               </text>
-              <rect x={-30} y={-62} width={60} height={14} rx={4} fill="none" stroke={colors.muted} strokeWidth={2} />
-              <rect x={-30} y={-62} width={60 * LOAD[i]} height={14} rx={4} fill={colors.amber} />
-              <text y={-70} textAnchor="middle" fontSize={20} fontWeight={700} fill={colors.muted}>
+              <rect x={-30} y={LBL_Y[i]} width={60} height={14} rx={4} fill="none" stroke={colors.muted} strokeWidth={2} />
+              <rect x={-30} y={LBL_Y[i]} width={60 * LOAD[i]} height={14} rx={4} fill={colors.amber} />
+              <text y={LBL_Y[i] - 8} textAnchor="middle" fontSize={20} fontWeight={700} fill={colors.muted}>
                 {fmt(LOAD[i])} pallet
               </text>
               {done ? (
