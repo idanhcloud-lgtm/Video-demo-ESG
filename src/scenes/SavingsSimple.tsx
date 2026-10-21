@@ -174,7 +174,7 @@ export const SavingsSimple: React.FC = () => {
       <Background />
       <div style={{position: 'absolute', left: 70, top: 40}}>
         <div style={{fontSize: 48, fontWeight: 800}}>
-          <span style={{color: colors.green}}>Savings</span> <span style={{color: colors.muted, fontWeight: 600}}>+</span> <span style={{color: colors.yellow}}>Nearest Neighbour</span>
+          <span style={{color: colors.green}}>Savings Algorithm</span> <span style={{color: colors.muted, fontWeight: 600}}>+</span> <span style={{color: colors.yellow}}>Nearest Neighbour Algorithm</span>
         </div>
         <div style={{fontSize: 22, color: colors.muted}}>Simulation · Mô phỏng</div>
       </div>
