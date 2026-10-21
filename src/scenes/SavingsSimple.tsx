@@ -7,7 +7,8 @@ import {colors, fontFamily} from '../theme';
  * 6 stops whose loads add up to 2 pallets; the vehicle carries 1 pallet per trip.
  * Savings starts with one trip per stop, ranks every pair by saving = d(K,i) + d(K,j) − d(i,j) and merges the two
  * trips when the merged load still fits (≤ 1 pallet) – so it optimises both distance and how full each trip is.
- * Nearest neighbour then gives the visit order of each trip. Straight-line distances, 1 m = 10 px.
+ * Every trip is measured and drawn in nearest-neighbour order as soon as it is formed, so there is no separate
+ * nearest-neighbour pass. Straight-line distances, 1 m = 10 px.
  * Vietnamese is the large line.
  */
 type Pt = [number, number];
@@ -65,13 +66,8 @@ const ROUTES_AFTER: number[][][] = []; // routes (as stop lists) after each step
 const FINAL = ROUTES_AFTER[ROUTES_AFTER.length - 1]
   .map((r) => nn(r))
   .sort((x, y) => P[x.order[0]][0] - P[y.order[0]][0]);
-/** Length of a trip driven in the order Savings built it (Door → chain → Door). */
-const chainLen = (r: number[]) => {
-  const pts: Pt[] = [DEPOT, ...r.map((i) => P[i]), DEPOT];
-  return pts.slice(1).reduce((t, q, k) => t + dd(pts[k], q), 0);
-};
-const ALONE_TOTAL = R(P.reduce((t, p) => t + 2 * dd(DEPOT, p), 0));
-const SAV_TOTAL = R(FINAL.reduce((t, r) => t + r.len, 0));
+/** Visit order of a trip: nearest neighbour from the door. */
+const ordOf = (r: number[]) => nn(r).order;
 const TRIP_COL = [colors.green, '#4dd0e1'];
 const EX = STEPS[0];
 const CAP_STEP = STEPS.findIndex((s) => s.kind === 'cap');
@@ -95,7 +91,7 @@ const linkFrom = (i: number) => CH_TRIP.reduce((b, j) => (dd(DEPOT, P[i]) + dd(D
 const HOLD = 6.0; // extra seconds on the choice
 
 // ---- timeline (seconds) ----
-const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 17.0, step0: 18.5, nn: 0, result: 0};
+const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 17.0, step0: 18.5, done: 0, result: 0};
 const SLOW = 2.6; // first steps, up to the first capacity refusal
 const FAST = 0.45;
 const STEP_AT: number[] = [];
@@ -105,12 +101,10 @@ const STEP_AT: number[] = [];
     STEP_AT.push(at);
     at += (k <= CAP_STEP + 1 ? SLOW : FAST) + (k === CHOICE ? HOLD : 0);
   });
-  T.nn = at + 0.6;
+  T.done = at + 0.6;
 }
-const NN_LEG = 1.1;
-const NN_AT = FINAL.map((_, k) => T.nn + 0.6 + FINAL.slice(0, k).reduce((t, r) => t + (r.order.length + 1) * NN_LEG + 0.5, 0));
-T.result = NN_AT[NN_AT.length - 1] + (FINAL[FINAL.length - 1].order.length + 1) * NN_LEG + 1.0;
-export const SAVINGS_SIMPLE_SECONDS = Math.ceil(T.result + 6.5);
+T.result = T.done + 4.5;
+export const SAVINGS_SIMPLE_SECONDS = Math.ceil(T.result + 6.0);
 
 const loopPts = (order: number[]): Pt[] => [DEPOT, ...order.map((i) => P[i]), DEPOT];
 const plen = (pts: Pt[]) => pts.slice(1).reduce((t, p, k) => t + Math.hypot(p[0] - pts[k][0], p[1] - pts[k][1]), 0);
@@ -151,10 +145,10 @@ export const SavingsSimple: React.FC = () => {
   const routes = k < 0 ? P.map((_, i) => [i]) : decided ? ROUTES_AFTER[k] : k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
   const merging = step && step.kind === 'merge' && slow ? interpolate(u, [1.0 + hold, 1.8 + hold], [0, 1], ease) : 1;
   const prevRoutes = k > 0 ? ROUTES_AFTER[k - 1] : P.map((_, i) => [i]);
-  const inNN = t >= T.nn;
+  const done = t >= T.done;
   const result = t >= T.result;
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
-  const total = R(inNN ? FINAL.reduce((s, r) => s + r.len, 0) : routes.reduce((s, r) => s + chainLen(r), 0));
+  const total = R(routes.reduce((s, r) => s + nn(r).len, 0));
   const routeOf = (i: number) => routes.findIndex((r) => r.includes(i));
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
 
@@ -167,12 +161,12 @@ export const SavingsSimple: React.FC = () => {
         ? u < 2.4
           ? [`Xe còn chỗ cho ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} đều vừa, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} quá nặng`, `The mover has room for ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} fit, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} too heavy`]
           : [`Chọn ${NAMES[CH_WIN]} vì tiết kiệm nhiều nhất: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`, `${NAMES[CH_WIN]} saves the most: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`]
-      : !inNN ? (step?.kind === 'cap' && slow
+      : !done ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
           : step?.kind === 'same' && slow
             ? [`${NAMES[step.a]} và ${NAMES[step.b]} đã chung chuyến → bỏ qua`, `${NAMES[step.a]} and ${NAMES[step.b]} already share a trip → skipped`]
             : ['Lần lượt gộp chuyến, miễn xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the mover can still carry it (≤ 1 pallet)'])
-      : !result ? ['Láng giềng gần nhất sắp thứ tự lấy hàng: vị trí gần nhất trước, lấy xong mang ra cửa', 'Nearest neighbour sets the pick order: closest location first, then bring the goods to the door']
+      : !result ? ['Mỗi chuyến đã được đo theo láng giềng gần nhất: vị trí gần nhất trước, lấy xong mang ra cửa', 'Each trip was measured in nearest-neighbour order: closest location first, then to the door']
       : ['Ít chuyến hơn, chuyến nào xe cũng đầy, chạy trong kho ít hơn', 'Fewer trips, a full mover every trip, less driving in the warehouse'];
 
   return (
@@ -187,8 +181,8 @@ export const SavingsSimple: React.FC = () => {
       {/* which algorithm is working now */}
       <div style={{position: 'absolute', left: 70, top: 150, display: 'flex', gap: 14, opacity: fade(T.ex - 0.4, T.ex) * (1 - fade(T.result - 0.3, T.result))}}>
         {[
-          {on: !inNN, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
-          {on: inNN, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'decides the pick order inside each trip', vi: 'quyết định thứ tự lấy hàng trong từng chuyến'},
+          {on: true, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
+          {on: true, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'orders and measures each trip as it is formed', vi: 'sắp thứ tự và đo từng chuyến ngay khi gộp'},
         ].map((a) => (
           <div key={a.n} style={{padding: '10px 18px', borderRadius: 14, border: `3px solid ${a.on ? a.c : '#2a3654'}`, background: a.on ? `${a.c}1f` : 'transparent', opacity: a.on ? 1 : 0.4,
             boxShadow: a.on ? `0 0 18px ${a.c}66` : 'none', maxWidth: 520}}>
@@ -210,20 +204,20 @@ export const SavingsSimple: React.FC = () => {
 
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
         {/* trips before nearest neighbour: drawn as spokes/loops per current route */}
-        {!inNN
+        {!done
           ? (merging < 1 ? prevRoutes : routes).map((r, ri) => {
               const isMergedNow = step && step.kind === 'merge' && slow && merging < 1 && [step.a, step.b].some((x) => r.includes(x));
               const exPart = t >= T.ex && t < T.rank && r.length === 1 && (r[0] === EX.a || r[0] === EX.b);
               const col = isMergedNow || exPart ? colors.red : r.length > 1 ? colors.green : '#8f9bb5';
               return (
-                <Loop key={`r${ri}-${r.join('')}`} order={r} color={col} w={r.length > 1 ? 6 : 4}
+                <Loop key={`r${ri}-${r.join('')}`} order={ordOf(r)} color={col} w={r.length > 1 ? 6 : 4}
                   draw={fade(T.alone + ri * 0.25, T.alone + ri * 0.25 + 0.8)}
                   opacity={(t >= T.ex && t < T.rank && !exPart ? 0.25 : 0.85) * (isMergedNow ? 1 - merging : 1)} />
               );
             })
           : null}
-        {step && step.kind === 'merge' && slow && merging < 1 && !inNN ? (
-          <Loop order={routes.find((r) => r.includes(step.a))!} color={colors.green} w={6} draw={merging} />
+        {step && step.kind === 'merge' && slow && merging < 1 && !done ? (
+          <Loop order={ordOf(routes.find((r) => r.includes(step.a))!)} color={colors.green} w={6} draw={merging} />
         ) : null}
         {/* worked example: the new link and the two removed spokes */}
         {t >= T.ex && t < T.rank ? (
@@ -233,7 +227,7 @@ export const SavingsSimple: React.FC = () => {
           </>
         ) : null}
         {/* pair being examined */}
-        {step && slow && !inNN && !choosing && u < 1.2 + hold ? (
+        {step && slow && !done && !choosing && u < 1.2 + hold ? (
           <line x1={P[step.a][0]} y1={P[step.a][1]} x2={P[step.b][0]} y2={P[step.b][1]} stroke={step.kind === 'cap' ? colors.red : step.kind === 'same' ? '#8f9bb5' : colors.yellow}
             strokeWidth={5} strokeDasharray="12 9" opacity={interpolate(u, [hold, hold + 0.2, hold + 1.0, hold + 1.2], [0, 1, 1, 0], clamp)} />
         ) : null}
@@ -275,49 +269,8 @@ export const SavingsSimple: React.FC = () => {
             })
           : null}
 
-        {/* Savings result kept faint underneath while nearest neighbour redraws each trip */}
-        {inNN && !result
-          ? ROUTES_AFTER[ROUTES_AFTER.length - 1].map((r) => <Loop key={`c${r.join('')}`} order={r} color="#8f9bb5" w={4} opacity={0.45} dash="10 10" />)
-          : null}
-
-        {/* nearest neighbour, trip by trip */}
-        {inNN
-          ? FINAL.map((tr, ti) => {
-              const at = NN_AT[ti];
-              const pts = loopPts(tr.order);
-              return pts.slice(1).map((to, legI) => {
-                const from = pts[legI];
-                const uu = (t - at - legI * NN_LEG) / NN_LEG;
-                if (uu < 0) return null;
-                const cands = legI < tr.order.length ? tr.order.slice(legI) : [];
-                const dr = interpolate(uu, [0.5, 0.95], [0, 1], ease);
-                return (
-                  <g key={`${ti}-${legI}`}>
-                    {uu < 1
-                      ? cands.map((i) => {
-                          const best = i === tr.order[legI];
-                          const sh = interpolate(uu, [0, 0.2], [0, 1], clamp);
-                          const keep = best ? 1 : interpolate(uu, [0.4, 0.55], [1, 0], clamp);
-                          const c = best && uu > 0.35 ? colors.yellow : '#8f9bb5';
-                          return (
-                            <g key={i} opacity={keep}>
-                              <line x1={from[0]} y1={from[1]} x2={from[0] + (P[i][0] - from[0]) * sh} y2={from[1] + (P[i][1] - from[1]) * sh} stroke={c} strokeWidth={3.5} strokeDasharray="9 8" />
-                              <text x={from[0] + (P[i][0] - from[0]) * 0.6 + 12} y={from[1] + (P[i][1] - from[1]) * 0.6} fontSize={22} fontWeight={800} fill={c} opacity={sh}
-                                stroke="#0b1222" strokeWidth={6} style={{paintOrder: 'stroke'}}>
-                                {R(dd(from, P[i]))} m
-                              </text>
-                            </g>
-                          );
-                        })
-                      : null}
-                    {dr > 0 ? (
-                      <line x1={from[0]} y1={from[1]} x2={from[0] + (to[0] - from[0]) * dr} y2={from[1] + (to[1] - from[1]) * dr} stroke={TRIP_COL[ti]} strokeWidth={7} strokeLinecap="round" />
-                    ) : null}
-                  </g>
-                );
-              });
-            })
-          : null}
+        {/* final trips, coloured per trip */}
+        {done ? FINAL.map((tr, ti) => <Loop key={`f${ti}`} order={tr.order} color={TRIP_COL[ti]} w={7} />) : null}
 
         {/* depot + stops */}
         <g transform={`translate(${DEPOT[0]} ${DEPOT[1]}) scale(${pop(0.5)})`}>
@@ -328,8 +281,8 @@ export const SavingsSimple: React.FC = () => {
         </g>
         {P.map((p, i) => {
           const fi = finalOf(i);
-          const ordered = inNN && t >= NN_AT[fi] + (FINAL[fi].order.indexOf(i) + 0.6) * NN_LEG;
-          const fill = inNN ? (ordered ? TRIP_COL[fi] : '#8f9bb5') : routes[routeOf(i)].length > 1 && merging >= 1 ? colors.green : colors.amber;
+          const ordered = done;
+          const fill = done ? TRIP_COL[fi] : routes[routeOf(i)].length > 1 && merging >= 1 ? colors.green : colors.amber;
           return (
             <g key={i} transform={`translate(${p[0]} ${p[1]}) scale(${pop(T.pts + i * 0.2)})`}>
               <circle r={34} fill={fill} stroke="#0b1222" strokeWidth={4} />
@@ -404,38 +357,16 @@ export const SavingsSimple: React.FC = () => {
         );
       })() : null}
 
-      {/* ranking + decisions */}
-      {t >= T.rank && !inNN ? (
-        <div style={{position: 'absolute', left: 1440, top: 300, width: 470, opacity: fade(T.rank, T.rank + 0.4)}}>
-          <div style={{fontSize: 18, color: colors.muted, letterSpacing: 2, marginBottom: 6}}>EVERY PAIR · SAVED · LOAD</div>
-          {STEPS.map((s, r) => {
-            const done = r < k || (r === k && decided);
-            const col = !done ? colors.yellow : s.kind === 'merge' ? colors.green : s.kind === 'cap' ? colors.red : '#4a5570';
-            return (
-              <div key={r} style={{display: 'flex', alignItems: 'center', height: 40, opacity: fade(T.rank + r * 0.08, T.rank + r * 0.08 + 0.25) * (done && s.kind !== 'merge' ? 0.6 : 1),
-                background: r === k && !inNN ? '#ffffff12' : 'transparent', borderRadius: 8, paddingLeft: 8}}>
-                <div style={{width: 70, fontSize: 25, fontWeight: 800}}>{NAMES[s.a]}+{NAMES[s.b]}</div>
-                <div style={{width: Math.max(4, s.save * 0.9), height: 14, borderRadius: 4, background: col}} />
-                <div style={{marginLeft: 10, width: 80, fontSize: 22, fontWeight: 800, color: col, whiteSpace: 'nowrap'}}>{SV(s.a, s.b)} m</div>
-                <div style={{fontSize: 20, fontWeight: 800, color: col, whiteSpace: 'nowrap'}}>
-                  {!done ? '' : s.kind === 'merge' ? `✓ merge · ${fmt(s.load)}` : s.kind === 'cap' ? `✗ ${fmt(s.load)} > 1 too full` : '– same trip'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-
-      {/* trip cards during nearest neighbour */}
-      {inNN && !result ? (
+      {/* trip cards once savings is done */}
+      {done && !result ? (
         <div style={{position: 'absolute', left: 1440, top: 330, width: 460}}>
           {FINAL.map((tr, ti) => (
-            <div key={ti} style={{marginBottom: 22, opacity: fade(NN_AT[ti] - 0.3, NN_AT[ti])}}>
+            <div key={ti} style={{marginBottom: 22, opacity: fade(T.done + ti * 0.4, T.done + ti * 0.4 + 0.4)}}>
               <div style={{fontSize: 26, fontWeight: 800, color: TRIP_COL[ti]}}>
                 Trip {ti + 1}: Door → {tr.order.map((i) => NAMES[i]).join(' → ')} → Door
               </div>
               <div style={{fontSize: 22, marginTop: 4}}>
-                {R(tr.len)} m · load {fmt(tr.order.reduce((s, i) => s + LOAD[i], 0))} pallet <Gauge load={tr.order.reduce((s, i) => s + LOAD[i], 0)} color={TRIP_COL[ti]} />
+                Load {fmt(tr.order.reduce((s, i) => s + LOAD[i], 0))} pallet <Gauge load={tr.order.reduce((s, i) => s + LOAD[i], 0)} color={TRIP_COL[ti]} />
               </div>
             </div>
           ))}
@@ -448,8 +379,8 @@ export const SavingsSimple: React.FC = () => {
           <div style={{position: 'absolute', inset: 0, zIndex: 3, opacity: res * 0.92, background: 'rgba(5,8,16,0.75)', backdropFilter: 'blur(6px)'}} />
           <div style={{position: 'absolute', left: 960, top: 460, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res, display: 'flex', gap: 30}}>
             {[
-              {t: 'One trip per location', e: 'Mỗi vị trí 1 chuyến', n: N, load: `${R((100 * LOAD.reduce((a, b) => a + b, 0)) / N)}% full per trip`, g: LOAD.reduce((a, b) => a + b, 0) / N, m: ALONE_TOTAL, c: colors.muted},
-              {t: 'Savings + Nearest Neighbour', e: 'Savings + Láng giềng gần nhất', n: FINAL.length, load: '100% full per trip', g: 1, m: SAV_TOTAL, c: colors.green},
+              {t: 'One trip per location', e: 'Mỗi vị trí 1 chuyến', n: N, load: `${R((100 * LOAD.reduce((a, b) => a + b, 0)) / N)}% full per trip`, g: LOAD.reduce((a, b) => a + b, 0) / N, c: colors.muted},
+              {t: 'Savings + Nearest Neighbour', e: 'Savings + Láng giềng gần nhất', n: FINAL.length, load: '100% full per trip', g: 1, c: colors.green},
             ].map((c) => (
               <div key={c.t} style={{width: 560, padding: '28px 34px', borderRadius: 22, background: '#0e1628', border: `3px solid ${c.c}`}}>
                 <div style={{fontSize: 30, fontWeight: 800, color: c.c}}>{c.t}</div>
@@ -458,7 +389,6 @@ export const SavingsSimple: React.FC = () => {
                 <div style={{fontSize: 24, marginTop: 6}}>
                   {c.load} <Gauge load={c.g} color={c.c} w={140} />
                 </div>
-                <div style={{fontSize: 70, fontWeight: 800, color: c.c, marginTop: 10}}>{c.m} m</div>
               </div>
             ))}
           </div>
