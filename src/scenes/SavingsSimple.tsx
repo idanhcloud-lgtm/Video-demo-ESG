@@ -81,8 +81,16 @@ const CHOICE = 1;
 const CH = STEPS[CHOICE];
 const CH_TRIP = ROUTES_AFTER[CHOICE - 1].find((r) => r.length > 1 && (r.includes(CH.a) || r.includes(CH.b)))!;
 const CH_WIN = CH_TRIP.includes(CH.a) ? CH.b : CH.a;
-const CH_RIVAL = P.map((_, i) => i).find((i) => i !== CH_WIN && !CH_TRIP.includes(i) && LOAD[i] === LOAD[CH_WIN])!;
-const linkSave = (i: number) => Math.max(...CH_TRIP.map((j) => SV(i, j)));
+function linkSaveOf(i: number) {
+  return Math.max(...CH_TRIP.map((j) => SV(i, j)));
+}
+const CH_ROOM = CAP - CH_TRIP.reduce((t, i) => t + LOAD[i], 0);
+// every stop outside the trip: the ones that fit compete on saving, the others are too heavy
+const CH_OUT = P.map((_, i) => i).filter((i) => !CH_TRIP.includes(i));
+const CH_FIT = CH_OUT.filter((i) => LOAD[i] <= CH_ROOM + 1e-9);
+const CH_HEAVY = CH_OUT.filter((i) => LOAD[i] > CH_ROOM + 1e-9);
+const CH_RIVALS = CH_FIT.filter((i) => i !== CH_WIN).sort((a, b) => linkSaveOf(b) - linkSaveOf(a));
+const linkSave = (i: number) => linkSaveOf(i);
 const linkFrom = (i: number) => CH_TRIP.reduce((b, j) => (dd(DEPOT, P[i]) + dd(DEPOT, P[j]) - dd(P[i], P[j]) > dd(DEPOT, P[i]) + dd(DEPOT, P[b]) - dd(P[i], P[b]) ? j : b), CH_TRIP[0]);
 const HOLD = 6.0; // extra seconds on the choice
 
@@ -157,8 +165,8 @@ export const SavingsSimple: React.FC = () => {
       : t < T.step0 ? ['Tính tiết kiệm cho mọi cặp, xếp từ lớn đến nhỏ', 'Score every pair, biggest saving first']
       : choosing
         ? u < 2.4
-          ? [`Xe còn chỗ cho 0.3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} đều vừa`, `The mover still has room for 0.3 pallet: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
-          : [`Chọn ${NAMES[CH_WIN]} vì gần hơn: tiết kiệm ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`, `${NAMES[CH_WIN]} is closer: it saves ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`]
+          ? [`Xe còn chỗ cho ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} đều vừa, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} quá nặng`, `The mover has room for ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} fit, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} too heavy`]
+          : [`Chọn ${NAMES[CH_WIN]} vì tiết kiệm nhiều nhất: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`, `${NAMES[CH_WIN]} saves the most: ${[CH_WIN, ...CH_RIVALS].map((i) => `${NAMES[i]} ${linkSave(i)} m`).join(' > ')}`]
       : !inNN ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
           : step?.kind === 'same' && slow
@@ -232,21 +240,35 @@ export const SavingsSimple: React.FC = () => {
 
         {/* the choice: two candidates fit the open trip, the closer one wins */}
         {choosing
-          ? [CH_WIN, CH_RIVAL].map((i, n) => {
+          ? [CH_WIN, ...CH_RIVALS, ...CH_HEAVY].map((i, n) => {
               const from = P[linkFrom(i)];
               const win = i === CH_WIN;
+              const heavy = CH_HEAVY.includes(i);
               const judged = u > 2.4;
-              const col = judged ? (win ? colors.green : colors.red) : colors.yellow;
+              const col = heavy ? '#8f9bb5' : judged ? (win ? colors.green : colors.red) : colors.yellow;
               const pulse = 1 + 0.12 * Math.sin(t * 7);
-              const sh = interpolate(u, [0.3 + n * 0.4, 0.8 + n * 0.4], [0, 1], clamp);
+              const sh = interpolate(u, [0.3 + n * 0.35, 0.8 + n * 0.35], [0, 1], clamp);
+              // rivals low on the map bend under the heavy stop so the arc never crosses it
+              const under = !win && !heavy && P[i][1] > 450;
+              const ctrlY = win ? Math.min(from[1], P[i][1]) : under ? Math.max(from[1], P[i][1]) + 100 : Math.min(from[1], P[i][1]) - 60 - 40 * n;
+              const lx = heavy ? P[i][0] - 62 : win ? P[i][0] - 30 : under ? P[i][0] + 50 : P[i][0] + 62;
+              const ly = heavy ? P[i][1] + 10 : win || under ? P[i][1] + 100 : P[i][1] + 10;
+              const anchor = heavy || under ? 'end' : win ? 'middle' : 'start';
+              const label = heavy
+                ? `+${fmt(LOAD[i])} → ${fmt(1 - CH_ROOM + LOAD[i])} too heavy`
+                : judged
+                  ? `${win ? '✓ chosen' : '✗'} · saves ${linkSave(i)} m`
+                  : `+${fmt(LOAD[i])} → 1.0 fits`;
               return (
-                <g key={i} opacity={sh}>
-                  <path d={`M${from[0]} ${from[1]} Q${(from[0] + P[i][0]) / 2} ${Math.min(from[1], P[i][1]) - (win ? 0 : 130)} ${P[i][0]} ${P[i][1]}`} fill="none" stroke={col} strokeWidth={5}
-                    strokeDasharray="12 9" opacity={judged && !win ? 0.6 : 1} />
-                  <circle cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={col} strokeWidth={5} />
-                  <text x={win ? P[i][0] - 30 : P[i][0] + 62} y={win ? P[i][1] + 92 : P[i][1] + 10} textAnchor={win ? 'middle' : 'start'} fontSize={26} fontWeight={800} fill={col}
+                <g key={i} opacity={sh * (heavy ? 0.85 : 1)}>
+                  {heavy ? null : (
+                    <path d={`M${from[0]} ${from[1]} Q${(from[0] + P[i][0]) / 2} ${ctrlY} ${P[i][0]} ${P[i][1]}`} fill="none" stroke={col} strokeWidth={5}
+                      strokeDasharray="12 9" opacity={judged && !win ? 0.6 : 1} />
+                  )}
+                  <circle cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={col} strokeWidth={5} strokeDasharray={heavy ? '6 6' : undefined} />
+                  <text x={lx} y={ly} textAnchor={anchor} fontSize={26} fontWeight={800} fill={col}
                     stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}>
-                    {judged ? `${win ? '✓ chosen' : '✗'} · saves ${linkSave(i)} m` : `+0.3 → 1.0 fits`}
+                    {label}
                   </text>
                 </g>
               );
