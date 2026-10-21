@@ -314,32 +314,36 @@ export const SavingsSimple: React.FC = () => {
       {result ? (
         <>
           <div style={{position: 'absolute', inset: 0, zIndex: 3, opacity: res * 0.92, background: 'rgba(5,8,16,0.75)', backdropFilter: 'blur(6px)'}} />
-          <div style={{position: 'absolute', left: 960, top: 460, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res, display: 'flex', gap: 30}}>
+          <div style={{position: 'absolute', left: 960, top: 450, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res,
+            width: 1100, padding: '40px 56px', borderRadius: 26, background: '#0e1628', border: `3px solid ${colors.green}`, boxShadow: `0 0 40px ${colors.green}44`}}>
+            <div style={{fontSize: 44, fontWeight: 800}}>The algorithm helps to</div>
+            <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Thuật toán giúp</div>
             {[
-              {t: 'One trip per location', e: 'Mỗi vị trí 1 chuyến', n: N, load: `${R((100 * LOAD.reduce((a, b) => a + b, 0)) / N)}% full per trip`, g: LOAD.reduce((a, b) => a + b, 0) / N, c: colors.muted},
-              {t: 'Savings + Nearest Neighbour', e: 'Savings + Láng giềng gần nhất', n: FINAL.length, load: '100% full per trip', g: 1, c: colors.green},
-            ].map((c) => (
-              <div key={c.t} style={{width: 560, padding: '28px 34px', borderRadius: 22, background: '#0e1628', border: `3px solid ${c.c}`}}>
-                <div style={{fontSize: 30, fontWeight: 800, color: c.c}}>{c.t}</div>
-                <div style={{fontSize: 19, color: colors.muted}}>{c.e}</div>
-                <div style={{fontSize: 28, marginTop: 18}}>{c.n} trips <span style={{fontSize: 20, color: colors.muted}}>· {c.n} chuyến</span></div>
-                <div style={{fontSize: 24, marginTop: 6}}>
-                  {c.load} <Gauge load={c.g} color={c.c} w={140} />
+              {n: '1', en: 'Optimize the route', vi: 'Tối ưu lộ trình', sub: 'Pick nearby locations in the same trip', subVi: 'Lấy chung các vị trí gần nhau'},
+              {n: '2', en: 'Optimize the load per trip', vi: 'Tối ưu sức chứa trên mỗi chuyến', sub: 'Fill the mover before going to the door', subVi: 'Chất đầy xe rồi mới ra cửa'},
+            ].map((it, n) => {
+              const o = fade(T.result + 0.6 + n * 0.6, T.result + 1.0 + n * 0.6);
+              return (
+                <div key={it.n} style={{display: 'flex', alignItems: 'center', gap: 28, marginTop: n ? 22 : 0, opacity: o, transform: `translateX(${(1 - o) * 30}px)`}}>
+                  <div style={{width: 76, height: 76, flex: 'none', borderRadius: 38, background: colors.green, color: '#0b1222', fontSize: 42, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    {it.n}
+                  </div>
+                  <div>
+                    <div style={{fontSize: 40, fontWeight: 800, color: colors.green, lineHeight: 1.15}}>{it.en}</div>
+                    <div style={{fontSize: 24, color: colors.muted, fontWeight: 600}}>{it.vi}</div>
+                    <div style={{fontSize: 24, fontWeight: 600, marginTop: 4}}>
+                      {it.sub} <span style={{fontSize: 19, color: colors.muted}}>· {it.subVi}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div style={{position: 'absolute', left: 0, right: 0, top: 730, zIndex: 4, textAlign: 'center', opacity: fade(T.result + 1.2, T.result + 1.6)}}>
-            <div style={{fontSize: 30, fontWeight: 700}}>
-              <span style={{color: colors.green}}>Capacity</span>: fill the mover before going to the door · <span style={{color: colors.green}}>Distance</span>: pick nearby locations together
-            </div>
-            <div style={{fontSize: 20, color: colors.muted}}>Sức chứa: chất đầy xe rồi mới ra cửa · Quãng đường: lấy chung các vị trí gần nhau</div>
+              );
+            })}
           </div>
         </>
       ) : null}
 
       {/* caption */}
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: 36, textAlign: 'center', zIndex: 5}}>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: 36, textAlign: 'center', zIndex: 5, opacity: 1 - fade(T.result, T.result + 0.4)}}>
         <div style={{display: 'inline-block', background: 'rgba(0,0,0,0.65)', borderRadius: 14, padding: '10px 28px'}}>
           <div style={{fontSize: 33, fontWeight: 700}}>{cap[1]}</div>
           <div style={{fontSize: 21, color: colors.muted}}>{cap[0]}</div>
