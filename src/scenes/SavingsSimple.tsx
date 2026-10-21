@@ -444,7 +444,7 @@ export const SavingsSimple: React.FC = () => {
             <div style={{fontSize: 30, fontWeight: 700}}>
               <span style={{color: colors.green}}>Capacity</span>: merge until the vehicle is full · <span style={{color: colors.green}}>Distance</span>: nearby stops first
             </div>
-            <div style={{fontSize: 20, color: colors.muted}}>Sức chứa: gộp đến khi xe đầy · Quãng đường: gộp điểm gần nhau trước · Illustrative, straight-line distances · Ví dụ minh họa</div>
+            <div style={{fontSize: 20, color: colors.muted}}>Sức chứa: gộp đến khi xe đầy · Quãng đường: gộp điểm gần nhau trước</div>
           </div>
         </>
       ) : null}
