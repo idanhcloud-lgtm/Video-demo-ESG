@@ -151,21 +151,21 @@ export const SavingsSimple: React.FC = () => {
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
 
   const cap: [string, string] =
-    t < T.alone ? ['6 điểm giao, tổng cộng 2 pallet hàng. Xe chở tối đa 1 pallet mỗi chuyến.', '6 stops, 2 pallets in total. The vehicle carries 1 pallet per trip.']
-      : t < T.ex ? ['Ban đầu: mỗi điểm một chuyến riêng – 6 chuyến, xe chạy gần như rỗng', 'Start: one trip per stop – 6 trips, the vehicle almost empty']
-      : t < T.rank ? [`Gộp ${NAMES[EX.a]} và ${NAMES[EX.b]} vào một chuyến: số mét bớt được gọi là "tiết kiệm"`, `Join ${NAMES[EX.a]} and ${NAMES[EX.b]} in one trip: the metres no longer driven are the saving`]
+    t < T.alone ? ['6 vị trí lấy hàng, tổng 2 pallet. Mỗi chuyến xe pallet mover chở tối đa 1 pallet ra cửa.', '6 pick locations, 2 pallets of goods in total. The pallet mover carries 1 pallet per trip to the door.']
+      : t < T.ex ? ['Ban đầu: mỗi vị trí một chuyến riêng – 6 chuyến, xe về cửa gần như rỗng', 'Start: one trip per location – 6 trips, the mover returns almost empty']
+      : t < T.rank ? [`Lấy ${NAMES[EX.a]} và ${NAMES[EX.b]} trong cùng một chuyến: số mét bớt được là "tiết kiệm"`, `Pick ${NAMES[EX.a]} and ${NAMES[EX.b]} in the same trip: the metres no longer driven are the saving`]
       : t < T.step0 ? ['Tính tiết kiệm cho mọi cặp, xếp từ lớn đến nhỏ', 'Score every pair, biggest saving first']
       : choosing
         ? u < 2.4
-          ? [`Chuyến ${CH_TRIP.map((i) => NAMES[i]).join('+')} còn trống 0.3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} đều vừa`, `Trip ${CH_TRIP.map((i) => NAMES[i]).join('+')} has room for 0.3: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
+          ? [`Xe còn chỗ cho 0.3 pallet: cả ${NAMES[CH_WIN]} và ${NAMES[CH_RIVAL]} đều vừa`, `The mover still has room for 0.3 pallet: both ${NAMES[CH_WIN]} and ${NAMES[CH_RIVAL]} fit`]
           : [`Chọn ${NAMES[CH_WIN]} vì gần hơn: tiết kiệm ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`, `${NAMES[CH_WIN]} is closer: it saves ${linkSave(CH_WIN)} m > ${linkSave(CH_RIVAL)} m`]
       : !inNN ? (step?.kind === 'cap' && slow
           ? [`${NAMES[step.a]} + ${NAMES[step.b]}: tổng ${fmt(step.load)} pallet > 1 → vượt sức chứa, bỏ qua`, `${NAMES[step.a]} + ${NAMES[step.b]}: ${fmt(step.load)} pallets > 1 → over capacity, skipped`]
           : step?.kind === 'same' && slow
             ? [`${NAMES[step.a]} và ${NAMES[step.b]} đã chung chuyến → bỏ qua`, `${NAMES[step.a]} and ${NAMES[step.b]} already share a trip → skipped`]
-            : ['Lần lượt gộp chuyến, miễn là xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the load still fits (≤ 1 pallet)'])
-      : !result ? ['Láng giềng gần nhất sắp thứ tự ghé: luôn tới điểm gần nhất, ghé hết thì về cửa', 'Nearest neighbour orders the stops: closest first, then back to the door']
-      : ['Ít chuyến hơn, chuyến nào cũng đầy, quãng đường ngắn hơn', 'Fewer trips, every trip full, less distance'];
+            : ['Lần lượt gộp chuyến, miễn xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the mover can still carry it (≤ 1 pallet)'])
+      : !result ? ['Láng giềng gần nhất sắp thứ tự lấy hàng: vị trí gần nhất trước, lấy xong mang ra cửa', 'Nearest neighbour sets the pick order: closest location first, then bring the goods to the door']
+      : ['Ít chuyến hơn, chuyến nào xe cũng đầy, chạy trong kho ít hơn', 'Fewer trips, a full mover every trip, less driving in the warehouse'];
 
   return (
     <AbsoluteFill style={{fontFamily, color: colors.text}}>
@@ -179,8 +179,8 @@ export const SavingsSimple: React.FC = () => {
       {/* which algorithm is working now */}
       <div style={{position: 'absolute', left: 70, top: 150, display: 'flex', gap: 14, opacity: fade(T.ex - 0.4, T.ex) * (1 - fade(T.result - 0.3, T.result))}}>
         {[
-          {on: !inNN, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which stops share a trip (within capacity)', vi: 'quyết định điểm nào đi chung chuyến (trong sức chứa)'},
-          {on: inNN, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'decides the visit order inside each trip', vi: 'quyết định thứ tự ghé trong từng chuyến'},
+          {on: !inNN, n: '1', name: 'SAVINGS', c: colors.green, en: 'decides which locations share a trip (within capacity)', vi: 'quyết định vị trí nào lấy chung một chuyến (trong sức chứa)'},
+          {on: inNN, n: '2', name: 'NEAREST NEIGHBOUR', c: colors.yellow, en: 'decides the pick order inside each trip', vi: 'quyết định thứ tự lấy hàng trong từng chuyến'},
         ].map((a) => (
           <div key={a.n} style={{padding: '10px 18px', borderRadius: 14, border: `3px solid ${a.on ? a.c : '#2a3654'}`, background: a.on ? `${a.c}1f` : 'transparent', opacity: a.on ? 1 : 0.4,
             boxShadow: a.on ? `0 0 18px ${a.c}66` : 'none', maxWidth: 520}}>
@@ -351,8 +351,8 @@ export const SavingsSimple: React.FC = () => {
           <div style={{position: 'absolute', left: 1410, top: 250, width: 490, opacity: fade(T.ex + 0.2, T.ex + 0.6) * (1 - fade(T.rank - 0.4, T.rank)),
             background: '#0e1628', border: '2px solid #ffffff22', borderRadius: 20, padding: '22px 26px'}}>
             <div style={{fontSize: 24, fontWeight: 800}}>SAVING({A}, {B})</div>
-            <div style={{fontSize: 19, fontWeight: 600, marginTop: 4}}>Should {A} and {B} share a trip? Compare the metres driven.</div>
-            <div style={{fontSize: 16, color: colors.muted, marginBottom: 14}}>Mục đích: {A} và {B} có nên đi chung chuyến không? So số mét phải chạy.</div>
+            <div style={{fontSize: 19, fontWeight: 600, marginTop: 4}}>Should {A} and {B} be picked in the same trip? Compare the metres driven.</div>
+            <div style={{fontSize: 16, color: colors.muted, marginBottom: 14}}>Mục đích: có nên lấy {A} và {B} trong cùng một chuyến không? So số mét phải chạy.</div>
             <div style={row(0.7)}>
               <div style={{fontSize: 22, fontWeight: 800, color: colors.red}}>2 separate trips <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 2 chuyến riêng</span></div>
               <div style={{fontSize: 22, marginTop: 6, lineHeight: 1.7}}>
@@ -361,7 +361,7 @@ export const SavingsSimple: React.FC = () => {
               <div style={{fontSize: 30, fontWeight: 800, color: colors.red, textAlign: 'right'}}>= {sep} m</div>
             </div>
             <div style={{...row(2.3), marginTop: 10}}>
-              <div style={{fontSize: 22, fontWeight: 800, color: colors.green}}>1 shared trip <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 1 chuyến chung</span></div>
+              <div style={{fontSize: 22, fontWeight: 800, color: colors.green}}>1 trip picking both <span style={{fontSize: 16, color: colors.muted, fontWeight: 600}}>· 1 chuyến lấy cả hai</span></div>
               <div style={{fontSize: 22, marginTop: 6, lineHeight: 1.7}}>
                 <Seg txt={`Door→${A}`} m={ka} c={colors.green} /> + <Seg txt={`${A}→${B}`} m={ab} c={colors.green} /> + <Seg txt={`${B}→Door`} m={kb} c={colors.green} />
               </div>
@@ -426,7 +426,7 @@ export const SavingsSimple: React.FC = () => {
           <div style={{position: 'absolute', inset: 0, zIndex: 3, opacity: res * 0.92, background: 'rgba(5,8,16,0.75)', backdropFilter: 'blur(6px)'}} />
           <div style={{position: 'absolute', left: 960, top: 460, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res, display: 'flex', gap: 30}}>
             {[
-              {t: 'One trip per stop', e: 'Mỗi điểm 1 chuyến', n: N, load: `${R((100 * LOAD.reduce((a, b) => a + b, 0)) / N)}% full per trip`, g: LOAD.reduce((a, b) => a + b, 0) / N, m: ALONE_TOTAL, c: colors.muted},
+              {t: 'One trip per location', e: 'Mỗi vị trí 1 chuyến', n: N, load: `${R((100 * LOAD.reduce((a, b) => a + b, 0)) / N)}% full per trip`, g: LOAD.reduce((a, b) => a + b, 0) / N, m: ALONE_TOTAL, c: colors.muted},
               {t: 'Savings + Nearest Neighbour', e: 'Savings + Láng giềng gần nhất', n: FINAL.length, load: '100% full per trip', g: 1, m: SAV_TOTAL, c: colors.green},
             ].map((c) => (
               <div key={c.t} style={{width: 560, padding: '28px 34px', borderRadius: 22, background: '#0e1628', border: `3px solid ${c.c}`}}>
@@ -442,9 +442,9 @@ export const SavingsSimple: React.FC = () => {
           </div>
           <div style={{position: 'absolute', left: 0, right: 0, top: 730, zIndex: 4, textAlign: 'center', opacity: fade(T.result + 1.2, T.result + 1.6)}}>
             <div style={{fontSize: 30, fontWeight: 700}}>
-              <span style={{color: colors.green}}>Capacity</span>: merge until the vehicle is full · <span style={{color: colors.green}}>Distance</span>: nearby stops first
+              <span style={{color: colors.green}}>Capacity</span>: fill the mover before going to the door · <span style={{color: colors.green}}>Distance</span>: pick nearby locations together
             </div>
-            <div style={{fontSize: 20, color: colors.muted}}>Sức chứa: gộp đến khi xe đầy · Quãng đường: gộp điểm gần nhau trước</div>
+            <div style={{fontSize: 20, color: colors.muted}}>Sức chứa: chất đầy xe rồi mới ra cửa · Quãng đường: lấy chung các vị trí gần nhau</div>
           </div>
         </>
       ) : null}
