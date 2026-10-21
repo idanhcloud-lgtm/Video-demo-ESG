@@ -77,12 +77,18 @@ const HOLD = 6.0; // extra seconds on the choice
 const T = {pts: 1.0, alone: 5.0, ex: 9.0, rank: 13.0, step0: 14.5, done: 0, result: 0};
 const SLOW = 2.6; // first steps, up to the first capacity refusal
 const FAST = 0.45;
+const FULL_HOLD = 2.4; // pause after a merge that fills the mover
+/** The merge at step k fills the mover to capacity: that trip is closed. */
+const isFull = (k: number) => STEPS[k].kind === 'merge' && STEPS[k].load >= CAP - 1e-9;
+const isSlow = (k: number) => k <= CAP_STEP + 1 || isFull(k);
+/** Trip number (1, 2, …) in the order the trips fill up. */
+const FULL_STEPS = STEPS.map((_, k) => k).filter(isFull);
 const STEP_AT: number[] = [];
 {
   let at = T.step0;
   STEPS.forEach((_, k) => {
     STEP_AT.push(at);
-    at += (k <= CAP_STEP + 1 ? SLOW : FAST) + (k === CHOICE ? HOLD : 0);
+    at += (isSlow(k) ? SLOW : FAST) + (k === CHOICE ? HOLD : 0) + (isFull(k) ? FULL_HOLD : 0);
   });
   T.done = at + 0.6;
 }
@@ -121,7 +127,7 @@ export const SavingsSimple: React.FC = () => {
   for (let n = 0; n < STEPS.length && STEP_AT[n] <= t; n++) k = n;
   const step = k >= 0 ? STEPS[k] : null;
   const u = k >= 0 ? t - STEP_AT[k] : 0;
-  const slow = k >= 0 && k <= CAP_STEP + 1;
+  const slow = k >= 0 && isSlow(k);
   const hold = k === CHOICE ? HOLD : 0;
   const choosing = k === CHOICE && u < 1.0 + hold;
   const decided = !slow || u > 1.0 + hold;
@@ -133,12 +139,21 @@ export const SavingsSimple: React.FC = () => {
   const res = spring({frame: frame - T.result * fps, fps, config: {damping: 200}});
   const routeOf = (i: number) => routes.findIndex((r) => r.includes(i));
   const finalOf = (i: number) => FINAL.findIndex((r) => r.order.includes(i));
+  // a trip reaches 1.0 pallet: it is closed and the next trip starts
+  const fullAt = (fk: number) => STEP_AT[fk] + 2.2 + (fk === CHOICE ? HOLD : 0);
+  const fullNow = step && isFull(k) && u > 2.2 + hold;
+  const fullNo = fullNow ? FULL_STEPS.indexOf(k) + 1 : 0;
+  const lastFull = fullNo === FULL_STEPS.length;
 
   const cap: [string, string] =
     t < T.alone ? ['6 vị trí lấy hàng, tổng 2 pallet. Mỗi chuyến xe pallet mover chở tối đa 1 pallet ra cửa.', '6 pick locations, 2 pallets of goods in total. The pallet mover carries 1 pallet per trip to the door.']
       : t < T.ex ? ['Ban đầu: mỗi vị trí một chuyến riêng – 6 chuyến, xe về cửa gần như rỗng', 'Start: one trip per location – 6 trips, the mover returns almost empty']
       : t < T.rank ? [`Lấy ${NAMES[EX.a]} và ${NAMES[EX.b]} trong cùng một chuyến thay vì 2 chuyến: xe chạy ít mét hơn`, `Pick ${NAMES[EX.a]} and ${NAMES[EX.b]} in one trip instead of two: fewer metres driven`]
       : t < T.step0 ? ['Tính cho mọi cặp số mét giảm được, cặp giảm nhiều nhất xét trước', 'Score every pair by metres cut, biggest cut first']
+      : fullNow && !done
+        ? lastFull
+          ? [`Chuyến ${fullNo} đã đầy 1.0 pallet → mọi vị trí đã có chuyến`, `Trip ${fullNo} is full: 1.0 pallet → every location has a trip`]
+          : [`Chuyến ${fullNo} đã đầy 1.0 pallet → chốt chuyến, sang chuyến tiếp theo`, `Trip ${fullNo} is full: 1.0 pallet → close it, start the next trip`]
       : choosing
         ? u < 2.4
           ? [`Xe còn chỗ cho ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} đều vừa, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} quá nặng`, `The mover has room for ${fmt(CH_ROOM)} pallet: ${CH_FIT.map((i) => NAMES[i]).join(', ')} fit, ${CH_HEAVY.map((i) => NAMES[i]).join(', ')} too heavy`]
@@ -255,6 +270,28 @@ export const SavingsSimple: React.FC = () => {
               );
             })
           : null}
+
+        {/* FULL badge inside each trip that reached 1.0 pallet */}
+        {FULL_STEPS.map((fk, n) => {
+          if (t < fullAt(fk) || result) return null;
+          const r = ROUTES_AFTER[fk].find((x) => x.includes(STEPS[fk].a))!;
+          // beside the trip, on the open side of the map, so it never sits on a line
+          const left = r.reduce((a, i) => a + P[i][0], 0) / r.length < DEPOT[0];
+          const [cx, cy] = left ? [340, 700] : [1590, 790];
+          const col = done ? TRIP_COL[finalOf(r[0])] : colors.green;
+          const sc = spring({frame: frame - fullAt(fk) * fps, fps, config: {damping: 12}});
+          return (
+            <g key={`full${fk}`} transform={`translate(${cx} ${cy}) scale(${sc})`}>
+              <rect x={-150} y={-44} width={300} height={88} rx={16} fill="#0b1222" stroke={col} strokeWidth={4} />
+              <text y={-6} textAnchor="middle" fontSize={30} fontWeight={800} fill={col}>
+                ✓ TRIP {n + 1} FULL
+              </text>
+              <text y={28} textAnchor="middle" fontSize={22} fontWeight={700} fill={colors.text}>
+                1.0 pallet · đầy xe
+              </text>
+            </g>
+          );
+        })}
 
         {/* final trips, coloured per trip */}
         {done ? FINAL.map((tr, ti) => <Loop key={`f${ti}`} order={tr.order} color={TRIP_COL[ti]} w={7} />) : null}
