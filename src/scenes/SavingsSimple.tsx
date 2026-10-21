@@ -316,11 +316,11 @@ export const SavingsSimple: React.FC = () => {
           <div style={{position: 'absolute', inset: 0, zIndex: 3, opacity: res * 0.92, background: 'rgba(5,8,16,0.75)', backdropFilter: 'blur(6px)'}} />
           <div style={{position: 'absolute', left: 960, top: 450, zIndex: 4, transform: `translate(-50%, -50%) scale(${0.9 + 0.1 * res})`, opacity: res,
             width: 1100, padding: '40px 56px', borderRadius: 26, background: '#0e1628', border: `3px solid ${colors.green}`, boxShadow: `0 0 40px ${colors.green}44`}}>
-            <div style={{fontSize: 44, fontWeight: 800}}>On every trip, the algorithm optimizes</div>
-            <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Trên mỗi chuyến, thuật toán tối ưu</div>
+            <div style={{fontSize: 44, fontWeight: 800}}>The algorithm, on every trip</div>
+            <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Thuật toán, trên mỗi chuyến</div>
             {[
-              {n: '1', en: 'The travel route between locations', vi: 'Lộ trình di chuyển giữa các vị trí', sub: 'Pick nearby locations together', subVi: 'Lấy chung các vị trí gần nhau'},
-              {n: '2', en: "The use of the mover's capacity", vi: 'Mức sử dụng sức chứa của xe', sub: 'Fill the mover before going to the door', subVi: 'Chất đầy xe rồi mới ra cửa'},
+              {n: '1', en: 'Route optimization', vi: 'Tối ưu lộ trình', sub: 'Pick nearby locations together', subVi: 'Lấy chung các vị trí gần nhau'},
+              {n: '2', en: 'Capacity optimization', vi: 'Tối ưu sức chứa', sub: 'Fill the mover before going to the door', subVi: 'Chất đầy xe rồi mới ra cửa'},
             ].map((it, n) => {
               const o = fade(T.result + 0.6 + n * 0.6, T.result + 1.0 + n * 0.6);
               return (
