@@ -21,6 +21,8 @@ const CAP = 1;
 const N = P.length;
 const R = (x: number) => Math.round(x);
 const fmt = (x: number) => x.toFixed(1);
+/** Distance between two stops as shown on screen, in metres. */
+const DIST = (a: number, b: number) => R(dd(P[a], P[b]));
 /** Saving as shown on screen: built from the rounded distances, so the on-screen arithmetic adds up. */
 const SV = (a: number, b: number) => R(dd(DEPOT, P[a])) + R(dd(DEPOT, P[b])) - R(dd(P[a], P[b]));
 
@@ -99,7 +101,7 @@ const JOIN_AT: number[] = P.map(() => Infinity); // when a stop joins a trip (it
       const out = P.map((_, i) => i).filter((i) => !used.includes(i) && !inTrip.includes(i));
       const fit = out.filter((i) => LOAD[i] <= room + 1e-9);
       const from = c[j - 1];
-      CANDS.push({trip: ti, at, from, win: c[j], room, rivals: fit.filter((i) => i !== c[j]).sort((x, y) => SV(from, y) - SV(from, x)), heavy: out.filter((i) => LOAD[i] > room + 1e-9)});
+      CANDS.push({trip: ti, at, from, win: c[j], room, rivals: fit.filter((i) => i !== c[j]).sort((x, y) => dd(P[from], P[x]) - dd(P[from], P[y])), heavy: out.filter((i) => LOAD[i] > room + 1e-9)});
       at += CAND_SHOW + CAND_JUDGE;
       JOIN_AT[c[j]] = at;
       SEGS.push({a: P[from], b: P[c[j]], at, trip: ti});
@@ -174,16 +176,17 @@ export const SavingsSimple: React.FC = () => {
         const fit = [cand.win, ...cand.rivals];
         return [`Xe còn chỗ cho ${fmt(cand.room)} pallet: ${names(fit)} ${fit.length > 1 ? 'đều vừa' : 'vừa'}${heavy}`, `The mover has room for ${fmt(cand.room)} pallet: ${names(fit)} ${fit.length > 1 ? 'fit' : 'fits'}${heavyEn}`];
       }
-      if (!cand.rivals.length) return [`Chỉ còn ${w} vừa → thêm ${w} vào chuyến (−${SV(cand.from, cand.win)} m)`, `Only ${w} fits → add ${w} to the trip (−${SV(cand.from, cand.win)} m)`];
-      const list = [cand.win, ...cand.rivals].map((i) => `${NAMES[i]} ${SV(cand.from, i)} m`).join(' > ');
-      return [`Chọn ${w} vì giảm được nhiều mét nhất: ${list}`, `${w} cuts the most metres: ${list}`];
+      const f = NAMES[cand.from];
+      if (!cand.rivals.length) return [`Chỉ còn ${w} vừa → thêm ${w} vào chuyến (cách ${f} ${DIST(cand.from, cand.win)} m)`, `Only ${w} fits → add ${w} to the trip (${DIST(cand.from, cand.win)} m from ${f})`];
+      const list = [cand.win, ...cand.rivals].map((i) => `${NAMES[i]} ${DIST(cand.from, i)} m`).join(' < ');
+      return [`Chọn ${w} vì gần ${f} nhất: ${list}`, `${w} is the closest to ${f}: ${list}`];
     }
     if (seedI >= 0) {
       const [a, b] = [...TRIPS[seedI].seed].sort((x, y) => x - y).map((i) => NAMES[i]);
       const m = SV(TRIPS[seedI].seed[0], TRIPS[seedI].seed[1]);
       return seedI === 0
-        ? [`Chuyến 1: lấy ${a} + ${b} chung một chuyến giảm nhiều mét nhất (−${m} m) → bắt đầu từ ${a}, ${b}`, `Trip 1: picking ${a} + ${b} in one trip cuts the most metres (−${m} m) → start with ${a}, ${b}`]
-        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, ${a} + ${b} giảm nhiều mét nhất (−${m} m)`, `Trip ${seedI + 1}: among the rest, ${a} + ${b} cut the most metres (−${m} m)`];
+        ? [`Chuyến 1: lấy ${a} + ${b} chung một chuyến → chạy ít hơn ${m} m so với 2 chuyến riêng`, `Trip 1: ${a} + ${b} in one trip → ${m} m less driving than two separate trips`]
+        : [`Chuyến ${seedI + 1}: trong các vị trí còn lại, lấy ${a} + ${b} chung → chạy ít hơn ${m} m`, `Trip ${seedI + 1}: among the rest, ${a} + ${b} in one trip → ${m} m less driving`];
     }
     if (!done) return ['Lần lượt gộp chuyến, miễn xe còn chở vừa (≤ 1 pallet)', 'Merge trips one by one, as long as the mover can still carry it (≤ 1 pallet)'];
     if (!result) return ['Hai chuyến đều đầy, mọi vị trí đã được lấy: mỗi chuyến đi một vòng từ cửa rồi về cửa', 'Both trips are full and every location is picked: each trip is one loop from the door and back'];
@@ -251,9 +254,9 @@ export const SavingsSimple: React.FC = () => {
                 <g opacity={o}>
                   <line x1={P[a][0]} y1={P[a][1]} x2={P[b][0]} y2={P[b][1]} stroke={colors.yellow} strokeWidth={5} strokeDasharray="12 9" />
                   {[a, b].map((i) => <circle key={i} cx={P[i][0]} cy={P[i][1]} r={50 * pulse} fill="none" stroke={colors.yellow} strokeWidth={5} />)}
-                  <text x={mx} y={my} textAnchor="middle" fontSize={28} fontWeight={800} fill={colors.yellow} stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}
+                  <text x={mx} y={my} textAnchor={nx < 0 ? 'end' : 'start'} fontSize={28} fontWeight={800} fill={colors.yellow} stroke="#0b1222" strokeWidth={7} style={{paintOrder: 'stroke'}}
                     opacity={interpolate(su, [0.6, 1.0], [0, 1], clamp)}>
-                    −{SV(a, b)} m
+                    {SV(a, b)} m less
                   </text>
                 </g>
               );
@@ -279,7 +282,9 @@ export const SavingsSimple: React.FC = () => {
               const label = heavy
                 ? `+${fmt(LOAD[i])} → ${fmt(CAP - cand.room + LOAD[i])} too heavy`
                 : judged
-                  ? `${win ? '✓ chosen' : '✗'} · −${SV(cand.from, i)} m`
+                  ? win
+                    ? `✓ ${DIST(cand.from, i)} m${cand.rivals.length ? ' · closest' : ''}`
+                    : `✗ ${DIST(cand.from, i)} m`
                   : `+${fmt(LOAD[i])} → ${fmt(CAP - cand.room + LOAD[i])} fits`;
               return (
                 <g key={i} opacity={sh * (heavy ? 0.85 : 1)}>
