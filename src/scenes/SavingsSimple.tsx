@@ -319,8 +319,8 @@ export const SavingsSimple: React.FC = () => {
             <div style={{fontSize: 44, fontWeight: 800}}>On every trip, the algorithm optimizes</div>
             <div style={{fontSize: 24, color: colors.muted, marginBottom: 26}}>Trên mỗi chuyến, thuật toán tối ưu</div>
             {[
-              {n: '1', en: 'The route', vi: 'Lộ trình', sub: 'Pick nearby locations together', subVi: 'Lấy chung các vị trí gần nhau'},
-              {n: '2', en: 'The load', vi: 'Sức chứa', sub: 'Fill the mover before going to the door', subVi: 'Chất đầy xe rồi mới ra cửa'},
+              {n: '1', en: 'The travel route between locations', vi: 'Lộ trình di chuyển giữa các vị trí', sub: 'Pick nearby locations together', subVi: 'Lấy chung các vị trí gần nhau'},
+              {n: '2', en: "The use of the mover's capacity", vi: 'Mức sử dụng sức chứa của xe', sub: 'Fill the mover before going to the door', subVi: 'Chất đầy xe rồi mới ra cửa'},
             ].map((it, n) => {
               const o = fade(T.result + 0.6 + n * 0.6, T.result + 1.0 + n * 0.6);
               return (
