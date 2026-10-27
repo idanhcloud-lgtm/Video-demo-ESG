@@ -61,8 +61,8 @@ export const TitleScene: React.FC<{noStats?: boolean; topGap?: number; site?: bo
       </div>
       {site ? (
         <div style={{marginTop: 16, textAlign: 'center', opacity: intro, padding: '12px 32px', borderRadius: 12, border: `2px solid ${colors.green}`, background: `${colors.green}14`}}>
-          <div style={{fontSize: 34, fontWeight: 800, color: colors.green}}>{vi ? 'Mô phỏng trên kho B2C – DTLA' : 'Simulated on the B2C warehouse – DTLA'}</div>
-          <div style={{fontSize: 22, color: colors.muted}}>{vi ? 'Simulated on the B2C warehouse – DTLA' : 'Mô phỏng trên kho B2C – DTLA'}</div>
+          <div style={{fontSize: 34, fontWeight: 800, color: colors.green}}>{vi ? 'Mô phỏng trên sơ đồ kho B2C – DTLA' : 'Simulated on the B2C warehouse layout – DTLA'}</div>
+          <div style={{fontSize: 22, color: colors.muted}}>{vi ? 'Simulated on the B2C warehouse layout – DTLA' : 'Mô phỏng trên sơ đồ kho B2C – DTLA'}</div>
         </div>
       ) : null}
       <div style={{display: noStats ? 'none' : 'flex', gap: 20, marginTop: 40}}>
