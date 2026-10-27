@@ -37,35 +37,42 @@ const Subtitles: React.FC<{enFirst?: boolean; vo: Voice; shift: (at: number) => 
 const BRAND_H = 72;
 const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
 
-const LOGO_W = 183; // slot for the 40 px high logo
+const LOGO_W = 183; // white plate around the 40 px high logo
 const SITE_W = 290;
-const BRAND_BOX_H = 56; // both cards the same height
-/** Company logo top left and the site name top right. On the title they sit centred above the title, then move out. */
-const Brand: React.FC<{outAt: number}> = ({outAt}) => {
+const BRAND_BOX_H = 56; // logo plate and site name the same height
+const DT_BLUE = '#034ea2';
+/**
+ * Company logo (always in its blue, so on a white plate) top left and the site name top right.
+ * On the title they sit centred above the title, then move out to the corners.
+ * style 'plate': only the logo has a white plate, the site name is white text.
+ * style 'bar': a white header strip across the top carries both, the site name in the logo blue.
+ */
+const Brand: React.FC<{outAt: number; style: 'plate' | 'bar'}> = ({outAt, style}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const t = frame / fps;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
   const m = interpolate(t, [outAt - 0.9, outAt], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
   const sc = interpolate(m, [0, 1], [1.4, 1]);
-  // on the title the two cards touch and read as one lockup; they part on the way to the corners
-  const gap = 0;
+  const gap = 24;
   // centre row, at the scale it has there
   const rowW = (LOGO_W + SITE_W) * 1.4 + gap;
   const cy = 215;
-  const logo = {x: interpolate(m, [0, 1], [960 - rowW / 2, 28]), y: interpolate(m, [0, 1], [cy, 12])};
-  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.4 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 12])};
+  const logo = {x: interpolate(m, [0, 1], [960 - rowW / 2, 28]), y: interpolate(m, [0, 1], [cy, 8])};
+  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.4 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 8])};
   const o = interpolate(t, [0.1, 0.6], [0, 1], clamp);
+  const bar = style === 'bar';
   const box = {position: 'absolute', zIndex: 50, height: BRAND_BOX_H, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
     transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o} as const;
   return (
     <>
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W}}>
-        <Img src={staticFile('brand/duytan_white.png')} style={{height: 40, display: 'block'}} />
+      {bar ? <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: BRAND_H, zIndex: 49, background: '#fff', opacity: m, boxShadow: '0 2px 12px rgba(0,0,0,0.35)'}} /> : null}
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10}}>
+        <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
       </div>
-      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2, color: '#fff'}}>
-        {/* divider while the two sit together on the title */}
-        <div style={{position: 'absolute', left: 0, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />
+      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
+        color: bar ? DT_BLUE : '#fff', background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent', borderRadius: 10}}>
+        {bar ? null : <div style={{position: 'absolute', left: -gap / 2 - 1, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />}
         DTLA WAREHOUSE
       </div>
     </>
@@ -74,7 +81,7 @@ const Brand: React.FC<{outAt: number}> = ({outAt}) => {
 
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
-export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean}> = ({enFirst = false, englishVoice = false, brand = false}) => {
+export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean; brandStyle?: 'plate' | 'bar'}> = ({enFirst = false, englishVoice = false, brand = false, brandStyle = 'plate'}) => {
   const vo = (englishVoice ? voEN : voV4) as unknown as Voice;
   const S = vo.scenes;
   const extra = brand ? TITLE_EXTRA : 0;
@@ -111,7 +118,7 @@ export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean
       </Sequence>
     ))}
     <Subtitles enFirst={enFirst} vo={vo} shift={shift} from={brand ? titleEnd : 0} />
-    {brand ? <Brand outAt={titleEnd} /> : null}
+    {brand ? <Brand outAt={titleEnd} style={brandStyle} /> : null}
   </AbsoluteFill>
   </LangContext.Provider>
   );
