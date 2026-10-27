@@ -37,7 +37,7 @@ const Subtitles: React.FC<{enFirst?: boolean; vo: Voice; shift: (at: number) => 
 const BRAND_H = 72;
 const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
 
-const LOGO_W = 183; // white plate around the 40 px high logo
+const LOGO_W = 205; // white plate around the 40 px high logo, room on the left for the swoosh
 const SITE_W = 290;
 const BRAND_BOX_H = 56; // logo plate and site name the same height
 const DT_BLUE = '#034ea2';
@@ -67,16 +67,41 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outA
   return (
     <>
       {bar ? <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: BRAND_H, zIndex: 49, background: '#fff', opacity: m, boxShadow: '0 2px 12px rgba(0,0,0,0.35)'}} /> : null}
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10, boxShadow: style === 'pill' ? '0 4px 14px rgba(0,0,0,0.4)' : undefined}}>
-        <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, borderRadius: 10, overflow: 'hidden',
+        ...(style === 'pill'
+          ? {background: 'linear-gradient(180deg, #ffffff 0%, #f1f5fb 100%)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 4px 14px rgba(0,0,0,0.45)', justifyContent: 'flex-end', paddingRight: 12}
+          : {background: '#fff'})}}>
+        {style === 'pill' ? (
+          // blue swoosh in the left corner
+          <svg width={LOGO_W} height={BRAND_BOX_H} viewBox={`0 0 ${LOGO_W} ${BRAND_BOX_H}`} style={{position: 'absolute', left: 0, top: 0}}>
+            <defs>
+              <linearGradient id="swA" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#1e8bff" />
+                <stop offset="1" stopColor="#0a56d0" />
+              </linearGradient>
+            </defs>
+            <path d={`M0 ${BRAND_BOX_H} L0 0 L6 0 Q10 30 30 ${BRAND_BOX_H} Z`} fill="url(#swA)" />
+            <path d={`M0 ${BRAND_BOX_H} L0 22 Q14 44 52 ${BRAND_BOX_H} Z`} fill="#bcd8f5" opacity={0.75} />
+          </svg>
+        ) : null}
+        <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block', position: 'relative'}} />
       </div>
       <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
         color: bar ? DT_BLUE : '#fff', borderRadius: 10,
         ...(style === 'pill'
-          ? {background: 'linear-gradient(180deg, #1a6fd1 0%, #034ea2 100%)', border: '1px solid rgba(255,255,255,0.35)', boxShadow: '0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25)', textShadow: '0 1px 2px rgba(0,0,0,0.3)'}
+          ? {background: 'linear-gradient(115deg, #0a6cf0 0%, #0849c6 55%, #0a3fae 100%)', border: '1.5px solid #5fb6ff', overflow: 'hidden',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.45), 0 0 10px rgba(95,182,255,0.35)', textShadow: '0 2px 3px rgba(0,0,0,0.35)'}
           : {background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent'})}}>
+        {style === 'pill' ? (
+          // light diagonal sheen bands on the right
+          <svg width={SITE_W} height={BRAND_BOX_H} viewBox={`0 0 ${SITE_W} ${BRAND_BOX_H}`} style={{position: 'absolute', left: 0, top: 0}}>
+            <path d={`M${SITE_W * 0.62} ${BRAND_BOX_H} Q${SITE_W * 0.85} ${BRAND_BOX_H * 0.6} ${SITE_W} 0 L${SITE_W} ${BRAND_BOX_H} Z`} fill="#3d8cff" opacity={0.35} />
+            <path d={`M${SITE_W * 0.78} ${BRAND_BOX_H} Q${SITE_W * 0.92} ${BRAND_BOX_H * 0.45} ${SITE_W} ${BRAND_BOX_H * 0.15} L${SITE_W} ${BRAND_BOX_H} Z`} fill="#6fb0ff" opacity={0.3} />
+            <path d={`M0 0 L${SITE_W * 0.35} 0 Q${SITE_W * 0.15} ${BRAND_BOX_H * 0.5} 0 ${BRAND_BOX_H * 0.7} Z`} fill="#ffffff" opacity={0.07} />
+          </svg>
+        ) : null}
         {bar || style === 'pill' ? null : <div style={{position: 'absolute', left: -gap / 2 - 1, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />}
-        DTLA WAREHOUSE
+        <span style={{position: 'relative'}}>DTLA WAREHOUSE</span>
       </div>
     </>
   );
