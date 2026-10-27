@@ -62,16 +62,36 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outA
   const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.4 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 8])};
   const o = interpolate(t, [0.1, 0.6], [0, 1], clamp);
   const bar = style === 'bar';
+  // a light sweep runs across both cards: once on the title, once as they land, then every few seconds
+  const SWEEP = 0.9;
+  const PERIOD = 7;
+  const sweepAt = (delay: number) => {
+    const starts = [1.2, outAt + 0.2];
+    for (let k = 1; outAt + 0.2 + k * PERIOD < t + SWEEP; k++) starts.push(outAt + 0.2 + k * PERIOD);
+    const s0 = starts.filter((x) => x + delay <= t).pop();
+    return s0 === undefined ? -1 : (t - s0 - delay) / SWEEP;
+  };
+  const Sheen: React.FC<{w: number; delay: number; strength: number; rgb?: string}> = ({w, delay, strength, rgb = '255,255,255'}) => {
+    const p = sweepAt(delay);
+    if (p < 0 || p > 1) return null;
+    const x = interpolate(p, [0, 1], [-80, w + 40], {easing: Easing.inOut(Easing.quad)});
+    return (
+      <div style={{position: 'absolute', top: -10, bottom: -10, left: x, width: 46, transform: 'skewX(-22deg)',
+        background: `linear-gradient(90deg, rgba(${rgb},0) 0%, rgba(${rgb},${strength}) 50%, rgba(${rgb},0) 100%)`}} />
+    );
+  };
+  // the blue card's border breathes gently
+  const glow = 0.25 + 0.15 * Math.sin(t * 2.2);
   const box = {position: 'absolute', zIndex: 50, height: BRAND_BOX_H, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
     transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o} as const;
   return (
     <>
       {bar ? <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: BRAND_H, zIndex: 49, background: '#fff', opacity: m, boxShadow: '0 2px 12px rgba(0,0,0,0.35)'}} /> : null}
       <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, borderRadius: 10, overflow: 'hidden',
-        ...(style === 'pill'
+        ...(!bar
           ? {background: 'linear-gradient(180deg, #ffffff 0%, #f1f5fb 100%)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 4px 14px rgba(0,0,0,0.45)', justifyContent: 'flex-end', paddingRight: 12}
           : {background: '#fff'})}}>
-        {style === 'pill' ? (
+        {!bar ? (
           // blue swoosh in the left corner
           <svg width={LOGO_W} height={BRAND_BOX_H} viewBox={`0 0 ${LOGO_W} ${BRAND_BOX_H}`} style={{position: 'absolute', left: 0, top: 0}}>
             <defs>
@@ -85,13 +105,14 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outA
           </svg>
         ) : null}
         <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block', position: 'relative'}} />
+        {!bar ? <Sheen w={LOGO_W} delay={0} strength={0.28} rgb="30,139,255" /> : null}
       </div>
       <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
         color: bar ? DT_BLUE : '#fff', borderRadius: 10,
         ...(style === 'pill'
           ? {background: 'linear-gradient(115deg, #0a6cf0 0%, #0849c6 55%, #0a3fae 100%)', border: '1.5px solid #5fb6ff', overflow: 'hidden',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.45), 0 0 10px rgba(95,182,255,0.35)', textShadow: '0 2px 3px rgba(0,0,0,0.35)'}
-          : {background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent'})}}>
+              boxShadow: `0 4px 14px rgba(0,0,0,0.45), 0 0 12px rgba(95,182,255,${glow})`, textShadow: '0 2px 3px rgba(0,0,0,0.35)'}
+          : {background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent', textShadow: bar ? undefined : '0 2px 6px rgba(0,0,0,0.6)'})}}>
         {style === 'pill' ? (
           // light diagonal sheen bands on the right
           <svg width={SITE_W} height={BRAND_BOX_H} viewBox={`0 0 ${SITE_W} ${BRAND_BOX_H}`} style={{position: 'absolute', left: 0, top: 0}}>
@@ -102,6 +123,7 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outA
         ) : null}
         {bar || style === 'pill' ? null : <div style={{position: 'absolute', left: -gap / 2 - 1, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />}
         <span style={{position: 'relative'}}>DTLA WAREHOUSE</span>
+        {style === 'pill' ? <Sheen w={SITE_W} delay={0.25} strength={0.35} /> : null}
       </div>
     </>
   );
