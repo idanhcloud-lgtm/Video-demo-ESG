@@ -6,10 +6,11 @@ import {fontFamily} from '../theme';
  * English captions, one per shot of the clip. The clip itself stays out of git (public/clips/).
  */
 export const SCAN_TO_SECONDS = 14;
+// top: caption position per shot, in the middle band but clear of the hands, scanner, printer tray and the TO text
 const STEPS = [
-  {at: 0.3, end: 3.5, n: '1', en: 'Scan the QR code on the pallet'},
-  {at: 3.7, end: 10.9, n: '2', en: 'SAP automatically creates the TO and prints it'},
-  {at: 11.1, end: 13.9, n: '3', en: 'The TO is ready for put-away'},
+  {at: 0.3, end: 3.5, top: 1450, n: '1', en: 'Scan the QR code on the pallet'},
+  {at: 3.7, end: 10.9, top: 1250, n: '2', en: 'SAP automatically creates the TO and prints it'},
+  {at: 11.1, end: 13.9, top: 1470, n: '3', en: 'The TO is ready for put-away'},
 ];
 
 export const ScanToClip: React.FC = () => {
@@ -20,14 +21,12 @@ export const ScanToClip: React.FC = () => {
   return (
     <AbsoluteFill style={{background: '#000', fontFamily}}>
       <OffthreadVideo src={staticFile('clips/scan_to.mp4')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-      {/* soft dark fade at the bottom so the caption reads on any shot */}
-      <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(0,0,0,0) 62%, rgba(0,0,0,0.55) 100%)'}} />
       {STEPS.map((s) => {
         const o = interpolate(t, [s.at, s.at + 0.3, s.end - 0.25, s.end], [0, 1, 1, 0], ease);
         if (o <= 0) return null;
         const y = interpolate(t, [s.at, s.at + 0.35], [24, 0], ease);
         return (
-          <div key={s.n} style={{position: 'absolute', left: 60, right: 60, bottom: 170, display: 'flex', justifyContent: 'center', opacity: o, transform: `translateY(${y}px)`}}>
+          <div key={s.n} style={{position: 'absolute', left: 60, right: 60, top: s.top, display: 'flex', justifyContent: 'center', opacity: o, transform: `translateY(${y}px)`}}>
             <div style={{display: 'flex', alignItems: 'center', gap: 22, background: 'rgba(8,14,28,0.82)', border: '2px solid rgba(95,182,255,0.55)', borderRadius: 22,
               padding: '22px 30px', boxShadow: '0 8px 28px rgba(0,0,0,0.45)'}}>
               <div style={{flex: 'none', width: 66, height: 66, borderRadius: 33, background: 'linear-gradient(180deg, #1a7cff, #034ea2)', color: '#fff',
