@@ -10,7 +10,8 @@ const stats = [
   {value: '26', en: 'Forklifts', vi: 'Xe nâng'},
 ];
 
-export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => {
+/** topGap: room above the title (the brand logos sit there in the branded cut). */
+export const TitleScene: React.FC<{noStats?: boolean; topGap?: number}> = ({noStats = false, topGap = 0}) => {
   const vi = useViFirst();
   const frame = useTimelineFrame();
   const fps = TIMELINE_FPS;
@@ -25,6 +26,7 @@ export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => 
         alignItems: 'center',
         justifyContent: 'center',
         gap: 32,
+        paddingTop: topGap,
       }}
     >
       <div
@@ -57,7 +59,11 @@ export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => 
       <div style={{fontSize: 30, color: colors.muted, opacity: intro}}>
         {vi ? 'Algorithm-Based Route Optimization for Reach Trucks' : 'Tối ưu lộ trình xe Reach Truck bằng thuật toán'}
       </div>
-      <div style={{display: noStats ? 'none' : 'flex', gap: 20, marginTop: 40}}>
+      <div style={{display: noStats ? 'none' : 'block', marginTop: 24, fontSize: 24, fontWeight: 800, letterSpacing: 3, color: colors.green, opacity: intro}}>
+        {vi ? 'KHO B2C – DTLA' : 'B2C WAREHOUSE – DTLA'}
+        <span style={{fontSize: 20, fontWeight: 600, color: colors.muted, letterSpacing: 2}}> · {vi ? 'B2C WAREHOUSE – DTLA' : 'KHO B2C – DTLA'}</span>
+      </div>
+      <div style={{display: noStats ? 'none' : 'flex', gap: 20, marginTop: -12}}>
         {stats.map((s, i) => {
           const p = spring({frame: frame - 20 - i * 6, fps, config: {damping: 200}});
           return (
@@ -75,8 +81,8 @@ export const TitleScene: React.FC<{noStats?: boolean}> = ({noStats = false}) => 
               }}
             >
               <div style={{fontSize: 48, fontWeight: 800}}>{s.value}</div>
-              <div style={{fontSize: 22, fontWeight: 600}}>{s.en}</div>
-              <div style={{fontSize: 18, color: colors.muted}}>{s.vi}</div>
+              <div style={{fontSize: 22, fontWeight: 600}}>{vi ? s.vi : s.en}</div>
+              <div style={{fontSize: 18, color: colors.muted}}>{vi ? s.en : s.vi}</div>
             </div>
           );
         })}
