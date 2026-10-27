@@ -38,7 +38,7 @@ const BRAND_H = 72;
 const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
 
 const LOGO_W = 183; // white card around the 40 px high logo
-const SITE_W = 330;
+const SITE_W = 290;
 const BRAND_BOX_H = 56; // both cards the same height
 /** Company logo top left and the site name top right. On the title they sit centred above the title, then move out. */
 const Brand: React.FC<{outAt: number}> = ({outAt}) => {
@@ -47,23 +47,26 @@ const Brand: React.FC<{outAt: number}> = ({outAt}) => {
   const t = frame / fps;
   const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
   const m = interpolate(t, [outAt - 0.9, outAt], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
-  const sc = interpolate(m, [0, 1], [1.5, 1]);
-  const gap = 28;
+  const sc = interpolate(m, [0, 1], [1.4, 1]);
+  // on the title the two cards touch and read as one lockup; they part on the way to the corners
+  const gap = 0;
   // centre row, at the scale it has there
-  const rowW = (LOGO_W + SITE_W) * 1.5 + gap;
+  const rowW = (LOGO_W + SITE_W) * 1.4 + gap;
   const cy = 215;
   const logo = {x: interpolate(m, [0, 1], [960 - rowW / 2, 28]), y: interpolate(m, [0, 1], [cy, 12])};
-  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.5 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 12])};
+  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.4 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 12])};
   const o = interpolate(t, [0.1, 0.6], [0, 1], clamp);
   const box = {position: 'absolute', zIndex: 50, height: BRAND_BOX_H, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o, boxShadow: '0 2px 10px rgba(0,0,0,0.35)'} as const;
+    transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o, boxShadow: `0 2px 10px rgba(0,0,0,${0.35 * m})`} as const; // no shadow seam while joined
   return (
     <>
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10}}>
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: `10px ${10 * m}px ${10 * m}px 10px`}}>
         <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
       </div>
-      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 26, fontWeight: 800, letterSpacing: 3,
-        color: '#fff', background: 'rgba(3,78,162,0.92)', borderRadius: 10}}>
+      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
+        color: '#034ea2', background: '#fff', borderRadius: `${10 * m}px 10px 10px ${10 * m}px`}}>
+        {/* divider while the two cards are joined */}
+        <div style={{position: 'absolute', left: 0, top: 10, bottom: 10, width: 2, background: '#c9d3e6', opacity: 1 - m}} />
         DTLA WAREHOUSE
       </div>
     </>
