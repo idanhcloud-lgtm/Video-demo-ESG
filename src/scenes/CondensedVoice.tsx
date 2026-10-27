@@ -1,8 +1,8 @@
-import {AbsoluteFill, Audio, Sequence, Series, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Img, Sequence, Series, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Subtitle} from '../components/Subtitle';
 import voEN from '../data/voiceEN.json';
 import voV4 from '../data/voiceV4.json';
-import {VIDEO} from '../theme';
+import {VIDEO, fontFamily} from '../theme';
 import {ClosingRecap} from './ClosingRecap';
 import {EndCard} from './EndCard';
 import {MainRace} from './MainRace';
@@ -28,14 +28,32 @@ const Subtitles: React.FC<{enFirst?: boolean; vo: Voice}> = ({enFirst, vo}) => {
   return <Subtitle vi={s.vi} en={s.en} opacity={o} enFirst={enFirst} />;
 };
 
+// with the brand on, the scenes shrink a little to leave a header strip for it
+const BRAND_H = 72;
+const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
+
+/** Company logo top left and the site name top right, on every frame. */
+const Brand: React.FC = () => (
+  <>
+    <div style={{position: 'absolute', left: 28, top: 12, zIndex: 50, background: '#fff', borderRadius: 10, padding: '6px 12px', boxShadow: '0 2px 10px rgba(0,0,0,0.35)'}}>
+      <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
+    </div>
+    <div style={{position: 'absolute', right: 28, top: 15, zIndex: 50, fontFamily, fontSize: 26, fontWeight: 800, letterSpacing: 3, color: '#fff',
+      background: 'rgba(3,78,162,0.92)', borderRadius: 10, padding: '8px 18px', boxShadow: '0 2px 10px rgba(0,0,0,0.35)'}}>
+      DTLA WAREHOUSE
+    </div>
+  </>
+);
+
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
-export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean}> = ({enFirst = false, englishVoice = false}) => {
+export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean}> = ({enFirst = false, englishVoice = false, brand = false}) => {
   const vo = (englishVoice ? voEN : voV4) as unknown as Voice;
   const S = vo.scenes;
   return (
   <LangContext.Provider value={enFirst ? 'en' : 'vi'}>
-  <AbsoluteFill>
+  <AbsoluteFill style={{background: '#070b14'}}>
+    <AbsoluteFill style={brand ? {transform: `translateY(${BRAND_H}px) scale(${BRAND_SCALE})`, transformOrigin: 'top center'} : undefined}>
     <Series>
       <Series.Sequence durationInFrames={f(S.title.seconds)}>
         <TitleScene noStats />
@@ -55,12 +73,14 @@ export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean
         <EndCard beats={S.end.beats} />
       </Series.Sequence>
     </Series>
+    </AbsoluteFill>
     {vo.audio.map((a) => (
       <Sequence key={a.file} from={f(a.at)}>
         <Audio src={staticFile(a.file)} />
       </Sequence>
     ))}
     <Subtitles enFirst={enFirst} vo={vo} />
+    {brand ? <Brand /> : null}
   </AbsoluteFill>
   </LangContext.Provider>
   );
