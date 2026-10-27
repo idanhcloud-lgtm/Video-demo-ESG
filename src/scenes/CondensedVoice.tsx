@@ -107,6 +107,17 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outA
   );
 };
 
+/** Soft scene change: fade (and a slight zoom) in at the start, fade out at the end. */
+const Soft: React.FC<{children: React.ReactNode; inSec?: number; outSec?: number}> = ({children, inSec = 0, outSec = 0}) => {
+  const frame = useCurrentFrame();
+  const {fps, durationInFrames} = useVideoConfig();
+  const ease = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)} as const;
+  const fin = inSec > 0 ? interpolate(frame, [0, inSec * fps], [0, 1], ease) : 1;
+  const fout = outSec > 0 ? interpolate(frame, [durationInFrames - outSec * fps, durationInFrames], [1, 0], ease) : 1;
+  const sc = interpolate(fin, [0, 1], [0.96, 1]);
+  return <AbsoluteFill style={{opacity: fin * fout, transform: `scale(${sc})`}}>{children}</AbsoluteFill>;
+};
+
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
 export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean; brandStyle?: 'plate' | 'bar' | 'pill'}> = ({enFirst = false, englishVoice = false, brand = false, brandStyle = 'pill'}) => {
@@ -122,10 +133,22 @@ export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean
     <AbsoluteFill style={brand ? {transform: `translateY(${BRAND_H}px) scale(${BRAND_SCALE})`, transformOrigin: 'top center'} : undefined}>
     <Series>
       <Series.Sequence durationInFrames={f(titleEnd)}>
-        <TitleScene noStats site={brand} topGap={brand ? 60 : 0} />
+        {brand ? (
+          <Soft outSec={0.5}>
+            <TitleScene noStats site topGap={60} />
+          </Soft>
+        ) : (
+          <TitleScene noStats />
+        )}
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.race.seconds)}>
-        <MainRace clean beats={S.race.beats} />
+        {brand ? (
+          <Soft inSec={0.9}>
+            <MainRace clean beats={S.race.beats} />
+          </Soft>
+        ) : (
+          <MainRace clean beats={S.race.beats} />
+        )}
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.p04.seconds)}>
         <Problem04 clean beats={S.p04.beats} />
