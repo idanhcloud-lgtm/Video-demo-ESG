@@ -47,7 +47,7 @@ const DT_BLUE = '#034ea2';
  * style 'plate': only the logo has a white plate, the site name is white text.
  * style 'bar': a white header strip across the top carries both, the site name in the logo blue.
  */
-const Brand: React.FC<{outAt: number; style: 'plate' | 'bar'}> = ({outAt, style}) => {
+const Brand: React.FC<{outAt: number; style: 'plate' | 'bar' | 'pill'}> = ({outAt, style}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const t = frame / fps;
@@ -67,12 +67,15 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar'}> = ({outAt, style}
   return (
     <>
       {bar ? <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: BRAND_H, zIndex: 49, background: '#fff', opacity: m, boxShadow: '0 2px 12px rgba(0,0,0,0.35)'}} /> : null}
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10}}>
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10, boxShadow: style === 'pill' ? '0 4px 14px rgba(0,0,0,0.4)' : undefined}}>
         <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
       </div>
       <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
-        color: bar ? DT_BLUE : '#fff', background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent', borderRadius: 10}}>
-        {bar ? null : <div style={{position: 'absolute', left: -gap / 2 - 1, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />}
+        color: bar ? DT_BLUE : '#fff', borderRadius: 10,
+        ...(style === 'pill'
+          ? {background: 'linear-gradient(180deg, #1a6fd1 0%, #034ea2 100%)', border: '1px solid rgba(255,255,255,0.35)', boxShadow: '0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25)', textShadow: '0 1px 2px rgba(0,0,0,0.3)'}
+          : {background: bar ? `rgba(255,255,255,${1 - m})` : 'transparent'})}}>
+        {bar || style === 'pill' ? null : <div style={{position: 'absolute', left: -gap / 2 - 1, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />}
         DTLA WAREHOUSE
       </div>
     </>
@@ -81,7 +84,7 @@ const Brand: React.FC<{outAt: number; style: 'plate' | 'bar'}> = ({outAt, style}
 
 /** Condensed version with the final v4 voice-over: every scene beat is placed on its sentence (tools/voice_v4_plan.py). */
 /** enFirst: subtitles with English as the main line. */
-export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean; brandStyle?: 'plate' | 'bar'}> = ({enFirst = false, englishVoice = false, brand = false, brandStyle = 'plate'}) => {
+export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean; brand?: boolean; brandStyle?: 'plate' | 'bar' | 'pill'}> = ({enFirst = false, englishVoice = false, brand = false, brandStyle = 'pill'}) => {
   const vo = (englishVoice ? voEN : voV4) as unknown as Voice;
   const S = vo.scenes;
   const extra = brand ? TITLE_EXTRA : 0;
