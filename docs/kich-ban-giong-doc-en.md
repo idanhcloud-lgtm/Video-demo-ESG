@@ -6,6 +6,18 @@ One voice tag at the start of each paragraph, `[long pause]` between sentences (
 
 ---
 
+## E0 – Title line (new, replaces the first sentence of E1)
+Record as its own file `audio/en/E0.mp3`, so the rest of E1 stays as it is.
+```
+[confident] Algorithm-based route optimization for reach trucks... simulated on the B2C warehouse layout at Duy Tan Long An.
+```
+If the voice mispronounces the name, use the phonetic spelling instead:
+```
+[confident] Algorithm-based route optimization for reach trucks... simulated on the B2C warehouse layout at Zwee Tun Long Ahn.
+```
+Subtitle: "Algorithm-based route optimization for reach trucks, simulated on the B2C warehouse layout at Duy Tan Long An." /
+"Tối ưu lộ trình xe reach truck bằng thuật toán, mô phỏng trên sơ đồ kho B2C – Duy Tân Long An."
+
 ## E1 – Opening and race
 ```
 [confident] Algorithm-based route optimization for reach trucks.
