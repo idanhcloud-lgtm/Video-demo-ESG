@@ -16,8 +16,8 @@ const duration = (S: Voice['scenes']) => f(S.title.seconds) + f(S.race.seconds) 
 export const CONDENSED_VOICE_DURATION = duration(voV4.scenes);
 /** English voice-over (audio/en): same scenes, beats placed on the English sentences. */
 export const CONDENSED_VOICE_EN_AUDIO_DURATION = duration((voEN as unknown as Voice).scenes);
-/** Branded cut: the title holds a little longer for the logos and the warehouse figures. */
-const TITLE_EXTRA = 3.0;
+/** Branded cut: the title holds a little longer for the logos and the warehouse line. */
+const TITLE_EXTRA = 1.5;
 export const CONDENSED_VOICE_EN_BRAND_DURATION = CONDENSED_VOICE_EN_AUDIO_DURATION + f(TITLE_EXTRA);
 
 /** Bilingual subtitle for the sentence being spoken. */
@@ -39,6 +39,7 @@ const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
 
 const LOGO_W = 183; // white card around the 40 px high logo
 const SITE_W = 330;
+const BRAND_BOX_H = 56; // both cards the same height
 /** Company logo top left and the site name top right. On the title they sit centred above the title, then move out. */
 const Brand: React.FC<{outAt: number}> = ({outAt}) => {
   const frame = useCurrentFrame();
@@ -50,18 +51,19 @@ const Brand: React.FC<{outAt: number}> = ({outAt}) => {
   const gap = 28;
   // centre row, at the scale it has there
   const rowW = (LOGO_W + SITE_W) * 1.5 + gap;
-  const cy = 150;
+  const cy = 215;
   const logo = {x: interpolate(m, [0, 1], [960 - rowW / 2, 28]), y: interpolate(m, [0, 1], [cy, 12])};
-  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.5 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy + 4, 15])};
+  const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.5 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 12])};
   const o = interpolate(t, [0.1, 0.6], [0, 1], clamp);
-  const box = {position: 'absolute', zIndex: 50, transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o, boxShadow: '0 2px 10px rgba(0,0,0,0.35)'} as const;
+  const box = {position: 'absolute', zIndex: 50, height: BRAND_BOX_H, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o, boxShadow: '0 2px 10px rgba(0,0,0,0.35)'} as const;
   return (
     <>
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, boxSizing: 'border-box', background: '#fff', borderRadius: 10, padding: '6px 12px'}}>
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: 10}}>
         <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
       </div>
-      <div style={{...box, left: site.x, top: site.y, width: SITE_W, boxSizing: 'border-box', textAlign: 'center', fontFamily, fontSize: 26, fontWeight: 800, letterSpacing: 3,
-        color: '#fff', background: 'rgba(3,78,162,0.92)', borderRadius: 10, padding: '8px 0'}}>
+      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 26, fontWeight: 800, letterSpacing: 3,
+        color: '#fff', background: 'rgba(3,78,162,0.92)', borderRadius: 10}}>
         DTLA WAREHOUSE
       </div>
     </>
@@ -83,7 +85,7 @@ export const CondensedVoice: React.FC<{enFirst?: boolean; englishVoice?: boolean
     <AbsoluteFill style={brand ? {transform: `translateY(${BRAND_H}px) scale(${BRAND_SCALE})`, transformOrigin: 'top center'} : undefined}>
     <Series>
       <Series.Sequence durationInFrames={f(titleEnd)}>
-        <TitleScene noStats={!brand} topGap={brand ? 40 : 0} />
+        <TitleScene noStats site={brand} topGap={brand ? 60 : 0} />
       </Series.Sequence>
       <Series.Sequence durationInFrames={f(S.race.seconds)}>
         <MainRace clean beats={S.race.beats} />
