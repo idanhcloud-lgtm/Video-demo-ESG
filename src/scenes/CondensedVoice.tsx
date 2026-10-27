@@ -37,7 +37,7 @@ const Subtitles: React.FC<{enFirst?: boolean; vo: Voice; shift: (at: number) => 
 const BRAND_H = 72;
 const BRAND_SCALE = (VIDEO.height - BRAND_H) / VIDEO.height;
 
-const LOGO_W = 183; // white card around the 40 px high logo
+const LOGO_W = 183; // slot for the 40 px high logo
 const SITE_W = 290;
 const BRAND_BOX_H = 56; // both cards the same height
 /** Company logo top left and the site name top right. On the title they sit centred above the title, then move out. */
@@ -57,16 +57,15 @@ const Brand: React.FC<{outAt: number}> = ({outAt}) => {
   const site = {x: interpolate(m, [0, 1], [960 - rowW / 2 + LOGO_W * 1.4 + gap, VIDEO.width - 28 - SITE_W]), y: interpolate(m, [0, 1], [cy, 12])};
   const o = interpolate(t, [0.1, 0.6], [0, 1], clamp);
   const box = {position: 'absolute', zIndex: 50, height: BRAND_BOX_H, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o, boxShadow: `0 2px 10px rgba(0,0,0,${0.35 * m})`} as const; // no shadow seam while joined
+    transformOrigin: 'top left', transform: `scale(${sc})`, opacity: o} as const;
   return (
     <>
-      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W, background: '#fff', borderRadius: `10px ${10 * m}px ${10 * m}px 10px`}}>
-        <Img src={staticFile('brand/duytan.png')} style={{height: 40, display: 'block'}} />
+      <div style={{...box, left: logo.x, top: logo.y, width: LOGO_W}}>
+        <Img src={staticFile('brand/duytan_white.png')} style={{height: 40, display: 'block'}} />
       </div>
-      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2,
-        color: '#034ea2', background: '#fff', borderRadius: `${10 * m}px 10px 10px ${10 * m}px`}}>
-        {/* divider while the two cards are joined */}
-        <div style={{position: 'absolute', left: 0, top: 10, bottom: 10, width: 2, background: '#c9d3e6', opacity: 1 - m}} />
+      <div style={{...box, left: site.x, top: site.y, width: SITE_W, fontFamily, fontSize: 24, fontWeight: 800, letterSpacing: 2, color: '#fff'}}>
+        {/* divider while the two sit together on the title */}
+        <div style={{position: 'absolute', left: 0, top: 10, bottom: 10, width: 2, background: '#ffffff66', opacity: 1 - m}} />
         DTLA WAREHOUSE
       </div>
     </>
