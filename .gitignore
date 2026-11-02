@@ -4,3 +4,5 @@ out/
 public/audio/
 __pycache__/
 public/clips/
+public/kho/
+src/data/khoDT.ts

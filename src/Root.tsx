@@ -6,6 +6,7 @@ import {SUMMARY_DURATION, Summary} from './scenes/Summary';
 import {TitleScene} from './scenes/TitleScene';
 import {FIGURE, SlideFigure} from './scenes/SlideFigure';
 import {CONDENSED_DURATION, Condensed} from './scenes/Condensed';
+import {KHO_NETWORK_SECONDS, KhoNetwork} from './scenes/KhoNetwork';
 import {SCAN_TO_SECONDS, ScanToClip} from './scenes/ScanToClip';
 import {CONDENSED_VOICE_DURATION, CONDENSED_VOICE_EN_AUDIO_DURATION, CONDENSED_VOICE_EN_BRAND_DURATION, CondensedVoice} from './scenes/CondensedVoice';
 import {MAIN_RACE_DURATION, MainRace} from './scenes/MainRace';
@@ -77,6 +78,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="MoverExplain" component={MoverExplain} durationInFrames={MOVER_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="AlgoExplain" component={AlgoExplain} durationInFrames={ALGO_EXPLAIN_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       <Composition id="ProjectAlgo" component={ProjectAlgo} durationInFrames={PROJECT_ALGO_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
+      <Composition id="KhoNetwork" component={KhoNetwork} durationInFrames={KHO_NETWORK_SECONDS * 30} fps={30} width={1920} height={1080} />
       <Composition id="ScanToClip" component={ScanToClip} durationInFrames={SCAN_TO_SECONDS * 30} fps={30} width={1080} height={1920} />
       <Composition id="SavingsSimple" component={SavingsSimple} durationInFrames={SAVINGS_SIMPLE_SECONDS * VIDEO.fps} fps={VIDEO.fps} width={VIDEO.width} height={VIDEO.height} />
       {(
