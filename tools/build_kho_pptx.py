@@ -13,7 +13,7 @@ import sys
 from lxml import etree
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
 
@@ -335,11 +335,51 @@ add_morph(s)
 notes(s, 'Bảy kho thuộc hai miền: một kho tại Bắc Ninh, sáu kho tại khu vực TP. Hồ Chí Minh và Tây Ninh.')
 
 
+HUB = next(k for k in KHO if k.get('hub'))
+
+
+def km(a, b):
+    """Straight-line (great-circle) distance in km."""
+    p1, p2 = math.radians(a['lat']), math.radians(b['lat'])
+    dl = math.radians(b['lon'] - a['lon'])
+    c = math.sin(p1) * math.sin(p2) + math.cos(p1) * math.cos(p2) * math.cos(dl)
+    return 6371 * math.acos(max(-1.0, min(1.0, c)))
+
+
+def route(slide, scr, k):
+    """Dashed line from the hub to warehouse k with its distance; only on k's own slide."""
+    x1, y1 = scr(HUB['lon'], HUB['lat'])
+    x2, y2 = scr(k['lon'], k['lat'])
+    ln = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1), Inches(y1), Inches(x2), Inches(y2))
+    ln.name = '!!route'
+    ln.line.color.rgb = GREEN
+    ln.line.width = Pt(2.75)
+    ln.line.dash_style = 7  # long dash
+    # label at the midpoint, kept on the visible map (left of the card)
+    # beside the line's midpoint (below it), so a short route never puts the label on the pins
+    mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+    L = math.hypot(x2 - x1, y2 - y1) or 1
+    nx, ny = -(y2 - y1) / L, (x2 - x1) / L
+    if ny < 0:
+        nx, ny = -nx, -ny
+    off = 0.95 if L < 2.5 else 0.0
+    mx, my = mx + nx * off, my + ny * off
+    mx, my = min(max(mx, 0.6), CARD_X - 2.3), min(max(my, 0.9), SH - 1.0)
+    d = km(HUB, k)
+    lab = box(slide, mx - 0.85, my - 0.36, 1.7, 0.72, WHITE, line=GREEN, radius=0.14, name='!!routekm', line_w=1.5)
+    lab.text_frame.text = ''
+    dist = f'{d:,.0f}'.replace(',', '.') if d >= 100 else f'{d:.1f}'.replace('.', ',')
+    text(slide, mx - 0.85, my - 0.3, 1.7, 0.36, [[(f'{dist} km', {'size': 18, 'bold': True, 'color': GREEN})]], align=PP_ALIGN.CENTER)
+    text(slide, mx - 0.85, my + 0.06, 1.7, 0.26, [[('từ DTLA · đường chim bay', {'size': 8, 'color': SUB})]], align=PP_ALIGN.CENTER)
+
+
 def kho_slide(k):
     z = 9 if k['region'] == 'north' else (34 if k.get('hub') else 30)
     s = new_slide()
     scr = draw_map(s, (k['lon'], k['lat'], z, 4.1, 3.85))
     places(s, scr, z)
+    if not k.get('hub'):
+        route(s, scr, k)
     pins(s, scr, active=k['id'], labels=True)
     card(s, k)
     logo(s)
