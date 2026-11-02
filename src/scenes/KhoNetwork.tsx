@@ -10,6 +10,8 @@ import {colors, fontFamily} from '../theme';
  */
 const FPS = 30;
 const BLUE = '#1f6fe5';
+// light tone: white cards and land on a pale sea, navy text, Duy Tan blue for the satellites
+const L = {ink: '#14286b', sub: '#5a6788', green: '#0f9d63', amber: '#d99400', card: '#ffffff', tile: '#f1f5fb', border: '#d9e2f2', sea: '#dce9f8'};
 
 // ---- projection: lon/lat → world px (1 at zoom 1), equirectangular around 16°N ----
 const K = 58;
@@ -73,7 +75,7 @@ const nf = (n: number) => Math.round(n).toLocaleString('vi-VN');
 
 /** Duy Tan logo on its white plate. */
 const Logo: React.FC<{h: number}> = ({h}) => (
-  <div style={{background: '#fff', borderRadius: h * 0.18, padding: `${h * 0.14}px ${h * 0.3}px`, boxShadow: '0 4px 16px rgba(0,0,0,0.45)', display: 'inline-flex'}}>
+  <div style={{background: '#fff', borderRadius: h * 0.18, padding: `${h * 0.14}px ${h * 0.3}px`, boxShadow: '0 4px 16px rgba(20,40,107,0.18)', border: `1px solid ${L.border}`, display: 'inline-flex'}}>
     <Img src={staticFile('brand/duytan.png')} style={{height: h, display: 'block'}} />
   </div>
 );
@@ -97,28 +99,28 @@ const Card: React.FC<{seg: Seg; t: number}> = ({seg, t}) => {
   const count = interpolate(t, [seg.arrive, seg.arrive + 1.2], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
   return (
     <div style={{position: 'absolute', right: 56, top: 112, width: 700, opacity: o, transform: `translateX(${(1 - inn) * 60}px)`,
-      background: 'rgba(9,15,30,0.94)', border: `2px solid ${k.hub ? colors.green : '#2a3b62'}`, borderRadius: 24, padding: '30px 34px',
-      boxShadow: '0 16px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: 16}}>
+      background: L.card, color: L.ink, border: `2px solid ${k.hub ? L.green : L.border}`, borderRadius: 24, padding: '30px 34px',
+      boxShadow: '0 16px 50px rgba(20,40,107,0.18)', display: 'flex', flexDirection: 'column', gap: 16}}>
       <div style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
-        {k.hub ? <span style={{fontSize: 18, fontWeight: 800, letterSpacing: 1.5, color: '#06251a', background: colors.green, borderRadius: 999, padding: '4px 14px'}}>KHO TRUNG TÂM · HUB</span> : null}
-        <span style={{fontSize: 18, fontWeight: 700, letterSpacing: 1.5, color: '#cfe0ff', background: '#1a2c55', borderRadius: 999, padding: '4px 14px'}}>
+        {k.hub ? <span style={{fontSize: 18, fontWeight: 800, letterSpacing: 1.5, color: '#ffffff', background: L.green, borderRadius: 999, padding: '4px 14px'}}>KHO TRUNG TÂM · HUB</span> : null}
+        <span style={{fontSize: 18, fontWeight: 700, letterSpacing: 1.5, color: L.ink, background: '#e3ecfb', borderRadius: 999, padding: '4px 14px'}}>
           {k.region === 'north' ? 'MIỀN BẮC · NORTH' : 'MIỀN NAM · SOUTH'}
         </span>
-        {k.estimated ? <span style={{fontSize: 18, fontWeight: 700, color: '#2a1d00', background: colors.amber, borderRadius: 999, padding: '4px 14px'}}>Số liệu tạm tính · Estimated</span> : null}
+        {k.estimated ? <span style={{fontSize: 18, fontWeight: 700, color: '#ffffff', background: L.amber, borderRadius: 999, padding: '4px 14px'}}>Số liệu tạm tính · Estimated</span> : null}
       </div>
       <div>
         <div style={{fontSize: 40, fontWeight: 800, lineHeight: 1.15}}>{k.vi}</div>
-        <div style={{fontSize: 22, color: colors.muted}}>{k.en}</div>
+        <div style={{fontSize: 22, color: L.sub}}>{k.en}</div>
       </div>
-      <div style={{fontSize: 24, fontWeight: 600, color: colors.green}}>
-        {k.role[0]} <span style={{fontSize: 19, fontWeight: 500, color: colors.muted}}>· {k.role[1]}</span>
+      <div style={{fontSize: 24, fontWeight: 600, color: L.green}}>
+        {k.role[0]} <span style={{fontSize: 19, fontWeight: 500, color: L.sub}}>· {k.role[1]}</span>
       </div>
-      <div style={{fontSize: 19, color: '#c9d1e3', lineHeight: 1.4, borderLeft: `3px solid ${BLUE}`, paddingLeft: 12}}>{k.address}</div>
+      <div style={{fontSize: 19, color: L.sub, lineHeight: 1.4, borderLeft: `3px solid ${BLUE}`, paddingLeft: 12}}>{k.address}</div>
       <div style={{display: 'flex', gap: 12, height: 210}}>
         {k.photos.length ? (
           k.photos.map((p) => <Img key={p} src={staticFile(p)} style={{flex: 1, minWidth: 0, height: 210, objectFit: 'cover', borderRadius: 14}} />)
         ) : (
-          <div style={{flex: 1, borderRadius: 14, border: '2px dashed #3a4a70', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: colors.muted}}>
+          <div style={{flex: 1, borderRadius: 14, border: `2px dashed ${L.border}`, background: L.tile, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: L.sub}}>
             <div style={{fontSize: 24, fontWeight: 600}}>Hình ảnh đang cập nhật</div>
             <div style={{fontSize: 18}}>Photo coming soon</div>
           </div>
@@ -129,13 +131,13 @@ const Card: React.FC<{seg: Seg; t: number}> = ({seg, t}) => {
           const v = k.stats[d.key];
           const txt = v === null ? '—' : typeof v === 'number' ? nf(v * count) : v;
           return (
-            <div key={d.key} style={{background: '#101a33', borderRadius: 14, padding: '12px 16px'}}>
-              <div style={{fontSize: typeof v === 'string' ? 20 : 34, fontWeight: 800, lineHeight: 1.15, color: k.estimated ? '#f0d58a' : '#fff', minHeight: 40}}>
+            <div key={d.key} style={{background: L.tile, borderRadius: 14, padding: '12px 16px'}}>
+              <div style={{fontSize: typeof v === 'string' ? 20 : 34, fontWeight: 800, lineHeight: 1.15, color: k.estimated ? '#b07800' : L.ink, minHeight: 40}}>
                 {txt}
-                {d.unit && typeof v === 'number' ? <span style={{fontSize: 18, fontWeight: 600, color: colors.muted}}> {d.unit}</span> : null}
+                {d.unit && typeof v === 'number' ? <span style={{fontSize: 18, fontWeight: 600, color: L.sub}}> {d.unit}</span> : null}
               </div>
-              <div style={{fontSize: 18, fontWeight: 600, color: '#c9d1e3'}}>
-                {d.vi} <span style={{fontSize: 15, fontWeight: 500, color: colors.muted}}>· {d.en}</span>
+              <div style={{fontSize: 18, fontWeight: 600, color: L.sub}}>
+                {d.vi} <span style={{fontSize: 15, fontWeight: 500, color: L.sub}}>· {d.en}</span>
               </div>
             </div>
           );
@@ -154,23 +156,23 @@ const Summary: React.FC<{t: number}> = ({t}) => {
   const totP = KHO.reduce((s, k) => s + k.stats.pallets, 0);
   const rows = [...KHO].sort((a, b) => b.stats.area - a.stats.area);
   return (
-    <div style={{position: 'absolute', right: 56, top: 112, width: 760, opacity: o, background: 'rgba(9,15,30,0.94)', border: '2px solid #2a3b62', borderRadius: 24,
+    <div style={{position: 'absolute', right: 56, top: 112, width: 760, opacity: o, background: L.card, color: L.ink, border: `2px solid ${L.border}`, boxShadow: '0 16px 50px rgba(20,40,107,0.18)', borderRadius: 24,
       padding: '30px 34px', display: 'flex', flexDirection: 'column', gap: 14}}>
       <div>
         <div style={{fontSize: 38, fontWeight: 800}}>7 kho · 2 miền</div>
-        <div style={{fontSize: 22, color: colors.muted}}>7 warehouses · 2 regions</div>
+        <div style={{fontSize: 22, color: L.sub}}>7 warehouses · 2 regions</div>
       </div>
       {rows.map((k, i) => {
         const g = interpolate(t, [T_SUMMARY + 0.2 + i * 0.12, T_SUMMARY + 1.0 + i * 0.12], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
         return (
           <div key={k.id} style={{display: 'flex', alignItems: 'center', gap: 14}}>
-            <div style={{width: 230, fontSize: 21, fontWeight: k.hub ? 800 : 600, color: k.hub ? colors.green : '#fff', whiteSpace: 'nowrap'}}>
+            <div style={{width: 230, fontSize: 21, fontWeight: k.hub ? 800 : 600, color: k.hub ? L.green : L.ink, whiteSpace: 'nowrap'}}>
               {k.vi.replace(/ \(.*\)/, '').replace('Kho ', '')}
-              {k.estimated ? <span style={{color: colors.amber}}> *</span> : null}
+              {k.estimated ? <span style={{color: L.amber}}> *</span> : null}
             </div>
-            <div style={{flex: 1, height: 22, background: '#101a33', borderRadius: 6, overflow: 'hidden'}}>
+            <div style={{flex: 1, height: 22, background: L.tile, borderRadius: 6, overflow: 'hidden'}}>
               <div style={{width: `${(k.stats.area / maxA) * 100 * g}%`, height: '100%', borderRadius: 6,
-                background: k.hub ? colors.green : k.estimated ? `repeating-linear-gradient(45deg, ${colors.amber}, ${colors.amber} 8px, #b8892d 8px, #b8892d 16px)` : BLUE}} />
+                background: k.hub ? L.green : k.estimated ? `repeating-linear-gradient(45deg, ${L.amber}, ${L.amber} 8px, #f2c14e 8px, #f2c14e 16px)` : BLUE}} />
             </div>
             <div style={{width: 130, textAlign: 'right', fontSize: 21, fontWeight: 700}}>{nf(k.stats.area)} m²</div>
           </div>
@@ -181,15 +183,15 @@ const Summary: React.FC<{t: number}> = ({t}) => {
           {v: `${nf(totA)} m²`, vi: 'Tổng diện tích', en: 'Total area'},
           {v: nf(totP), vi: 'Tổng vị trí pallet', en: 'Total pallet positions'},
         ].map((s) => (
-          <div key={s.vi} style={{flex: 1, background: '#101a33', borderRadius: 14, padding: '12px 16px'}}>
+          <div key={s.vi} style={{flex: 1, background: L.tile, borderRadius: 14, padding: '12px 16px'}}>
             <div style={{fontSize: 34, fontWeight: 800}}>{s.v}</div>
-            <div style={{fontSize: 18, fontWeight: 600, color: '#c9d1e3'}}>
-              {s.vi} <span style={{fontSize: 15, color: colors.muted}}>· {s.en}</span>
+            <div style={{fontSize: 18, fontWeight: 600, color: L.sub}}>
+              {s.vi} <span style={{fontSize: 15, color: L.sub}}>· {s.en}</span>
             </div>
           </div>
         ))}
       </div>
-      <div style={{fontSize: 17, color: colors.amber}}>* Số liệu tạm tính, cập nhật sau · Estimated, to be confirmed</div>
+      <div style={{fontSize: 17, color: L.amber}}>* Số liệu tạm tính, cập nhật sau · Estimated, to be confirmed</div>
     </div>
   );
 };
@@ -213,38 +215,38 @@ export const KhoNetwork: React.FC = () => {
   const ts = toScreen(115.0, 9.4);
 
   return (
-    <AbsoluteFill style={{background: 'radial-gradient(ellipse at 45% 50%, #0d1c3a 0%, #060a16 75%)', fontFamily, color: '#fff'}}>
+    <AbsoluteFill style={{background: 'radial-gradient(ellipse at 45% 50%, #d9e8f8 0%, #bfd6f0 85%)', fontFamily, color: L.ink}}>
       {/* map */}
       <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: mapIn}}>
         <defs>
           <linearGradient id="land" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#1d3d78" />
-            <stop offset="1" stopColor="#163265" />
+            <stop offset="0" stopColor="#ffffff" />
+            <stop offset="1" stopColor="#f2f6fc" />
           </linearGradient>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="6" />
           </filter>
         </defs>
         <g transform={`translate(${cam.sx - wx(cam.lon) * cam.z} ${560 - wy(cam.lat) * cam.z}) scale(${cam.z})`}>
-          <path d={NB_D} fill="#111b33" stroke="#22304f" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-          <path d={VN_D} fill="#3d7bff" opacity={0.35} filter="url(#glow)" />
-          <path d={VN_D} fill="url(#land)" stroke="#5a9bff" strokeWidth={1.6} vectorEffect="non-scaling-stroke" />
-          <path d={RIV_D} fill="none" stroke="#4f86d8" strokeWidth={cam.z > 6 ? 1.6 : 0.8} opacity={0.55} vectorEffect="non-scaling-stroke" />
+          <path d={NB_D} fill="#dde2ea" stroke="#b9c3d3" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+          <path d={VN_D} fill="#1f6fe5" opacity={0.18} filter="url(#glow)" />
+          <path d={VN_D} fill="url(#land)" stroke="#1f5fc8" strokeWidth={1.8} vectorEffect="non-scaling-stroke" />
+          <path d={RIV_D} fill="none" stroke="#8cb8ea" strokeWidth={cam.z > 6 ? 1.6 : 0.8} opacity={0.55} vectorEffect="non-scaling-stroke" />
         </g>
         {/* archipelagos: islands as dots so they read at any zoom */}
         {[...sat.hoangSa, ...sat.truongSa].map(([lo, la], i) => {
           const [x, y] = toScreen(lo, la);
-          return <circle key={i} cx={x} cy={y} r={2.6} fill="#7fb0ff" />;
+          return <circle key={i} cx={x} cy={y} r={2.6} fill="#1f5fc8" />;
         })}
       </svg>
-      <div style={{position: 'absolute', left: hs[0] + 14, top: hs[1] - 46, opacity: mapIn * (cam.z < 2 ? 1 : 0), fontSize: 18, fontWeight: 600, color: '#9ec3ff', whiteSpace: 'nowrap'}}>
+      <div style={{position: 'absolute', left: hs[0] + 14, top: hs[1] - 46, opacity: mapIn * (cam.z < 2 ? 1 : 0), fontSize: 18, fontWeight: 600, color: '#1f5fc8', whiteSpace: 'nowrap'}}>
         Quần đảo Hoàng Sa
       </div>
-      <div style={{position: 'absolute', left: ts[0] - 60, top: ts[1] + 40, opacity: mapIn * (cam.z < 2 ? 1 : 0), fontSize: 18, fontWeight: 600, color: '#9ec3ff', whiteSpace: 'nowrap'}}>
+      <div style={{position: 'absolute', left: ts[0] - 60, top: ts[1] + 40, opacity: mapIn * (cam.z < 2 ? 1 : 0), fontSize: 18, fontWeight: 600, color: '#1f5fc8', whiteSpace: 'nowrap'}}>
         Quần đảo Trường Sa
       </div>
       <div style={{position: 'absolute', left: toScreen(112.6, 13.2)[0], top: toScreen(112.6, 13.2)[1], opacity: mapIn * 0.6 * (cam.z < 2 ? 1 : 0), fontSize: 22, fontWeight: 600,
-        letterSpacing: 6, color: '#5d86c9', whiteSpace: 'nowrap', transform: 'translateX(-50%)'}}>
+        letterSpacing: 6, color: '#7d9cc9', whiteSpace: 'nowrap', transform: 'translateX(-50%)'}}>
         BIỂN ĐÔNG
       </div>
 
@@ -257,8 +259,8 @@ export const KhoNetwork: React.FC = () => {
         return (
           <div key={p.vi} style={{position: 'absolute', left: x, top: y, opacity: mapIn * (show ? 0.8 : 0), transform: 'translate(-50%, -50%)', display: 'flex',
             flexDirection: near ? 'column-reverse' : 'row', alignItems: 'center', gap: 6}}>
-            <div style={{width: 7, height: 7, borderRadius: 4, background: '#9fb3d9'}} />
-            <div style={{fontSize: cam.z > 6 ? 22 : 17, fontWeight: 600, color: '#b8c7e6', whiteSpace: 'nowrap'}}>{p.vi}</div>
+            <div style={{width: 7, height: 7, borderRadius: 4, background: '#7a89a8'}} />
+            <div style={{fontSize: cam.z > 6 ? 22 : 17, fontWeight: 600, color: '#46557a', whiteSpace: 'nowrap'}}>{p.vi}</div>
           </div>
         );
       })}
@@ -270,15 +272,15 @@ export const KhoNetwork: React.FC = () => {
         const on = active === k.id;
         const r = k.hub ? 15 : 11;
         const pulse = on ? (t * 1.2) % 1 : 0;
-        const col = k.hub ? colors.green : k.estimated ? colors.amber : BLUE;
+        const col = k.hub ? L.green : k.estimated ? L.amber : BLUE;
         const labelOn = showNames || on;
         return (
           <div key={k.id} style={{position: 'absolute', left: x, top: y, transform: `translate(-50%, -50%) scale(${pop})`, opacity: mapIn}}>
             {on ? <div style={{position: 'absolute', left: -r * 3 + r, top: -r * 3 + r, width: r * 4, height: r * 4, borderRadius: '50%', border: `3px solid ${col}`,
               transform: `scale(${0.6 + pulse * 1.4})`, opacity: 1 - pulse}} /> : null}
-            <div style={{width: r * 2, height: r * 2, borderRadius: '50%', background: col, border: '3px solid #fff', boxShadow: `0 0 18px ${col}`}} />
+            <div style={{width: r * 2, height: r * 2, borderRadius: '50%', background: col, border: '3px solid #fff', boxShadow: `0 2px 8px rgba(20,40,107,0.35), 0 0 14px ${col}`}} />
             <div style={{position: 'absolute', left: r * 2 + 10, top: r - 15, whiteSpace: 'nowrap', fontSize: on ? 24 : 19, fontWeight: on ? 800 : 600,
-              color: on ? '#fff' : '#dbe6ff', opacity: labelOn ? 1 : 0, textShadow: '0 2px 6px rgba(0,0,0,0.9)'}}>
+              color: L.ink, opacity: labelOn ? 1 : 0, textShadow: '0 0 4px #ffffff, 0 0 8px #ffffff, 0 0 2px #ffffff'}}>
               {k.vi.replace(/ \(.*\)/, '')}
             </div>
           </div>
@@ -289,19 +291,19 @@ export const KhoNetwork: React.FC = () => {
       <div style={{position: 'absolute', left: 56, bottom: 52, opacity: mapIn * Math.min(interpolate(t, [T_PINS + 2.5, T_PINS + 3.2], [0, 1], clamp),
         // only on the whole map: close in it would sit on the warehouse labels
         interpolate(cam.z, [1.6, 2.6], [1, 0], clamp)),
-        display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(9,15,30,0.85)', border: '1px solid #2a3b62', borderRadius: 16, padding: '16px 22px'}}>
+        display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.92)', border: `1px solid ${L.border}`, boxShadow: '0 8px 24px rgba(20,40,107,0.12)', borderRadius: 16, padding: '16px 22px'}}>
         <div style={{fontSize: 30, fontWeight: 800}}>
-          7 kho · 2 miền <span style={{fontSize: 20, fontWeight: 500, color: colors.muted}}>7 warehouses · 2 regions</span>
+          7 kho · 2 miền <span style={{fontSize: 20, fontWeight: 500, color: L.sub}}>7 warehouses · 2 regions</span>
         </div>
-        <div style={{display: 'flex', gap: 22, fontSize: 18, color: '#c9d1e3'}}>
+        <div style={{display: 'flex', gap: 22, fontSize: 18, color: L.ink}}>
           {[
-            {c: colors.green, vi: 'Kho trung tâm', en: 'Hub'},
+            {c: L.green, vi: 'Kho trung tâm', en: 'Hub'},
             {c: BLUE, vi: 'Kho vệ tinh', en: 'Satellite'},
-            {c: colors.amber, vi: 'Số liệu tạm tính', en: 'Estimated'},
+            {c: L.amber, vi: 'Số liệu tạm tính', en: 'Estimated'},
           ].map((l) => (
             <div key={l.vi} style={{display: 'flex', alignItems: 'center', gap: 8}}>
               <div style={{width: 14, height: 14, borderRadius: 7, background: l.c, border: '2px solid #fff'}} />
-              {l.vi} <span style={{color: colors.muted}}>· {l.en}</span>
+              {l.vi} <span style={{color: L.sub}}>· {l.en}</span>
             </div>
           ))}
         </div>
@@ -316,21 +318,21 @@ export const KhoNetwork: React.FC = () => {
       </div>
 
       {/* title */}
-      <AbsoluteFill style={{opacity: titleO, alignItems: 'center', justifyContent: 'center', gap: 26, background: 'rgba(6,10,22,0.9)'}}>
+      <AbsoluteFill style={{opacity: titleO, alignItems: 'center', justifyContent: 'center', gap: 26, background: 'rgba(244,248,253,0.96)'}}>
         <Logo h={64} />
         <div style={{fontSize: 76, fontWeight: 800, letterSpacing: 2, transform: `translateY(${interpolate(t, [0.3, 1.2], [20, 0], clamp)}px)`}}>
-          Hệ thống kho <span style={{color: '#5aa2ff'}}>Duy Tân</span>
+          Hệ thống kho <span style={{color: '#1f5fc8'}}>Duy Tân</span>
         </div>
-        <div style={{fontSize: 32, color: colors.muted}}>Duy Tan Warehouse Network</div>
+        <div style={{fontSize: 32, color: L.sub}}>Duy Tan Warehouse Network</div>
       </AbsoluteFill>
 
       {/* end */}
-      <AbsoluteFill style={{opacity: endO, alignItems: 'center', justifyContent: 'center', gap: 22, background: 'rgba(6,10,22,0.92)'}}>
+      <AbsoluteFill style={{opacity: endO, alignItems: 'center', justifyContent: 'center', gap: 22, background: 'rgba(244,248,253,0.97)'}}>
         <Logo h={64} />
         <div style={{fontSize: 56, fontWeight: 800}}>
-          Hệ thống kho <span style={{color: '#5aa2ff'}}>Duy Tân</span>
+          Hệ thống kho <span style={{color: '#1f5fc8'}}>Duy Tân</span>
         </div>
-        <div style={{fontSize: 26, color: colors.muted}}>Duy Tan Warehouse Network</div>
+        <div style={{fontSize: 26, color: L.sub}}>Duy Tan Warehouse Network</div>
       </AbsoluteFill>
     </AbsoluteFill>
   );
