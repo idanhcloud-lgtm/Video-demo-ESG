@@ -370,7 +370,7 @@ def route(slide, scr, k):
     lab.text_frame.text = ''
     dist = f'{d:,.0f}'.replace(',', '.') if d >= 100 else f'{d:.1f}'.replace('.', ',')
     text(slide, mx - 0.85, my - 0.3, 1.7, 0.36, [[(f'{dist} km', {'size': 18, 'bold': True, 'color': GREEN})]], align=PP_ALIGN.CENTER)
-    text(slide, mx - 0.85, my + 0.06, 1.7, 0.26, [[('từ DTLA · đường chim bay', {'size': 8, 'color': SUB})]], align=PP_ALIGN.CENTER)
+    text(slide, mx - 0.85, my + 0.06, 1.7, 0.26, [[('từ DTLA · from DTLA', {'size': 8, 'color': SUB})]], align=PP_ALIGN.CENTER)
 
 
 def kho_slide(k):
@@ -378,7 +378,8 @@ def kho_slide(k):
     s = new_slide()
     scr = draw_map(s, (k['lon'], k['lat'], z, 4.1, 3.85))
     places(s, scr, z)
-    if not k.get('hub'):
+    # routes only within the southern cluster, not to the northern warehouse
+    if not k.get('hub') and k['region'] == HUB['region']:
         route(s, scr, k)
     pins(s, scr, active=k['id'], labels=True)
     card(s, k)
