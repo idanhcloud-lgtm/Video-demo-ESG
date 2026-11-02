@@ -157,6 +157,22 @@ def draw_map(slide, cam):
         poly(r, f'!!nb{i}', NEIGH, NEIGH_LINE, 0.5)
     for i, r in enumerate(VN_RINGS):
         poly(r, f'!!vn{i}', WHITE, LINE_BLUE, 1.25)
+    # roads as two open multi-path shapes (minor, major) so Morph tweens them as two objects
+    for key, name, col, lw in (('roadsMinor', '!!roadsMinor', RGBColor(0xC9, 0xD4, 0xE6), 0.6), ('roadsMajor', '!!roadsMajor', RGBColor(0xB1, 0xC0, 0xDA), 1.1)):
+        lines = MAP[key]
+        first = scr(*lines[0][0])
+        b = slide.shapes.build_freeform(Inches(first[0]), Inches(first[1]))
+        for j, ln in enumerate(lines):
+            pts = [scr(lo, la) for lo, la in ln]
+            if j:
+                b.move_to(Inches(pts[0][0]), Inches(pts[0][1]))
+            b.add_line_segments([(Inches(x), Inches(y)) for x, y in pts[1:]], close=False)
+        sh = b.convert_to_shape()
+        sh.name = name
+        sh.fill.background()
+        sh.line.color.rgb = col
+        sh.line.width = Pt(lw)
+        sh.shadow.inherit = False
     for i, (lo, la) in enumerate(ISLANDS):
         x, y = scr(lo, la)
         d = 0.05

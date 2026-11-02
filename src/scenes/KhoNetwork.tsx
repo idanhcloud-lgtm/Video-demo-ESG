@@ -23,6 +23,8 @@ const linePath = (r: number[][]) => r.map(([lo, la], i) => `${i ? 'L' : 'M'}${wx
 const VN_D = (vnMap.vn as number[][][]).map(ringPath).join('');
 const NB_D = (vnMap.neighbours as number[][][]).map(ringPath).join('');
 const RIV_D = (vnMap.rivers as number[][][]).map(linePath).join('');
+const ROAD_MAJOR_D = (vnMap.roadsMajor as number[][][]).map(linePath).join('');
+const ROAD_MINOR_D = (vnMap.roadsMinor as number[][][]).map(linePath).join('');
 
 // ---- camera keyframes ----
 type Cam = {lon: number; lat: number; z: number; sx: number}; // sx: screen x of the camera centre
@@ -231,6 +233,9 @@ export const KhoNetwork: React.FC = () => {
           <path d={NB_D} fill="#dde2ea" stroke="#b9c3d3" strokeWidth={1} vectorEffect="non-scaling-stroke" />
           <path d={VN_D} fill="#1f6fe5" opacity={0.18} filter="url(#glow)" />
           <path d={VN_D} fill="url(#land)" stroke="#1f5fc8" strokeWidth={1.8} vectorEffect="non-scaling-stroke" />
+          {/* roads, faint: minor first, then the highways */}
+          <path d={ROAD_MINOR_D} fill="none" stroke="#c9d4e6" strokeWidth={cam.z > 6 ? 1.6 : 0.9} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          <path d={ROAD_MAJOR_D} fill="none" stroke="#b1c0da" strokeWidth={cam.z > 6 ? 3 : 1.5} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
           <path d={RIV_D} fill="none" stroke="#8cb8ea" strokeWidth={cam.z > 6 ? 1.6 : 0.8} opacity={0.55} vectorEffect="non-scaling-stroke" />
         </g>
         {/* archipelagos: islands as dots so they read at any zoom */}
