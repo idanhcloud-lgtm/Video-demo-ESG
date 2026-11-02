@@ -61,6 +61,7 @@ def ring_area(r):
 VN_RINGS = [r for r in MAP['vn'] if ring_area(r) > 0.0005]
 NB_RINGS = [r for r in MAP['neighbours'] if ring_area(r) > 0.02]
 ISLANDS = MAP['hoangSa'] + MAP['truongSa']
+ANY_ESTIMATED = any(k.get('estimated') for k in KHO)
 
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
@@ -284,7 +285,7 @@ def card(slide, k):
         box(slide, tx, ty, tw, th, TILE, radius=0.1)
         v = st[key]
         if v is None:
-            val = [('—', {'size': 20, 'bold': True})]
+            val = [('', {'size': 20, 'bold': True})]  # not provided: left blank
         elif isinstance(v, str):
             val = [(v, {'size': 11, 'bold': True})]
         else:
@@ -299,7 +300,10 @@ def legend(slide):
     box(slide, 0.42, 6.35, 5.3, 0.8, WHITE, line=BORDER, radius=0.12, name='!!legend')
     text(slide, 0.62, 6.42, 5.0, 0.35, [[('7 kho · 2 miền ', {'size': 16, 'bold': True}), ('7 warehouses · 2 regions', {'size': 10, 'color': SUB})]])
     lx = 0.62
-    for col, vi, en in [(GREEN, 'Kho trung tâm', 'Hub'), (BLUE, 'Kho vệ tinh', 'Satellite'), (AMBER, 'Số liệu tạm tính', 'Estimated')]:
+    items = [(GREEN, 'Kho trung tâm', 'Hub'), (BLUE, 'Kho vệ tinh', 'Satellite')]
+    if ANY_ESTIMATED:
+        items.append((AMBER, 'Số liệu tạm tính', 'Estimated'))
+    for col, vi, en in items:
         box(slide, lx, 6.84, 0.13, 0.13, col, shape=MSO_SHAPE.OVAL)
         text(slide, lx + 0.2, 6.8, 1.8, 0.25, [[(vi, {'size': 9}), (' · ' + en, {'size': 8, 'color': SUB})]])
         lx += 1.65
@@ -432,7 +436,8 @@ for i, (v, vi, en) in enumerate([(nf(sum(k['stats']['area'] for k in KHO)) + ' m
     box(s, bx, ty, 2.45, 0.9, TILE, radius=0.1)
     text(s, bx + 0.15, ty + 0.08, 2.2, 0.4, [[(v, {'size': 18, 'bold': True})]])
     text(s, bx + 0.15, ty + 0.52, 2.2, 0.3, [[(vi, {'size': 9, 'bold': True, 'color': SUB}), (' · ' + en, {'size': 8, 'color': SUB})]])
-text(s, x + 0.3, ty + 1.02, w - 0.6, 0.3, [[('* Số liệu tạm tính, cập nhật sau · Estimated, to be confirmed', {'size': 9, 'color': AMBER_TEXT})]])
+if ANY_ESTIMATED:
+    text(s, x + 0.3, ty + 1.02, w - 0.6, 0.3, [[('* Số liệu tạm tính, cập nhật sau · Estimated, to be confirmed', {'size': 9, 'color': AMBER_TEXT})]])
 add_morph(s)
 notes(s, 'Tổng hợp diện tích các kho. Các kho có dấu * đang dùng số liệu tạm tính.')
 
